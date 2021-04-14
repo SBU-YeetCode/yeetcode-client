@@ -1,11 +1,20 @@
 overwrite: true
 schema: 'https://yeetcode.isaiahg.com/graphql'
-# documents: 'src/**/*.graphql'
+documents: 'graphql/**/*.ts'
 generates:
-  src/generated/graphql.ts:
+  graphql/generated.ts:
     plugins:
       - 'typescript'
       - 'typescript-operations'
       - 'typescript-react-query'
     config:
       skipTypename: true
+      fetcher:
+        endpoint: 'https://yeetcode.isaiahg.com/graphql'
+        fetchParams:
+          credentials: 'include'
+          headers: 
+            Content-Type: application/json
+            Access-Control-Allow-Credentials: 'true'
+            Access-Control-Allow-Origin: http://localhost:3000
+            Connection: keep-alive

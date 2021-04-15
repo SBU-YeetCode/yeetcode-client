@@ -5,8 +5,12 @@ export const GET_ME = gql`
 			_id
 			email
 			name
+			profilePicture {
+				avatar
+				large
+			}
+			roles
+			username
 		}
 	}
-
 `
-

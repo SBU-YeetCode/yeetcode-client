@@ -527,7 +527,10 @@ export type UserInput = {
 export type ContextGetMeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type ContextGetMeQuery = { getMe?: Maybe<Pick<User, '_id' | 'email' | 'name'>> };
+export type ContextGetMeQuery = { getMe?: Maybe<(
+    Pick<User, '_id' | 'email' | 'name' | 'roles' | 'username'>
+    & { profilePicture: Pick<ProfilePicture, 'avatar' | 'large'> }
+  )> };
 
 
 export const ContextGetMeDocument = `
@@ -536,6 +539,12 @@ export const ContextGetMeDocument = `
     _id
     email
     name
+    profilePicture {
+      avatar
+      large
+    }
+    roles
+    username
   }
 }
     `;

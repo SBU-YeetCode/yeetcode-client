@@ -1,1 +1,1 @@
-schema: 'https://yeetcode.isaiahg.com/graphql'
+schema: 'http://localhost:5000/graphql'

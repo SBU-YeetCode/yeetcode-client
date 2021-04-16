@@ -35,12 +35,12 @@ export default function AccountDropdown(): ReactElement {
 				</Stack>
 			</MenuButton>
 			<MenuList>
-				<MenuItem>
-					<Link href={`/profile/${user.username}`}>My Profile</Link>
-				</MenuItem>
-				<MenuItem>
-					<Link href={`/game/new`}>Create Game</Link>
-				</MenuItem>
+				<Link href={`/profile/${user.username}`}>
+					<MenuItem>My Profile</MenuItem>
+				</Link>
+				<Link href={`/game/new`}>
+					<MenuItem>Create Game</MenuItem>
+				</Link>
 				<MenuItem onClick={signOut}>Logout</MenuItem>
 			</MenuList>
 		</Menu>

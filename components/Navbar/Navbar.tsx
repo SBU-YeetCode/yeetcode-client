@@ -47,7 +47,7 @@ export default function Navbar() {
 
 	return (
 		<Flex
-			h={{ base: 'auto', md: 16 }}
+			h={{ base: 'auto', md: '56px' }}
 			as='nav'
 			p='2'
 			bg='teal'

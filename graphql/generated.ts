@@ -1,4 +1,4 @@
-import { useQuery, UseQueryOptions } from 'react-query';
+import { useMutation, UseMutationOptions, useQuery, UseQueryOptions } from 'react-query';
 export type Maybe<T> = T | null;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
@@ -62,6 +62,14 @@ export type Deleted = {
   amountDeleted: Scalars['Int'];
 };
 
+export enum Gametype {
+  Livecoding = 'LIVECODING',
+  Multiplechoice = 'MULTIPLECHOICE',
+  Fillinblank = 'FILLINBLANK',
+  Matching = 'MATCHING',
+  Spotthebug = 'SPOTTHEBUG'
+}
+
 export type Game = {
   createdBy: Scalars['String'];
   dateCreated: Scalars['Date'];
@@ -76,31 +84,11 @@ export type Game = {
   difficulty: Scalars['String'];
   tags: Array<Scalars['String']>;
   description: Scalars['String'];
-  levels: Array<Level>;
-  stages: Array<Stage>;
-  questions: Array<Question>;
-  roadmap: Array<SubGameRoadmap>;
+  levels: Array<LevelObject>;
+  stages: Array<StageObject>;
+  questions: Array<QuestionObject>;
+  roadmap: Array<RoadmapObject>;
   _id: Scalars['ObjectId'];
-};
-
-export type GameInput = {
-  createdBy: Scalars['String'];
-  dateCreated: Scalars['Date'];
-  lastUpdated: Scalars['Date'];
-  commentCount: Scalars['Int'];
-  totalStars: Scalars['Int'];
-  rating: Scalars['Float'];
-  playCount: Scalars['Int'];
-  commentsRef: Array<Scalars['String']>;
-  codingLanguage: Scalars['String'];
-  title: Scalars['String'];
-  difficulty: Scalars['String'];
-  tags: Array<Scalars['String']>;
-  description: Scalars['String'];
-  levels: Array<LevelInput>;
-  stages: Array<StageInput>;
-  questions: Array<QuestionInput>;
-  roadmap: Array<SubGameRoadmapInput>;
 };
 
 export type GameProgress = {
@@ -139,15 +127,20 @@ export enum Languages {
 }
 
 export type Level = {
+  title: Scalars['String'];
+  description: Scalars['String'];
   _id: Scalars['ObjectId'];
+};
+
+export type LevelInput = {
   title: Scalars['String'];
   description: Scalars['String'];
 };
 
-export type LevelInput = {
-  _id: Scalars['ObjectId'];
+export type LevelObject = {
   title: Scalars['String'];
   description: Scalars['String'];
+  _id: Scalars['ObjectId'];
 };
 
 export type LevelProgress = {
@@ -176,9 +169,13 @@ export type Mutation = {
   deleteGameProgress: Deleted;
   createGame: Game;
   updateGame: Game;
-  updateLevels: Array<Level>;
-  updateQuestions: Array<Question>;
-  updateStages: Array<Stage>;
+  updateRoadmap: Array<RoadmapObject>;
+  updateLevels: Array<LevelObject>;
+  createLevel: LevelObject;
+  createQuestion: QuestionObject;
+  createStage: StageObject;
+  updateQuestions: Array<QuestionObject>;
+  updateStages: Array<StageObject>;
   deleteGame: Deleted;
 };
 
@@ -221,7 +218,11 @@ export type MutationDeleteGameProgressArgs = {
 
 
 export type MutationCreateGameArgs = {
-  game: GameInput;
+  codingLanguage?: Maybe<Scalars['String']>;
+  title?: Maybe<Scalars['String']>;
+  difficulty?: Maybe<Scalars['String']>;
+  tags?: Maybe<Array<Scalars['String']>>;
+  description?: Maybe<Scalars['String']>;
 };
 
 
@@ -235,21 +236,45 @@ export type MutationUpdateGameArgs = {
 };
 
 
+export type MutationUpdateRoadmapArgs = {
+  gameId: Scalars['String'];
+  roadmap: Array<RoadmapInput>;
+};
+
+
 export type MutationUpdateLevelsArgs = {
   gameId: Scalars['String'];
-  levelsToUpdate: Array<LevelInput>;
+  levelsToUpdate: Array<Level>;
+};
+
+
+export type MutationCreateLevelArgs = {
+  gameId: Scalars['String'];
+  level: LevelInput;
+};
+
+
+export type MutationCreateQuestionArgs = {
+  gameId: Scalars['String'];
+  question: QuestionInput;
+};
+
+
+export type MutationCreateStageArgs = {
+  gameId: Scalars['String'];
+  stage: StageInput;
 };
 
 
 export type MutationUpdateQuestionsArgs = {
   gameId: Scalars['String'];
-  questionsToUpdate: Array<QuestionInput>;
+  questionsToUpdate: Array<Question>;
 };
 
 
 export type MutationUpdateStagesArgs = {
   gameId: Scalars['String'];
-  stagesToUpdate: Array<StageInput>;
+  stagesToUpdate: Array<Stage>;
 };
 
 
@@ -319,10 +344,10 @@ export type Query = {
   getFilterGames: PaginatedGameResponse;
   getSearch: PaginatedGameResponse;
   getUserCreatedGames: Array<Game>;
-  getLevel: Level;
-  getStage: Stage;
-  getQuestion: Question;
-  getRoadmap: Array<SubGameRoadmap>;
+  getLevel: LevelObject;
+  getStage: StageObject;
+  getQuestion: QuestionObject;
+  getRoadmap: Array<RoadmapObject>;
 };
 
 
@@ -419,39 +444,53 @@ export type QueryGetRoadmapArgs = {
 };
 
 export type Question = {
-  _id: Scalars['ObjectId'];
-  sequence: Scalars['String'];
-  title: Scalars['String'];
-  description: Scalars['String'];
-  timeLimit: Scalars['Int'];
-  points: Scalars['Int'];
-  lives: Scalars['Int'];
-  hints: Array<Hint>;
-  gameType: Scalars['String'];
-  toAnswer: Scalars['String'];
-  exampleSolutionCode: Scalars['String'];
-  exampleSolutionDescription: Scalars['String'];
-  correctChoice: Scalars['String'];
-  incorrectChoices: Array<Scalars['String']>;
-  matchings: Array<Matching>;
-};
-
-export type QuestionInput = {
-  _id: Scalars['ObjectId'];
-  sequence: Scalars['String'];
   title: Scalars['String'];
   description: Scalars['String'];
   timeLimit: Scalars['Int'];
   points: Scalars['Int'];
   lives: Scalars['Int'];
   hints: Array<HintInput>;
-  gameType: Scalars['String'];
+  gameType: Gametype;
   toAnswer: Scalars['String'];
   exampleSolutionCode: Scalars['String'];
   exampleSolutionDescription: Scalars['String'];
   correctChoice: Scalars['String'];
   incorrectChoices: Array<Scalars['String']>;
   matchings: Array<MatchingInput>;
+  _id: Scalars['ObjectId'];
+};
+
+export type QuestionInput = {
+  title: Scalars['String'];
+  description: Scalars['String'];
+  timeLimit: Scalars['Int'];
+  points: Scalars['Int'];
+  lives: Scalars['Int'];
+  hints: Array<HintInput>;
+  gameType: Gametype;
+  toAnswer: Scalars['String'];
+  exampleSolutionCode: Scalars['String'];
+  exampleSolutionDescription: Scalars['String'];
+  correctChoice: Scalars['String'];
+  incorrectChoices: Array<Scalars['String']>;
+  matchings: Array<MatchingInput>;
+};
+
+export type QuestionObject = {
+  title: Scalars['String'];
+  description: Scalars['String'];
+  timeLimit: Scalars['Int'];
+  points: Scalars['Int'];
+  lives: Scalars['Int'];
+  hints: Array<Hint>;
+  gameType: Gametype;
+  toAnswer: Scalars['String'];
+  exampleSolutionCode: Scalars['String'];
+  exampleSolutionDescription: Scalars['String'];
+  correctChoice: Scalars['String'];
+  incorrectChoices: Array<Scalars['String']>;
+  matchings: Array<Matching>;
+  _id: Scalars['ObjectId'];
 };
 
 export type QuestionProgress = {
@@ -461,6 +500,21 @@ export type QuestionProgress = {
   pointsReceived: Scalars['Int'];
 };
 
+export type RoadmapInput = {
+  parent?: Maybe<Scalars['ObjectId']>;
+  sequence: Scalars['Int'];
+  kind: Scalars['String'];
+  refId: Scalars['String'];
+};
+
+export type RoadmapObject = {
+  parent?: Maybe<Scalars['ObjectId']>;
+  sequence: Scalars['Int'];
+  kind: Scalars['String'];
+  refId: Scalars['String'];
+  _id: Scalars['ObjectId'];
+};
+
 export enum Sort_Options {
   Rating = 'RATING',
   Newest = 'NEWEST',
@@ -468,34 +522,25 @@ export enum Sort_Options {
 }
 
 export type Stage = {
+  title: Scalars['String'];
+  description: Scalars['String'];
   _id: Scalars['ObjectId'];
+};
+
+export type StageInput = {
   title: Scalars['String'];
   description: Scalars['String'];
 };
 
-export type StageInput = {
-  _id: Scalars['ObjectId'];
+export type StageObject = {
   title: Scalars['String'];
   description: Scalars['String'];
+  _id: Scalars['ObjectId'];
 };
 
 export type StageProgress = {
   stageId: Scalars['String'];
   completed: Scalars['Boolean'];
-};
-
-export type SubGameRoadmap = {
-  _id: Scalars['ObjectId'];
-  refId: Scalars['String'];
-  sequence: Scalars['String'];
-  kind: Scalars['String'];
-};
-
-export type SubGameRoadmapInput = {
-  _id: Scalars['ObjectId'];
-  refId: Scalars['String'];
-  sequence: Scalars['String'];
-  kind: Scalars['String'];
 };
 
 export type User = {
@@ -524,6 +569,50 @@ export type UserInput = {
   roles: Array<Scalars['String']>;
 };
 
+export type CreateGameMutationVariables = Exact<{
+  title?: Maybe<Scalars['String']>;
+  codingLanguage?: Maybe<Scalars['String']>;
+  difficulty?: Maybe<Scalars['String']>;
+  description?: Maybe<Scalars['String']>;
+  tags?: Maybe<Array<Scalars['String']> | Scalars['String']>;
+}>;
+
+
+export type CreateGameMutation = { createGame: Pick<Game, '_id'> };
+
+export type UpdateGameMutationVariables = Exact<{
+  gameId: Scalars['ObjectId'];
+  newTitle?: Maybe<Scalars['String']>;
+  newCodingLanguage?: Maybe<Scalars['String']>;
+  newDifficulty?: Maybe<Scalars['String']>;
+  newDescription?: Maybe<Scalars['String']>;
+  newTags?: Maybe<Array<Scalars['String']> | Scalars['String']>;
+}>;
+
+
+export type UpdateGameMutation = { updateGame: Pick<Game, '_id'> };
+
+export type UpdateQuestionMutationVariables = Exact<{
+  gameId: Scalars['String'];
+  questionsToUpdate: Array<Question> | Question;
+}>;
+
+
+export type UpdateQuestionMutation = { updateQuestions: Array<Pick<QuestionObject, '_id'>> };
+
+export type GetGameEditQueryVariables = Exact<{
+  id: Scalars['String'];
+}>;
+
+
+export type GetGameEditQuery = { getGame?: Maybe<(
+    Pick<Game, '_id' | 'createdBy' | 'title' | 'description' | 'codingLanguage' | 'difficulty' | 'tags'>
+    & { roadmap: Array<Pick<RoadmapObject, '_id' | 'parent' | 'sequence' | 'kind' | 'refId'>>, levels: Array<Pick<LevelObject, '_id' | 'title' | 'description'>>, stages: Array<Pick<StageObject, '_id' | 'title' | 'description'>>, questions: Array<(
+      Pick<QuestionObject, '_id' | 'title' | 'description' | 'timeLimit' | 'points' | 'lives' | 'gameType' | 'toAnswer' | 'exampleSolutionCode' | 'exampleSolutionDescription' | 'correctChoice' | 'incorrectChoices'>
+      & { hints: Array<Pick<Hint, '_id' | 'description' | 'timeToReveal'>>, matchings: Array<Pick<Matching, '_id' | 'pairOne' | 'pairTwo'>> }
+    )> }
+  )> };
+
 export type ContextGetMeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -533,6 +622,130 @@ export type ContextGetMeQuery = { getMe?: Maybe<(
   )> };
 
 
+export const CreateGameDocument = `
+    mutation createGame($title: String, $codingLanguage: String, $difficulty: String, $description: String, $tags: [String!]) {
+  createGame(
+    title: $title
+    codingLanguage: $codingLanguage
+    difficulty: $difficulty
+    description: $description
+    tags: $tags
+  ) {
+    _id
+  }
+}
+    `;
+export const useCreateGameMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<CreateGameMutation, TError, CreateGameMutationVariables, TContext>) => 
+    useMutation<CreateGameMutation, TError, CreateGameMutationVariables, TContext>(
+      (variables?: CreateGameMutationVariables) => fetcher<CreateGameMutation, CreateGameMutationVariables>(CreateGameDocument, variables)(),
+      options
+    );
+export const UpdateGameDocument = `
+    mutation updateGame($gameId: ObjectId!, $newTitle: String, $newCodingLanguage: String, $newDifficulty: String, $newDescription: String, $newTags: [String!]) {
+  updateGame(
+    gameId: $gameId
+    newTitle: $newTitle
+    newCodingLanguage: $newCodingLanguage
+    newDifficulty: $newDifficulty
+    newDescription: $newDescription
+    newTags: $newTags
+  ) {
+    _id
+  }
+}
+    `;
+export const useUpdateGameMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<UpdateGameMutation, TError, UpdateGameMutationVariables, TContext>) => 
+    useMutation<UpdateGameMutation, TError, UpdateGameMutationVariables, TContext>(
+      (variables?: UpdateGameMutationVariables) => fetcher<UpdateGameMutation, UpdateGameMutationVariables>(UpdateGameDocument, variables)(),
+      options
+    );
+export const UpdateQuestionDocument = `
+    mutation updateQuestion($gameId: String!, $questionsToUpdate: [Question!]!) {
+  updateQuestions(gameId: $gameId, questionsToUpdate: $questionsToUpdate) {
+    _id
+  }
+}
+    `;
+export const useUpdateQuestionMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<UpdateQuestionMutation, TError, UpdateQuestionMutationVariables, TContext>) => 
+    useMutation<UpdateQuestionMutation, TError, UpdateQuestionMutationVariables, TContext>(
+      (variables?: UpdateQuestionMutationVariables) => fetcher<UpdateQuestionMutation, UpdateQuestionMutationVariables>(UpdateQuestionDocument, variables)(),
+      options
+    );
+export const GetGameEditDocument = `
+    query GetGameEdit($id: String!) {
+  getGame(id: $id) {
+    _id
+    createdBy
+    roadmap {
+      _id
+      parent
+      sequence
+      kind
+      refId
+    }
+    title
+    description
+    levels {
+      _id
+      title
+      description
+    }
+    stages {
+      _id
+      title
+      description
+    }
+    codingLanguage
+    difficulty
+    tags
+    questions {
+      _id
+      title
+      description
+      timeLimit
+      points
+      lives
+      hints {
+        _id
+        description
+        timeToReveal
+      }
+      gameType
+      toAnswer
+      exampleSolutionCode
+      exampleSolutionDescription
+      correctChoice
+      incorrectChoices
+      matchings {
+        _id
+        pairOne
+        pairTwo
+      }
+    }
+  }
+}
+    `;
+export const useGetGameEditQuery = <
+      TData = GetGameEditQuery,
+      TError = unknown
+    >(
+      variables: GetGameEditQueryVariables, 
+      options?: UseQueryOptions<GetGameEditQuery, TError, TData>
+    ) => 
+    useQuery<GetGameEditQuery, TError, TData>(
+      ['GetGameEdit', variables],
+      fetcher<GetGameEditQuery, GetGameEditQueryVariables>(GetGameEditDocument, variables),
+      options
+    );
 export const ContextGetMeDocument = `
     query ContextGetMe {
   getMe {

@@ -1,12 +1,15 @@
 import '../styles/globals.css'
 import ContextWrapper from '../contexts/ContextWrapper'
-import Navbar from '../components/Navbar/Navbar'
+import Layout from '../components/Layout/Layout'
+import { ReactQueryDevtools } from 'react-query/devtools'
 
 function MyApp({ Component, pageProps }) {
 	return (
 		<ContextWrapper>
-			<Navbar />
-			<Component {...pageProps} />
+			<ReactQueryDevtools />
+			<Layout>
+				<Component {...pageProps} />
+			</Layout>
 		</ContextWrapper>
 	)
 }

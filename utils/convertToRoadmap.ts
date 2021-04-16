@@ -29,7 +29,8 @@ export function convertToRoadmap(
 	for (let i = 0; i < roadmap.length; i++) {
 		let currHash = hash[roadmap[i]._id]
 		if (currHash.parent && hash[currHash.parent]) {
-			hash[currHash.parent].children.push()
+			hash[currHash.parent].children.push(currHash)
+			delete hash[roadmap[i]._id]
 		}
 	}
 	return Object.values(hash).sort((a, b) => a.sequence - b.sequence)

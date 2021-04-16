@@ -13,6 +13,8 @@ import {
 	Spacer,
 	IconButton,
 	BoxProps,
+	Button,
+	VStack,
 } from '@chakra-ui/react'
 import { IconType } from 'react-icons'
 import {
@@ -23,6 +25,7 @@ import {
 } from 'react-icons/bs'
 import { SiOpslevel } from 'react-icons/si'
 import { AiFillDelete } from 'react-icons/ai'
+import { BiBookOpen } from 'react-icons/bi'
 
 interface Action {
 	type: 'add' | 'edit' | 'delete'
@@ -47,6 +50,7 @@ const iconVal: { [key: string]: IconType } = {
 	Question: BsListTask,
 	Level: SiOpslevel,
 	Stage: BsStopwatch,
+	Game: BiBookOpen,
 }
 
 export interface RoadmapData {
@@ -55,6 +59,7 @@ export interface RoadmapData {
 	title: string
 	id: string
 	parent: string | null
+	refId: string | undefined
 	children: RoadmapData[]
 }
 
@@ -66,22 +71,43 @@ export function Item({
 	onAction,
 	selected,
 }: Props) {
+	const style = {
+		_hover: {
+			bg: selected === item.refId ? 'gray.500' : 'gray.700',
+		},
+
+		bg: selected === item.refId ? 'gray.500' : 'gray.700',
+	}
+	const Title = () => (
+		<Wrap
+			spacing={5}
+			alignItems='center'
+			alignContent='center'
+			justifyContent='space-between'
+		>
+			{item.children.length > 0 ? <AccordionIcon /> : <Box mr={2} />}
+			<HStack spacing={5} alignItems='center'>
+				<Icon as={iconVal[item.kind]} color='primary.400' />
+				<Text
+					fontSize={item.kind === 'Game' ? '2xl' : 'inherit'}
+					color={item.kind === 'Game' ? 'primary.400' : 'inherit'}
+				>
+					{item.title}
+				</Text>
+			</HStack>
+		</Wrap>
+	)
 	return (
 		<>
-			<AccordionButton w={showActions ? '85%' : '100%'}>
-				<Wrap
-					spacing={5}
-					alignItems='center'
-					alignContent='center'
-					justifyContent='space-between'
-				>
-					{item.children.length > 0 ? <AccordionIcon /> : <Box mr={2} />}
-					<HStack spacing={5} alignItems='center'>
-						<Icon as={iconVal[item.kind]} />
-						<Text>{item.title}</Text>
-					</HStack>
-				</Wrap>
-			</AccordionButton>
+			{item.children.length > 0 ? (
+				<AccordionButton {...style} w={showActions ? '85%' : '100%'}>
+					<Title />
+				</AccordionButton>
+			) : (
+				<Button variant='unstyled' {...style} mb={2} w='100%'>
+					<Title />
+				</Button>
+			)}
 			<ItemActions
 				selected={selected}
 				item={item}
@@ -138,9 +164,7 @@ export const ItemActions = ({
 
 export function AccordionItem({ item, ...other }: Props) {
 	return (
-		<ChakraAccordionItem
-			bg={other.selected === item.sequence ? 'gray.500' : 'gray.700'}
-		>
+		<ChakraAccordionItem>
 			<HStack>
 				<Item item={item} {...other} />
 			</HStack>
@@ -151,7 +175,9 @@ export function AccordionItem({ item, ...other }: Props) {
 							<AccordionItem key={subItem.sequence} item={subItem} {...other} />
 						</Accordion>
 					) : (
-						<Item key={subItem.sequence} item={subItem} {...other} />
+						<HStack>
+							<Item key={subItem.sequence} item={subItem} {...other} />
+						</HStack>
 					)
 				)}
 			</AccordionPanel>
@@ -159,77 +185,84 @@ export function AccordionItem({ item, ...other }: Props) {
 	)
 }
 
-const data: RoadmapData[] = [
-	{
-		sequence: 1,
-		parent: null,
-		kind: 'Level',
-		title: 'Functional Components',
-		id: '1234',
-		children: [
-			{
-				sequence: 2,
-				kind: 'Stage',
-				title: 'Hooks',
-				id: '1234',
-				children: [
-					{
-						sequence: 3,
-						kind: 'Question',
-						title: 'useState',
-						id: '1234',
-						children: [],
-					},
-				],
-			},
-			{
-				sequence: 4,
-				kind: 'Stage',
-				title: 'Custom hooks',
-				id: '1234',
-				children: [],
-			},
-		],
-	},
-	{
-		sequence: 5,
-		kind: 'Level',
-		title: 'REACT SUCKS',
-		id: '1234',
-		children: [],
-	},
-]
-
 export default function Roadmap({
+	selectedInstance,
+	setSelectedInstance,
 	showActions,
 	showCompleted,
 	showReorder,
 	onChange,
+	data,
+	gameTitle,
 	...style
 }: RoadmapProps & Partial<BoxProps>): ReactElement {
+	function onAction(action: 'edit' | 'delete' | 'add', item: RoadmapData) {
+		switch (action) {
+			case 'edit': {
+				setSelectedInstance(item.refId, item.kind as any)
+				return
+			}
+			case 'delete': {
+				console.log('delete not implemented yet')
+				return
+			}
+			case 'add': {
+				console.log('add not implemented yet')
+				return
+			}
+		}
+	}
 	return (
-		<Accordion allowMultiple bg='gray.700' {...style}>
-			{data.map((item, index) => (
-				<AccordionItem
-					selected={4}
-					key={item.sequence}
-					item={item}
+		<Box bg='gray.700' borderRadius={10} {...style}>
+			<HStack>
+				<Item
+					item={{
+						children: [],
+						id: 'Game',
+						kind: 'Game',
+						parent: null,
+						sequence: 0,
+						title: gameTitle,
+						refId: undefined,
+					}}
+					selected={'false'}
+					onAction={onAction}
 					showActions={showActions}
 					showReorder={showReorder}
 				/>
-			))}
-		</Accordion>
+			</HStack>
+			<Accordion allowMultiple bg='gray.700'>
+				{data.map((item, index) => (
+					<AccordionItem
+						selected={selectedInstance}
+						key={item.sequence}
+						item={item}
+						showActions={showActions}
+						showReorder={showReorder}
+						onAction={onAction}
+					/>
+				))}
+			</Accordion>
+		</Box>
 	)
 }
 
-interface Props extends RoadmapProps {
-	selected: number
+interface Props {
+	selected: string
 	item: RoadmapData
-	onAction?: (action: 'edit' | 'delete' | 'add', item: RoadmapData) => void
-}
-
-interface RoadmapProps {
 	showActions?: boolean
 	showCompleted?: boolean
 	showReorder?: boolean
+	onAction?: (action: 'edit' | 'delete' | 'add', item: RoadmapData) => void
+}
+
+interface RoadmapProps extends Omit<Props, 'selected' | 'item'> {
+	selectedInstance: string
+	setSelectedInstance: (
+		id: string | undefined,
+		kind: 'Level' | 'Stage' | 'Question' | 'Game'
+	) => void
+	refId?: string | undefined
+	data: RoadmapData[]
+	gameTitle: string
 }

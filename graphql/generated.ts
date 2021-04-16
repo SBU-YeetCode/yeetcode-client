@@ -6,7 +6,7 @@ export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Mayb
 
 function fetcher<TData, TVariables>(query: string, variables?: TVariables) {
   return async (): Promise<TData> => {
-    const res = await fetch("http://localhost:5000/graphql", {
+    const res = await fetch("https://yeetcode.isaiahg.com/graphql", {
       method: "POST",
       credentials: "include",
       headers: {"Content-Type":"application/json","Access-Control-Allow-Credentials":"true","Access-Control-Allow-Origin":"http://localhost:3000","Connection":"keep-alive"},
@@ -172,6 +172,8 @@ export type Mutation = {
   updateRoadmap: Array<RoadmapObject>;
   updateLevels: Array<LevelObject>;
   createLevel: LevelObject;
+  createQuestion: QuestionObject;
+  createStage: StageObject;
   updateQuestions: Array<QuestionObject>;
   updateStages: Array<StageObject>;
   deleteGame: Deleted;
@@ -249,6 +251,18 @@ export type MutationUpdateLevelsArgs = {
 export type MutationCreateLevelArgs = {
   gameId: Scalars['String'];
   level: LevelInput;
+};
+
+
+export type MutationCreateQuestionArgs = {
+  gameId: Scalars['String'];
+  question: QuestionInput;
+};
+
+
+export type MutationCreateStageArgs = {
+  gameId: Scalars['String'];
+  stage: StageInput;
 };
 
 
@@ -430,7 +444,6 @@ export type QueryGetRoadmapArgs = {
 };
 
 export type Question = {
-  sequence: Scalars['String'];
   title: Scalars['String'];
   description: Scalars['String'];
   timeLimit: Scalars['Int'];
@@ -447,8 +460,23 @@ export type Question = {
   _id: Scalars['ObjectId'];
 };
 
+export type QuestionInput = {
+  title: Scalars['String'];
+  description: Scalars['String'];
+  timeLimit: Scalars['Int'];
+  points: Scalars['Int'];
+  lives: Scalars['Int'];
+  hints: Array<HintInput>;
+  gameType: Gametype;
+  toAnswer: Scalars['String'];
+  exampleSolutionCode: Scalars['String'];
+  exampleSolutionDescription: Scalars['String'];
+  correctChoice: Scalars['String'];
+  incorrectChoices: Array<Scalars['String']>;
+  matchings: Array<MatchingInput>;
+};
+
 export type QuestionObject = {
-  sequence: Scalars['String'];
   title: Scalars['String'];
   description: Scalars['String'];
   timeLimit: Scalars['Int'];
@@ -499,6 +527,11 @@ export type Stage = {
   _id: Scalars['ObjectId'];
 };
 
+export type StageInput = {
+  title: Scalars['String'];
+  description: Scalars['String'];
+};
+
 export type StageObject = {
   title: Scalars['String'];
   description: Scalars['String'];
@@ -547,13 +580,33 @@ export type CreateGameMutationVariables = Exact<{
 
 export type CreateGameMutation = { createGame: Pick<Game, '_id'> };
 
+export type UpdateGameMutationVariables = Exact<{
+  gameId: Scalars['ObjectId'];
+  newTitle?: Maybe<Scalars['String']>;
+  newCodingLanguage?: Maybe<Scalars['String']>;
+  newDifficulty?: Maybe<Scalars['String']>;
+  newDescription?: Maybe<Scalars['String']>;
+  newTags?: Maybe<Array<Scalars['String']> | Scalars['String']>;
+}>;
+
+
+export type UpdateGameMutation = { updateGame: Pick<Game, '_id'> };
+
+export type UpdateQuestionMutationVariables = Exact<{
+  gameId: Scalars['String'];
+  questionsToUpdate: Array<Question> | Question;
+}>;
+
+
+export type UpdateQuestionMutation = { updateQuestions: Array<Pick<QuestionObject, '_id'>> };
+
 export type GetGameEditQueryVariables = Exact<{
   id: Scalars['String'];
 }>;
 
 
 export type GetGameEditQuery = { getGame?: Maybe<(
-    Pick<Game, '_id' | 'createdBy' | 'title' | 'description'>
+    Pick<Game, '_id' | 'createdBy' | 'title' | 'description' | 'codingLanguage' | 'difficulty' | 'tags'>
     & { roadmap: Array<Pick<RoadmapObject, '_id' | 'parent' | 'sequence' | 'kind' | 'refId'>>, levels: Array<Pick<LevelObject, '_id' | 'title' | 'description'>>, stages: Array<Pick<StageObject, '_id' | 'title' | 'description'>>, questions: Array<(
       Pick<QuestionObject, '_id' | 'title' | 'description' | 'timeLimit' | 'points' | 'lives' | 'gameType' | 'toAnswer' | 'exampleSolutionCode' | 'exampleSolutionDescription' | 'correctChoice' | 'incorrectChoices'>
       & { hints: Array<Pick<Hint, '_id' | 'description' | 'timeToReveal'>>, matchings: Array<Pick<Matching, '_id' | 'pairOne' | 'pairTwo'>> }
@@ -590,6 +643,43 @@ export const useCreateGameMutation = <
       (variables?: CreateGameMutationVariables) => fetcher<CreateGameMutation, CreateGameMutationVariables>(CreateGameDocument, variables)(),
       options
     );
+export const UpdateGameDocument = `
+    mutation updateGame($gameId: ObjectId!, $newTitle: String, $newCodingLanguage: String, $newDifficulty: String, $newDescription: String, $newTags: [String!]) {
+  updateGame(
+    gameId: $gameId
+    newTitle: $newTitle
+    newCodingLanguage: $newCodingLanguage
+    newDifficulty: $newDifficulty
+    newDescription: $newDescription
+    newTags: $newTags
+  ) {
+    _id
+  }
+}
+    `;
+export const useUpdateGameMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<UpdateGameMutation, TError, UpdateGameMutationVariables, TContext>) => 
+    useMutation<UpdateGameMutation, TError, UpdateGameMutationVariables, TContext>(
+      (variables?: UpdateGameMutationVariables) => fetcher<UpdateGameMutation, UpdateGameMutationVariables>(UpdateGameDocument, variables)(),
+      options
+    );
+export const UpdateQuestionDocument = `
+    mutation updateQuestion($gameId: String!, $questionsToUpdate: [Question!]!) {
+  updateQuestions(gameId: $gameId, questionsToUpdate: $questionsToUpdate) {
+    _id
+  }
+}
+    `;
+export const useUpdateQuestionMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<UpdateQuestionMutation, TError, UpdateQuestionMutationVariables, TContext>) => 
+    useMutation<UpdateQuestionMutation, TError, UpdateQuestionMutationVariables, TContext>(
+      (variables?: UpdateQuestionMutationVariables) => fetcher<UpdateQuestionMutation, UpdateQuestionMutationVariables>(UpdateQuestionDocument, variables)(),
+      options
+    );
 export const GetGameEditDocument = `
     query GetGameEdit($id: String!) {
   getGame(id: $id) {
@@ -614,6 +704,9 @@ export const GetGameEditDocument = `
       title
       description
     }
+    codingLanguage
+    difficulty
+    tags
     questions {
       _id
       title

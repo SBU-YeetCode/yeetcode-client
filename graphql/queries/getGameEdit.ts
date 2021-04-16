@@ -23,6 +23,9 @@ export const GET_GAME_EDIT = gql`
 				title
 				description
 			}
+			codingLanguage
+			difficulty
+			tags
 			questions {
 				_id
 				title

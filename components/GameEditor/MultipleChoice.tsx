@@ -151,6 +151,7 @@ export default function MultipleChoice({
 							<Input
 								placeholder='Multiple Choice Input'
 								size='sm'
+								value={newChoice}
 								onChange={(e) => setNewChoice(e.target.value)}
 							/>
 							<Button

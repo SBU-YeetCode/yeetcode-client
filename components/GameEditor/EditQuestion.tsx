@@ -1,6 +1,7 @@
 import { Button, IconButton } from '@chakra-ui/button'
 import { CloseIcon } from '@chakra-ui/icons'
 import { Box, Center, Heading, HStack, Spacer, Text } from '@chakra-ui/layout'
+import { useQueryClient } from 'react-query'
 import {
 	FormControl,
 	FormLabel,
@@ -14,12 +15,18 @@ import {
 	Tab,
 	Input,
 } from '@chakra-ui/react'
-import { Question, Gametype } from '../../graphql/generated'
+import {
+	Question,
+	Gametype,
+	useUpdateQuestionMutation,
+} from '../../graphql/generated'
 import React, { useState } from 'react'
 import MultipleChoice from './MultipleChoice'
 
 type EditQuestionProps = {
 	selectedInstance: any
+	setSelectedInstance: any
+	gameId: string
 }
 
 const SELECT: { [key: string]: string } = {
@@ -30,11 +37,14 @@ const SELECT: { [key: string]: string } = {
 	Spotthebug: 'Spot the bug',
 }
 
-export default function EditQuestion({ selectedInstance }: EditQuestionProps) {
+export default function EditQuestion({
+	selectedInstance,
+	setSelectedInstance,
+	gameId,
+}: EditQuestionProps) {
 	let selectedInstanceTemp: Question = {
 		_id: 'somelongidhere',
 		title: 'Question Title',
-		sequence: '1',
 		description: 'Question description',
 		timeLimit: 40,
 		points: 30,
@@ -51,7 +61,11 @@ export default function EditQuestion({ selectedInstance }: EditQuestionProps) {
 		],
 	}
 	// State
-	const [instanceState, setInstanceState] = useState(selectedInstanceTemp)
+	const [instanceState, setInstanceState] = useState<Question>()
+	const queryClient = useQueryClient()
+	React.useEffect(() => {
+		setInstanceState(selectedInstance.item ?? selectedInstanceTemp)
+	}, [selectedInstance])
 	const [tabIndex, setTabIndex] = useState(0)
 	const [questionNav, setQuestionNav] = useState([
 		'Question',
@@ -65,6 +79,8 @@ export default function EditQuestion({ selectedInstance }: EditQuestionProps) {
 	const [selectedMode, setSelectedMode] = useState(
 		selectedInstanceTemp.gameType
 	)
+
+	const { mutate, data, isLoading, error } = useUpdateQuestionMutation()
 
 	React.useEffect(() => {
 		if (selectedMode === Gametype.Livecoding) {
@@ -81,15 +97,30 @@ export default function EditQuestion({ selectedInstance }: EditQuestionProps) {
 	function getKeyByValue(object: any, value: any) {
 		return Object.keys(object).find((key) => object[key] === value)
 	}
-
+	if (!instanceState) return <> </>
 	return (
 		<>
 			<HStack>
 				<Spacer />
-				<Heading textAlign='center'>{selectedInstanceTemp.title}</Heading>
+				<Heading textAlign='center'>{instanceState.title}</Heading>
 				<Spacer />
-				<Button bg='primary.300'>Save</Button>
+				<Button
+					bg='primary.300'
+					isLoading={isLoading}
+					onClick={(e) => {
+						mutate({
+							gameId: gameId,
+							questionsToUpdate: [instanceState],
+						})
+						queryClient.invalidateQueries('GetGameEdit')
+						queryClient.refetchQueries('GetGameEdit')
+					}}
+				>
+					Save
+				</Button>
 				<IconButton
+					// TODO: Are you sure you want to close?
+					onClick={() => setSelectedInstance({ item: undefined })}
 					borderRadius={100}
 					bg='primary.300'
 					aria-label='Close Question'
@@ -206,29 +237,11 @@ export default function EditQuestion({ selectedInstance }: EditQuestionProps) {
 								</FormControl>
 								<FormControl isRequired>
 									<FormLabel size='md'>Point Loss Method</FormLabel>
-									<Input
-									// value={instanceState.description}
-									// onChange={(e) =>
-									// 	setInstanceState({
-									// 		...instanceState,
-									// 		description: e.target.value,
-									// 	})
-									// }
-									// placeholder='Input the description here...'
-									/>
+									<Input />
 								</FormControl>
 								<FormControl isRequired>
 									<FormLabel size='md'>Point Loss After Each Hint</FormLabel>
-									<Input
-									// value={instanceState.description}
-									// onChange={(e) =>
-									// 	setInstanceState({
-									// 		...instanceState,
-									// 		description: e.target.value,
-									// 	})
-									// }
-									// placeholder='Input the description here...'
-									/>
+									<Input />
 								</FormControl>
 							</Box>
 						</Center>

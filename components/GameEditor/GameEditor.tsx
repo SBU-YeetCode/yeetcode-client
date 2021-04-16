@@ -13,19 +13,23 @@ import { GetGameEditQuery } from '../../graphql/generated'
 import EditQuestion from './EditQuestion'
 import GameInformation from './GameInformation'
 
-type RoadmapProps = {
+type GameEditorProps = {
 	isLoadingProps: boolean
 	dataProps: GetGameEditQuery | undefined
 	selectedInstance: any
-	selectedType: 'Stage' | 'Level' | 'Question' | 'Game'
+	setSelectedInstance: any
+	gameId: string
+	refetch: () => void
 }
 
-export default function GameEditor({
+export default function GameEditorProps({
 	isLoadingProps,
 	dataProps,
 	selectedInstance,
-	selectedType,
-}: RoadmapProps) {
+	setSelectedInstance,
+	gameId,
+	refetch,
+}: GameEditorProps) {
 	return (
 		<Box
 			m={6}
@@ -35,11 +39,18 @@ export default function GameEditor({
 			w={'100%'}
 			h={'100%'}
 		>
-			{selectedType === 'Question' && (
-				<EditQuestion selectedInstance={selectedInstance} />
+			{selectedInstance.kind === 'Question' && (
+				<EditQuestion
+					selectedInstance={selectedInstance}
+					setSelectedInstance={setSelectedInstance}
+					gameId={gameId}
+				/>
 			)}
-			{selectedType === 'Game' && (
-				<GameInformation selectedInstance={selectedInstance} />
+			{selectedInstance.kind === 'Game' && (
+				<GameInformation
+					selectedInstance={selectedInstance}
+					setSelectedInstance={setSelectedInstance}
+				/>
 			)}
 		</Box>
 	)

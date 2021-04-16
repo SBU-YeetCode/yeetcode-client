@@ -23,7 +23,7 @@ const UserContextProvider = ({ children }: React.PropsWithChildren<{}>) => {
 	const isLoggedIn = () => data?.getMe !== null
 
 	const signOut = () => {
-		window.location.href = `https://yeetcode.isaiahg.com/auth/logout`
+		window.location.href = `${process.env.SERVER_URL}/auth/logout`
 	}
 
 	return (

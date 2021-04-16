@@ -1,12 +1,13 @@
 import '../styles/globals.css'
 import ContextWrapper from '../contexts/ContextWrapper'
-import Navbar from '../components/Navbar/Navbar'
+import Layout from '../components/Layout/Layout'
 
 function MyApp({ Component, pageProps }) {
 	return (
 		<ContextWrapper>
-			<Navbar />
-			<Component {...pageProps} />
+			<Layout>
+				<Component {...pageProps} />
+			</Layout>
 		</ContextWrapper>
 	)
 }

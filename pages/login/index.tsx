@@ -29,7 +29,11 @@ export default function Login() {
 			<Center mt='10'>
 				<GoogleButton
 					onClick={() =>
-						router.push('https://yeetcode.isaiahg.com/auth/google')
+						router.push(
+							process.env.SERVER_URL
+								? `${process.env.SERVER_URL}/auth/google`
+								: `http://localhost:5000/auth/google`
+						)
 					}
 				/>
 			</Center>

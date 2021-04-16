@@ -87,7 +87,7 @@ export default function NewGameForm({
 	const initialFocuRef = React.useRef<HTMLInputElement | null>(null)
 
 	const [gameInfo, setGameInfo] = React.useState<NewGame>(() => {
-		if ((selectedInstance.kind = 'Game'))
+		if (selectedInstance?.kind === 'Game')
 			return {
 				codingLanguage: selectedInstance?.item.codingLanguage
 					? selectedInstance.item.codingLanguage
@@ -142,17 +142,20 @@ export default function NewGameForm({
 
 	return (
 		<>
-			<HStack>
-				<Spacer />
-				<IconButton
-					// TODO: Are you sure you want to close?
-					onClick={() => setSelectedInstance({ item: undefined })}
-					borderRadius={100}
-					bg='primary.300'
-					aria-label='Close Question'
-					icon={<CloseIcon />}
-				/>
-			</HStack>
+			{selectedInstance && (
+				<HStack>
+					<Spacer />
+					<IconButton
+						// TODO: Are you sure you want to close?
+						onClick={() => setSelectedInstance({ item: undefined })}
+						borderRadius={100}
+						bg='primary.300'
+						aria-label='Close Question'
+						icon={<CloseIcon />}
+					/>
+				</HStack>
+			)}
+
 			<Center>
 				<FormControl id='newGame' m={10}>
 					<FormLabel>Game Title</FormLabel>

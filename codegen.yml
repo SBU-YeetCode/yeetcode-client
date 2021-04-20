@@ -9,12 +9,7 @@ generates:
       - 'typescript-react-query'
     config:
       skipTypename: true
+      exposeQueryKeys: true
       fetcher:
-        endpoint: https://yeetcode.isaiahg.com/graphql
-        fetchParams:
-          credentials: 'include'
-          headers:
-            Content-Type: application/json
-            Access-Control-Allow-Credentials: 'true'
-            Access-Control-Allow-Origin: http://localhost:3000
-            Connection: keep-alive
+        func: './fetcher#fetcher'
+        isReactHook: false # optional, defaults to false, controls the function's signature. Read below

@@ -1,29 +1,9 @@
 import { useMutation, UseMutationOptions, useQuery, UseQueryOptions } from 'react-query';
+import { fetcher } from './fetcher';
 export type Maybe<T> = T | null;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
-
-function fetcher<TData, TVariables>(query: string, variables?: TVariables) {
-  return async (): Promise<TData> => {
-    const res = await fetch("https://yeetcode.isaiahg.com/graphql", {
-      method: "POST",
-      credentials: "include",
-      headers: {"Content-Type":"application/json","Access-Control-Allow-Credentials":"true","Access-Control-Allow-Origin":"http://localhost:3000","Connection":"keep-alive"},
-      body: JSON.stringify({ query, variables }),
-    });
-    
-    const json = await res.json();
-
-    if (json.errors) {
-      const { message } = json.errors[0];
-
-      throw new Error(message);
-    }
-
-    return json.data;
-  }
-}
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: string;
@@ -621,6 +601,18 @@ export type ContextGetMeQuery = { getMe?: Maybe<(
     & { profilePicture: Pick<ProfilePicture, 'avatar' | 'large'> }
   )> };
 
+export type GetSearchResultsQueryVariables = Exact<{
+  query: Scalars['String'];
+  cursor?: Maybe<Scalars['String']>;
+  amount?: Maybe<Scalars['Int']>;
+}>;
+
+
+export type GetSearchResultsQuery = { getSearch: (
+    Pick<PaginatedGameResponse, 'hasMore' | 'nextCursor'>
+    & { nodes: Array<Pick<Game, 'title' | 'rating' | 'createdBy' | 'tags' | 'codingLanguage' | 'difficulty' | 'description' | 'playCount'>> }
+  ) };
+
 
 export const CreateGameDocument = `
     mutation createGame($title: String, $codingLanguage: String, $difficulty: String, $description: String, $tags: [String!]) {
@@ -746,6 +738,8 @@ export const useGetGameEditQuery = <
       fetcher<GetGameEditQuery, GetGameEditQueryVariables>(GetGameEditDocument, variables),
       options
     );
+useGetGameEditQuery.getKey = (variables: GetGameEditQueryVariables) => ['GetGameEdit', variables];
+
 export const ContextGetMeDocument = `
     query ContextGetMe {
   getMe {
@@ -773,3 +767,37 @@ export const useContextGetMeQuery = <
       fetcher<ContextGetMeQuery, ContextGetMeQueryVariables>(ContextGetMeDocument, variables),
       options
     );
+useContextGetMeQuery.getKey = (variables?: ContextGetMeQueryVariables) => ['ContextGetMe', variables];
+
+export const GetSearchResultsDocument = `
+    query GetSearchResults($query: String!, $cursor: String, $amount: Int) {
+  getSearch(query: $query, cursor: $cursor, amount: $amount) {
+    hasMore
+    nextCursor
+    nodes {
+      title
+      rating
+      createdBy
+      tags
+      title
+      codingLanguage
+      difficulty
+      description
+      playCount
+    }
+  }
+}
+    `;
+export const useGetSearchResultsQuery = <
+      TData = GetSearchResultsQuery,
+      TError = unknown
+    >(
+      variables: GetSearchResultsQueryVariables, 
+      options?: UseQueryOptions<GetSearchResultsQuery, TError, TData>
+    ) => 
+    useQuery<GetSearchResultsQuery, TError, TData>(
+      ['GetSearchResults', variables],
+      fetcher<GetSearchResultsQuery, GetSearchResultsQueryVariables>(GetSearchResultsDocument, variables),
+      options
+    );
+useGetSearchResultsQuery.getKey = (variables: GetSearchResultsQueryVariables) => ['GetSearchResults', variables];

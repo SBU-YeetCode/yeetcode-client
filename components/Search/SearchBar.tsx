@@ -1,31 +1,38 @@
 import React, { ReactElement, useState } from 'react'
-import { Input, InputGroup, InputRightElement } from '@chakra-ui/react'
+import { Button, Input, InputGroup, InputRightElement, Link } from '@chakra-ui/react'
 import { SearchIcon } from '@chakra-ui/icons'
 
 import NextLink from 'next/link'
 import { useRouter } from 'next/router'
 
-export default function SearchBar(): ReactElement {
+interface Props {
+	onSubmit?: (query: string) => void
+}
+
+export default function SearchBar({ onSubmit }: Props): ReactElement {
 	const router = useRouter()
 	const { q } = router.query
-    React.useEffect(() => {
-        setSearchInput(q)
-    },[q])
+	React.useEffect(() => {
+		setSearchInput(q)
+	}, [q])
 	const [searchInput, setSearchInput] = useState(q)
 	const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault()
-		router.push(
-			{
-				pathname: '/search',
-				query: {
-					q: searchInput,
+		if (onSubmit) onSubmit(searchInput as string)
+		else {
+			router.push(
+				{
+					pathname: '/search',
+					query: {
+						q: searchInput,
+					},
 				},
-			},
-			undefined,
-			{
-				shallow: true,
-			}
-		)
+				undefined,
+				{
+					shallow: true,
+				}
+			)
+		}
 	}
 	return (
 		<form onSubmit={handleSearch}>
@@ -34,21 +41,21 @@ export default function SearchBar(): ReactElement {
 				display={{ base: !q ? 'none' : 'block', lg: 'block' }}>
 				<Input
 					onChange={(e) => setSearchInput(e.target.value)}
-                    value={searchInput}
+					value={searchInput}
 					variant='filled'
 					placeholder='Search here for a game...'
 					borderWidth={1}
 					_focus={{
 						borderColor: 'secondary.300',
 					}}></Input>
-				<NextLink href={`/search?q=${searchInput}`}>
+				<Link  onClick={handleSearch as any}>
 					<InputRightElement
 						bg='secondary.300'
 						borderRightRadius='6'
 						children={<SearchIcon />}
 						cursor='pointer'
 					/>
-				</NextLink>
+				</Link>
 			</InputGroup>
 		</form>
 	)

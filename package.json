@@ -25,7 +25,8 @@
     "react-google-button": "^0.7.2",
     "react-icons": "^4.2.0",
     "react-infinite-scroll-component": "^6.0.0",
-    "react-query": "^3.13.0"
+    "react-query": "^3.13.0",
+    "zustand": "^3.4.1"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "1.21.3",

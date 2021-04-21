@@ -318,6 +318,7 @@ export type Query = {
   getGameComments: PaginatedCommentResponse;
   getUserReviews: Array<Comment>;
   getGameProgress?: Maybe<GameProgress>;
+  getGameProgressByUser?: Maybe<GameProgress>;
   getUserCompletedGames: Array<GameProgress>;
   getUserRecentGames: Array<GameProgress>;
   getGame?: Maybe<Game>;
@@ -362,6 +363,12 @@ export type QueryGetUserReviewsArgs = {
 
 export type QueryGetGameProgressArgs = {
   id: Scalars['ObjectId'];
+};
+
+
+export type QueryGetGameProgressByUserArgs = {
+  gameId: Scalars['ObjectId'];
+  userId: Scalars['ObjectId'];
 };
 
 
@@ -593,6 +600,23 @@ export type GetGameEditQuery = { getGame?: Maybe<(
     )> }
   )> };
 
+export type GetGamePlayingProgressQueryVariables = Exact<{
+  userId: Scalars['ObjectId'];
+  gameId: Scalars['ObjectId'];
+}>;
+
+
+export type GetGamePlayingProgressQuery = { getGameProgressByUser?: Maybe<(
+    Pick<GameProgress, '_id' | 'completedAt' | 'isCompleted' | 'totalPoints'>
+    & { levels?: Maybe<Array<Pick<LevelProgress, 'levelId' | 'completed'>>>, stages?: Maybe<Array<Pick<StageProgress, 'stageId' | 'completed'>>>, questions?: Maybe<Array<Pick<QuestionProgress, 'questionId' | 'completed' | 'livesLeft' | 'pointsReceived'>>>, game: (
+      Pick<Game, '_id'>
+      & { levels: Array<Pick<LevelObject, 'title' | 'description'>>, stages: Array<Pick<StageObject, 'title' | 'description'>>, questions: Array<(
+        Pick<QuestionObject, 'title' | 'correctChoice' | 'incorrectChoices' | '_id' | 'description' | 'timeLimit' | 'points' | 'lives' | 'gameType' | 'toAnswer' | 'exampleSolutionCode' | 'exampleSolutionDescription'>
+        & { matchings: Array<Pick<Matching, 'pairOne' | 'pairTwo'>>, hints: Array<Pick<Hint, 'description' | 'timeToReveal'>> }
+      )> }
+    ) }
+  )> };
+
 export type ContextGetMeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -739,6 +763,77 @@ export const useGetGameEditQuery = <
       options
     );
 useGetGameEditQuery.getKey = (variables: GetGameEditQueryVariables) => ['GetGameEdit', variables];
+
+export const GetGamePlayingProgressDocument = `
+    query GetGamePlayingProgress($userId: ObjectId!, $gameId: ObjectId!) {
+  getGameProgressByUser(userId: $userId, gameId: $gameId) {
+    _id
+    completedAt
+    isCompleted
+    levels {
+      levelId
+      completed
+    }
+    stages {
+      stageId
+      completed
+    }
+    questions {
+      questionId
+      completed
+      livesLeft
+      pointsReceived
+    }
+    totalPoints
+    game {
+      _id
+      levels {
+        title
+        description
+      }
+      stages {
+        title
+        description
+      }
+      questions {
+        title
+        correctChoice
+        incorrectChoices
+        matchings {
+          pairOne
+          pairTwo
+        }
+        _id
+        description
+        timeLimit
+        points
+        lives
+        hints {
+          description
+          timeToReveal
+        }
+        gameType
+        toAnswer
+        exampleSolutionCode
+        exampleSolutionDescription
+      }
+    }
+  }
+}
+    `;
+export const useGetGamePlayingProgressQuery = <
+      TData = GetGamePlayingProgressQuery,
+      TError = unknown
+    >(
+      variables: GetGamePlayingProgressQueryVariables, 
+      options?: UseQueryOptions<GetGamePlayingProgressQuery, TError, TData>
+    ) => 
+    useQuery<GetGamePlayingProgressQuery, TError, TData>(
+      ['GetGamePlayingProgress', variables],
+      fetcher<GetGamePlayingProgressQuery, GetGamePlayingProgressQueryVariables>(GetGamePlayingProgressDocument, variables),
+      options
+    );
+useGetGamePlayingProgressQuery.getKey = (variables: GetGamePlayingProgressQueryVariables) => ['GetGamePlayingProgress', variables];
 
 export const ContextGetMeDocument = `
     query ContextGetMe {

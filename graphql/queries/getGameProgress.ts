@@ -21,23 +21,37 @@ query GetGamePlayingProgress($userId: ObjectId!, $gameId: ObjectId!) {
             completed
             livesLeft
             pointsReceived
+            hintsRevealed
+            dateStarted
         }
         totalPoints
         game {
+            title
             _id
+            roadmap {
+                parent
+                sequence
+                kind
+                refId
+                _id
+            }
             levels {
+                _id
                 title
                 description
             }
             stages {
+                _id
                 title
                 description
             }
             questions {
+                _id
                 title
                 correctChoice
                 incorrectChoices
                 matchings {
+                    _id
                     pairOne
                     pairTwo
                 }
@@ -47,6 +61,7 @@ query GetGamePlayingProgress($userId: ObjectId!, $gameId: ObjectId!) {
                 points
                 lives
                 hints {
+                    _id
                     description
                     timeToReveal
                 }

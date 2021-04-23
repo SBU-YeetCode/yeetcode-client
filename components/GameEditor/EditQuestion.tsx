@@ -1,6 +1,6 @@
 import { Button, IconButton } from '@chakra-ui/button'
 import { CloseIcon } from '@chakra-ui/icons'
-import { Box, Center, Heading, HStack, Spacer, Text } from '@chakra-ui/layout'
+import { Box, Center, Flex, Heading, HStack, Spacer, } from '@chakra-ui/layout'
 import { useQueryClient } from 'react-query'
 import {
 	FormControl,
@@ -19,9 +19,11 @@ import {
 	Question,
 	Gametype,
 	useUpdateQuestionMutation,
+	HintInput,
 } from '../../graphql/generated'
 import React, { useState } from 'react'
 import MultipleChoice from './MultipleChoice'
+import HintEditor from './HintEditor'
 
 type EditQuestionProps = {
 	selectedInstance: any
@@ -217,7 +219,10 @@ export default function EditQuestion({
 					</TabPanel>
 					<TabPanel>
 						{/* Hints Panel */}
-						Hints
+						<Flex direction='column' justify='center' alignItems='center'>
+							<Heading>Hints</Heading>
+							<HintEditor hints={instanceState.hints} setHints={(newHints: HintInput[]) => setInstanceState({...instanceState, hints: newHints})}/>
+						</Flex>
 					</TabPanel>
 					<TabPanel>
 						{/* Settings Panel */}

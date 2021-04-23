@@ -147,6 +147,7 @@ export type Mutation = {
   createComment: Comment;
   createGameProgress: GameProgress;
   deleteGameProgress: Deleted;
+  updateQuestionProgress: QuestionProgress;
   createGame: Game;
   updateGame: Game;
   updateRoadmap: Array<RoadmapObject>;
@@ -194,6 +195,13 @@ export type MutationCreateGameProgressArgs = {
 export type MutationDeleteGameProgressArgs = {
   userId: Scalars['ObjectId'];
   gameProgressId: Scalars['String'];
+};
+
+
+export type MutationUpdateQuestionProgressArgs = {
+  questionProgress: QuestionProgressInput;
+  gameId: Scalars['String'];
+  userId: Scalars['String'];
 };
 
 
@@ -485,6 +493,19 @@ export type QuestionProgress = {
   completed: Scalars['Boolean'];
   livesLeft: Scalars['Int'];
   pointsReceived: Scalars['Int'];
+  dateStarted?: Maybe<Scalars['Date']>;
+  /** Number representing the index of the latest hint revealed */
+  hintsRevealed?: Maybe<Scalars['Int']>;
+};
+
+export type QuestionProgressInput = {
+  questionId: Scalars['String'];
+  completed: Scalars['Boolean'];
+  livesLeft: Scalars['Int'];
+  pointsReceived: Scalars['Int'];
+  dateStarted?: Maybe<Scalars['Date']>;
+  /** Number representing the index of the latest hint revealed */
+  hintsRevealed?: Maybe<Scalars['Int']>;
 };
 
 export type RoadmapInput = {
@@ -567,6 +588,14 @@ export type CreateGameMutationVariables = Exact<{
 
 export type CreateGameMutation = { createGame: Pick<Game, '_id'> };
 
+export type CreateGameProgressMutationVariables = Exact<{
+  gameId: Scalars['String'];
+  userId: Scalars['ObjectId'];
+}>;
+
+
+export type CreateGameProgressMutation = { createGameProgress: Pick<GameProgress, '_id' | 'startedAt' | 'isCompleted' | 'userId' | 'gameId'> };
+
 export type UpdateGameMutationVariables = Exact<{
   gameId: Scalars['ObjectId'];
   newTitle?: Maybe<Scalars['String']>;
@@ -587,6 +616,14 @@ export type UpdateQuestionMutationVariables = Exact<{
 
 export type UpdateQuestionMutation = { updateQuestions: Array<Pick<QuestionObject, '_id'>> };
 
+export type GetGameProgressForGamePreviewQueryVariables = Exact<{
+  gameId: Scalars['ObjectId'];
+  userId: Scalars['ObjectId'];
+}>;
+
+
+export type GetGameProgressForGamePreviewQuery = { getGameProgressByUser?: Maybe<Pick<GameProgress, '_id' | 'startedAt' | 'isCompleted' | 'userId' | 'gameId'>> };
+
 export type GetGameEditQueryVariables = Exact<{
   id: Scalars['String'];
 }>;
@@ -600,6 +637,13 @@ export type GetGameEditQuery = { getGame?: Maybe<(
     )> }
   )> };
 
+export type GamePreviewQueryVariables = Exact<{
+  gameId: Scalars['String'];
+}>;
+
+
+export type GamePreviewQuery = { getGame?: Maybe<Pick<Game, '_id' | 'title' | 'description' | 'tags' | 'lastUpdated' | 'totalStars' | 'rating' | 'playCount' | 'codingLanguage' | 'difficulty'>> };
+
 export type GetGamePlayingProgressQueryVariables = Exact<{
   userId: Scalars['ObjectId'];
   gameId: Scalars['ObjectId'];
@@ -608,11 +652,11 @@ export type GetGamePlayingProgressQueryVariables = Exact<{
 
 export type GetGamePlayingProgressQuery = { getGameProgressByUser?: Maybe<(
     Pick<GameProgress, '_id' | 'completedAt' | 'isCompleted' | 'totalPoints'>
-    & { levels?: Maybe<Array<Pick<LevelProgress, 'levelId' | 'completed'>>>, stages?: Maybe<Array<Pick<StageProgress, 'stageId' | 'completed'>>>, questions?: Maybe<Array<Pick<QuestionProgress, 'questionId' | 'completed' | 'livesLeft' | 'pointsReceived'>>>, game: (
-      Pick<Game, '_id'>
-      & { levels: Array<Pick<LevelObject, 'title' | 'description'>>, stages: Array<Pick<StageObject, 'title' | 'description'>>, questions: Array<(
-        Pick<QuestionObject, 'title' | 'correctChoice' | 'incorrectChoices' | '_id' | 'description' | 'timeLimit' | 'points' | 'lives' | 'gameType' | 'toAnswer' | 'exampleSolutionCode' | 'exampleSolutionDescription'>
-        & { matchings: Array<Pick<Matching, 'pairOne' | 'pairTwo'>>, hints: Array<Pick<Hint, 'description' | 'timeToReveal'>> }
+    & { levels?: Maybe<Array<Pick<LevelProgress, 'levelId' | 'completed'>>>, stages?: Maybe<Array<Pick<StageProgress, 'stageId' | 'completed'>>>, questions?: Maybe<Array<Pick<QuestionProgress, 'questionId' | 'completed' | 'livesLeft' | 'pointsReceived' | 'hintsRevealed' | 'dateStarted'>>>, game: (
+      Pick<Game, 'title' | '_id'>
+      & { roadmap: Array<Pick<RoadmapObject, 'parent' | 'sequence' | 'kind' | 'refId' | '_id'>>, levels: Array<Pick<LevelObject, '_id' | 'title' | 'description'>>, stages: Array<Pick<StageObject, '_id' | 'title' | 'description'>>, questions: Array<(
+        Pick<QuestionObject, '_id' | 'title' | 'correctChoice' | 'incorrectChoices' | 'description' | 'timeLimit' | 'points' | 'lives' | 'gameType' | 'toAnswer' | 'exampleSolutionCode' | 'exampleSolutionDescription'>
+        & { matchings: Array<Pick<Matching, '_id' | 'pairOne' | 'pairTwo'>>, hints: Array<Pick<Hint, '_id' | 'description' | 'timeToReveal'>> }
       )> }
     ) }
   )> };
@@ -659,6 +703,25 @@ export const useCreateGameMutation = <
       (variables?: CreateGameMutationVariables) => fetcher<CreateGameMutation, CreateGameMutationVariables>(CreateGameDocument, variables)(),
       options
     );
+export const CreateGameProgressDocument = `
+    mutation CreateGameProgress($gameId: String!, $userId: ObjectId!) {
+  createGameProgress(userId: $userId, gameId: $gameId) {
+    _id
+    startedAt
+    isCompleted
+    userId
+    gameId
+  }
+}
+    `;
+export const useCreateGameProgressMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<CreateGameProgressMutation, TError, CreateGameProgressMutationVariables, TContext>) => 
+    useMutation<CreateGameProgressMutation, TError, CreateGameProgressMutationVariables, TContext>(
+      (variables?: CreateGameProgressMutationVariables) => fetcher<CreateGameProgressMutation, CreateGameProgressMutationVariables>(CreateGameProgressDocument, variables)(),
+      options
+    );
 export const UpdateGameDocument = `
     mutation updateGame($gameId: ObjectId!, $newTitle: String, $newCodingLanguage: String, $newDifficulty: String, $newDescription: String, $newTags: [String!]) {
   updateGame(
@@ -696,6 +759,31 @@ export const useUpdateQuestionMutation = <
       (variables?: UpdateQuestionMutationVariables) => fetcher<UpdateQuestionMutation, UpdateQuestionMutationVariables>(UpdateQuestionDocument, variables)(),
       options
     );
+export const GetGameProgressForGamePreviewDocument = `
+    query GetGameProgressForGamePreview($gameId: ObjectId!, $userId: ObjectId!) {
+  getGameProgressByUser(gameId: $gameId, userId: $userId) {
+    _id
+    startedAt
+    isCompleted
+    userId
+    gameId
+  }
+}
+    `;
+export const useGetGameProgressForGamePreviewQuery = <
+      TData = GetGameProgressForGamePreviewQuery,
+      TError = unknown
+    >(
+      variables: GetGameProgressForGamePreviewQueryVariables, 
+      options?: UseQueryOptions<GetGameProgressForGamePreviewQuery, TError, TData>
+    ) => 
+    useQuery<GetGameProgressForGamePreviewQuery, TError, TData>(
+      ['GetGameProgressForGamePreview', variables],
+      fetcher<GetGameProgressForGamePreviewQuery, GetGameProgressForGamePreviewQueryVariables>(GetGameProgressForGamePreviewDocument, variables),
+      options
+    );
+useGetGameProgressForGamePreviewQuery.getKey = (variables: GetGameProgressForGamePreviewQueryVariables) => ['GetGameProgressForGamePreview', variables];
+
 export const GetGameEditDocument = `
     query GetGameEdit($id: String!) {
   getGame(id: $id) {
@@ -764,6 +852,37 @@ export const useGetGameEditQuery = <
     );
 useGetGameEditQuery.getKey = (variables: GetGameEditQueryVariables) => ['GetGameEdit', variables];
 
+export const GamePreviewDocument = `
+    query GamePreview($gameId: String!) {
+  getGame(id: $gameId) {
+    _id
+    title
+    description
+    tags
+    lastUpdated
+    totalStars
+    rating
+    playCount
+    codingLanguage
+    difficulty
+    tags
+  }
+}
+    `;
+export const useGamePreviewQuery = <
+      TData = GamePreviewQuery,
+      TError = unknown
+    >(
+      variables: GamePreviewQueryVariables, 
+      options?: UseQueryOptions<GamePreviewQuery, TError, TData>
+    ) => 
+    useQuery<GamePreviewQuery, TError, TData>(
+      ['GamePreview', variables],
+      fetcher<GamePreviewQuery, GamePreviewQueryVariables>(GamePreviewDocument, variables),
+      options
+    );
+useGamePreviewQuery.getKey = (variables: GamePreviewQueryVariables) => ['GamePreview', variables];
+
 export const GetGamePlayingProgressDocument = `
     query GetGamePlayingProgress($userId: ObjectId!, $gameId: ObjectId!) {
   getGameProgressByUser(userId: $userId, gameId: $gameId) {
@@ -783,23 +902,37 @@ export const GetGamePlayingProgressDocument = `
       completed
       livesLeft
       pointsReceived
+      hintsRevealed
+      dateStarted
     }
     totalPoints
     game {
+      title
       _id
+      roadmap {
+        parent
+        sequence
+        kind
+        refId
+        _id
+      }
       levels {
+        _id
         title
         description
       }
       stages {
+        _id
         title
         description
       }
       questions {
+        _id
         title
         correctChoice
         incorrectChoices
         matchings {
+          _id
           pairOne
           pairTwo
         }
@@ -809,6 +942,7 @@ export const GetGamePlayingProgressDocument = `
         points
         lives
         hints {
+          _id
           description
           timeToReveal
         }

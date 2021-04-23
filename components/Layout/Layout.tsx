@@ -8,7 +8,7 @@ export default function Layout({
 	return (
 		<Box minH='100vh'>
 			<Header />
-			<Box minH='calc(100vh - 56px)'>{children}</Box>
+			<Box h='calc(100vh - 56px)'>{children}</Box>
 		</Box>
 	)
 }

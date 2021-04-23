@@ -19,7 +19,7 @@ const UserContextProvider = ({ children }: React.PropsWithChildren<{}>) => {
 	const { data, isLoading, error, refetch } = useContextGetMeQuery()
 
 	if (isLoading) return <></>
-	console.log(data)
+	// console.log(data)
 	const isLoggedIn = () => data?.getMe !== null
 
 	const signOut = () => {

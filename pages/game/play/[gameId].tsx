@@ -1,7 +1,7 @@
 import React, { ReactElement } from 'react'
 import { useRouter } from 'next/router'
 import { useUser } from '../../../contexts/UserContext'
-import { Skeleton, useToast } from '@chakra-ui/react'
+import { Skeleton, Spinner, useToast } from '@chakra-ui/react'
 import { useGetGamePlayingProgressQuery} from '../../../graphql/generated'
 import GameplayManager from '../../../components/GameplayManager/GameplayManager'
 
@@ -9,7 +9,7 @@ import GameplayManager from '../../../components/GameplayManager/GameplayManager
 export default function PlayGame(): ReactElement {
 	const router = useRouter()
 	const gameId = router.query.gameId as string
-
+	if (!gameId) return <></>
 	const toast = useToast()
 
 	const { user, isLoggedIn } = useUser()
@@ -39,10 +39,8 @@ export default function PlayGame(): ReactElement {
 	}, [isError])
 
 
-
+	if(!data) return <Spinner/>
 	return (	
-		<Skeleton isLoaded={!isLoading}>
-			<GameplayManager data={data!.getGameProgressByUser!}/>
-		</Skeleton>
+			<GameplayManager data={data?.getGameProgressByUser!}/>
 	)
 }

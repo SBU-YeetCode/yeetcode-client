@@ -4,25 +4,21 @@ import {
 	Heading,
 	Spacer,
 	Center,
-	Input,
-	InputGroup,
-	InputRightElement,
 	Link,
 	HStack,
 	Box,
 	Stack,
 } from '@chakra-ui/react'
-import { SearchIcon } from '@chakra-ui/icons'
 import NextLink from 'next/link'
 import { useRouter } from 'next/router'
 import React, { useState } from 'react'
 import { useUser } from '../../contexts/UserContext'
 import AccountDropdown from './AccountDropdown'
+import SearchBar from '../Search/SearchBar'
 
 export default function Navbar() {
 	const { user, isLoggedIn } = useUser()
 	const router = useRouter()
-	const [searchInput, setSearchInput] = useState('')
 	const [show, setShow] = React.useState(false)
 	const handleToggle = () => setShow(!show)
 
@@ -60,36 +56,8 @@ export default function Navbar() {
 						YeetCode
 					</Heading>
 				</Link>
-				<InputGroup
-					w={{ base: '0', lg: '40vw' }}
-					display={{ base: 'none', lg: 'block' }}
-				>
-					<Input
-						onChange={(e) => setSearchInput(e.target.value)}
-						onKeyPress={(e) => {
-							if (e.key === 'Enter' && searchInput)
-								router.push(`/search?q=${searchInput}`)
-						}}
-						variant='filled'
-						placeholder='Search here for a game...'
-						borderWidth={1}
-						bg='primary.700'
-						// bg='primary.300'
-						_focus={{
-							bg: 'primary.700',
-							borderColor: 'secondary.300',
-						}}
-					></Input>
-					<Link as={NextLink} href={`/search?q=${searchInput}`}>
-						<InputRightElement
-							bg='secondary.300'
-							borderRightRadius='6'
-							children={<SearchIcon />}
-							cursor='pointer'
-						/>
-					</Link>
-				</InputGroup>
-				<Stack
+				<SearchBar/>
+			<Stack
 					direction={['column', 'column', 'column', 'row']}
 					as={'nav'}
 					display={{ base: show ? 'flex' : 'none', md: 'flex' }}

@@ -1,7 +1,8 @@
 import { Button, IconButton } from '@chakra-ui/button'
 import { CloseIcon } from '@chakra-ui/icons'
-import { Box, Center, Heading, HStack, Spacer, Text } from '@chakra-ui/layout'
+import { Box, Center, Flex, Heading, HStack, Spacer } from '@chakra-ui/layout'
 import { useQueryClient } from 'react-query'
+import ObjectId from 'bson-objectid'
 import {
 	FormControl,
 	FormLabel,
@@ -19,9 +20,11 @@ import {
 	Question,
 	Gametype,
 	useUpdateQuestionMutation,
+	HintInput,
 } from '../../graphql/generated'
 import React, { useState } from 'react'
 import MultipleChoice from './MultipleChoice'
+import HintEditor from './HintEditor'
 
 type EditQuestionProps = {
 	selectedInstance: any
@@ -37,34 +40,27 @@ const SELECT: { [key: string]: string } = {
 	Spotthebug: 'Spot the bug',
 }
 
+const GAMETYPE_INFO: { [key: string]: keyof Question } = {
+	LIVECODING: 'liveCoding',
+	MULTIPLECHOICE: 'multipleChoice',
+	FILLINBLANK: 'fillInTheBlank',
+	MATCHING: 'matching',
+	SPOTTHEBUG: 'spotTheBug',
+}
+
 export default function EditQuestion({
 	selectedInstance,
 	setSelectedInstance,
 	gameId,
 }: EditQuestionProps) {
-	let selectedInstanceTemp: Question = {
-		_id: 'somelongidhere',
-		title: 'Question Title',
-		description: 'Question description',
-		timeLimit: 40,
-		points: 30,
-		lives: 10,
-		hints: [{ _id: 'hintid1', description: 'hint desc', timeToReveal: 10 }],
-		gameType: Gametype.Multiplechoice,
-		toAnswer: 'What is 1+1?',
-		exampleSolutionCode: 'example solution',
-		exampleSolutionDescription: 'example solution description',
-		correctChoice: 'correct choice',
-		incorrectChoices: ['incorrect choice 1', 'incorrect choice 2'],
-		matchings: [
-			{ pairOne: 'Pair one', pairTwo: 'Pair two', _id: 'matchingid' },
-		],
-	}
 	// State
 	const [instanceState, setInstanceState] = useState<Question>()
+
 	const queryClient = useQueryClient()
 	React.useEffect(() => {
-		setInstanceState(selectedInstance.item ?? selectedInstanceTemp)
+		console.log(selectedInstance)
+		setInstanceState(selectedInstance.item)
+		setSelectedMode(selectedInstance.item.gameType)
 	}, [selectedInstance])
 	const [tabIndex, setTabIndex] = useState(0)
 	const [questionNav, setQuestionNav] = useState([
@@ -73,11 +69,9 @@ export default function EditQuestion({
 		'Hints',
 		'Settings',
 	])
-	if (selectedInstanceTemp.gameType === Gametype.Livecoding)
-		questionNav.push('Test Cases')
 	const [selectedNav, setSelectedNav] = useState(questionNav[0])
 	const [selectedMode, setSelectedMode] = useState(
-		selectedInstanceTemp.gameType
+		selectedInstance.gameType
 	)
 
 	const { mutate, data, isLoading, error } = useUpdateQuestionMutation()
@@ -171,11 +165,19 @@ export default function EditQuestion({
 								<FormControl>
 									<FormLabel size='md'>Question</FormLabel>
 									<Textarea
-										value={instanceState.toAnswer}
+										value={
+											instanceState[GAMETYPE_INFO[instanceState.gameType]]
+												.prompt
+										}
 										onChange={(e) =>
 											setInstanceState({
 												...instanceState,
-												toAnswer: e.target.value,
+												[GAMETYPE_INFO[instanceState.gameType]]: {
+													...instanceState[
+														GAMETYPE_INFO[instanceState.gameType]
+													],
+													prompt: e.target.value,
+												},
 											})
 										}
 										placeholder='Ask the question here...'
@@ -217,7 +219,15 @@ export default function EditQuestion({
 					</TabPanel>
 					<TabPanel>
 						{/* Hints Panel */}
-						Hints
+						<Flex direction='column' justify='center' alignItems='center'>
+							<Heading>Hints</Heading>
+							<HintEditor
+								hints={instanceState.hints}
+								setHints={(newHints: HintInput[]) =>
+									setInstanceState({ ...instanceState, hints: newHints })
+								}
+							/>
+						</Flex>
 					</TabPanel>
 					<TabPanel>
 						{/* Settings Panel */}

@@ -39,15 +39,36 @@ export const GET_GAME_EDIT = gql`
 					timeToReveal
 				}
 				gameType
-				toAnswer
-				exampleSolutionCode
-				exampleSolutionDescription
-				correctChoice
-				incorrectChoices
-				matchings {
+				multipleChoice {
 					_id
-					pairOne
-					pairTwo
+					prompt
+					correctChoice
+					incorrectChoices
+				}
+				fillInTheBlank {
+					_id
+					prompt
+					solutions
+				}
+				spotTheBug {
+					_id
+					prompt
+					bugLine
+					code
+				}
+				liveCoding {
+					_id
+					prompt
+					exampleSolutionCode
+					exampleSolutionDescription
+				}
+				matching {
+					_id
+					prompt
+					matching {
+						pairOne
+						pairTwo
+					}
 				}
 			}
 		}

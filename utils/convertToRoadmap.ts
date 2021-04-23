@@ -30,6 +30,11 @@ export function convertToRoadmap(
 		let currHash = hash[roadmap[i]._id]
 		if (currHash.parent && hash[currHash.parent]) {
 			hash[currHash.parent].children.push(currHash)
+		}
+	}
+	for (let i = 0; i < roadmap.length; i++) {
+		let currHash = hash[roadmap[i]._id]
+		if (currHash.parent != null) {
 			delete hash[roadmap[i]._id]
 		}
 	}

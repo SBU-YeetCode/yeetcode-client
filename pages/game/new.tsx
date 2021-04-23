@@ -1,12 +1,12 @@
 import React, { ReactElement } from 'react'
-import useAuthenticate from '../../hooks/useAuthenticate'
 import NewGameForm from '../../components/NewGameForm'
+import { Flex } from '@chakra-ui/react'
+interface Props {}
 
-export default function NewGame(): ReactElement {
-	useAuthenticate('/')
+export default function NewGame({}: Props): ReactElement {
 	return (
-		<>
+		<Flex direction='column' alignItems='center'>
 			<NewGameForm />
-		</>
+		</Flex>
 	)
 }

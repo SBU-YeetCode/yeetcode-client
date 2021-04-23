@@ -84,6 +84,7 @@ export function Item({
 			alignItems='center'
 			alignContent='center'
 			justifyContent='space-between'
+			onClick={() => onAction && onAction("click",item)}
 		>
 			{item.children.length > 0 ? <AccordionIcon /> : <Box mr={2} />}
 			<HStack spacing={5} alignItems='center'>
@@ -194,9 +195,10 @@ export default function Roadmap({
 	onChange,
 	data,
 	gameTitle,
+	showTitle = true,
 	...style
 }: RoadmapProps & Partial<BoxProps>): ReactElement {
-	function onAction(action: 'edit' | 'delete' | 'add', item: RoadmapData) {
+	function onAction(action: 'edit' | 'delete' | 'add' | 'click', item: RoadmapData) {
 		switch (action) {
 			case 'edit': {
 				setSelectedInstance(item.refId, item.kind as any)
@@ -210,11 +212,14 @@ export default function Roadmap({
 				console.log('add not implemented yet')
 				return
 			}
+			case 'click': {
+				setSelectedInstance(item.refId, item.kind as any)
+			}
 		}
 	}
 	return (
 		<Box bg='gray.700' borderRadius={10} {...style}>
-			<HStack>
+			{showTitle &&<HStack>
 				<Item
 					item={{
 						children: [],
@@ -230,7 +235,7 @@ export default function Roadmap({
 					showActions={showActions}
 					showReorder={showReorder}
 				/>
-			</HStack>
+			</HStack>}
 			<Accordion allowMultiple bg='gray.700'>
 				{data.map((item, index) => (
 					<AccordionItem
@@ -253,7 +258,8 @@ interface Props {
 	showActions?: boolean
 	showCompleted?: boolean
 	showReorder?: boolean
-	onAction?: (action: 'edit' | 'delete' | 'add', item: RoadmapData) => void
+	showTitle?: boolean
+	onAction?: (action: 'edit' | 'delete' | 'add' | 'click', item: RoadmapData) => void
 }
 
 interface RoadmapProps extends Omit<Props, 'selected' | 'item'> {

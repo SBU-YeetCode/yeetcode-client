@@ -148,6 +148,7 @@ export type Mutation = {
   createGameProgress: GameProgress;
   deleteGameProgress: Deleted;
   updateQuestionProgress: QuestionProgress;
+  submitQuestion: SubmitQuestion;
   createGame: Game;
   updateGame: Game;
   updateRoadmap: Array<RoadmapObject>;
@@ -201,7 +202,15 @@ export type MutationDeleteGameProgressArgs = {
 export type MutationUpdateQuestionProgressArgs = {
   questionProgress: QuestionProgressInput;
   gameId: Scalars['String'];
-  userId: Scalars['String'];
+  userId: Scalars['ObjectId'];
+};
+
+
+export type MutationSubmitQuestionArgs = {
+  userId: Scalars['ObjectId'];
+  gameId: Scalars['String'];
+  questionId: Scalars['String'];
+  submittedAnswer: Scalars['String'];
 };
 
 
@@ -551,6 +560,10 @@ export type StageProgress = {
   completed: Scalars['Boolean'];
 };
 
+export type SubmitQuestion = {
+  isCorrect: Scalars['Boolean'];
+};
+
 export type User = {
   _id: Scalars['ObjectId'];
   name: Scalars['String'];
@@ -595,6 +608,25 @@ export type CreateGameProgressMutationVariables = Exact<{
 
 
 export type CreateGameProgressMutation = { createGameProgress: Pick<GameProgress, '_id' | 'startedAt' | 'isCompleted' | 'userId' | 'gameId'> };
+
+export type StartQuestionMutationVariables = Exact<{
+  gameId: Scalars['String'];
+  userId: Scalars['ObjectId'];
+  questionProgress: QuestionProgressInput;
+}>;
+
+
+export type StartQuestionMutation = { updateQuestionProgress: Pick<QuestionProgress, 'dateStarted'> };
+
+export type SubmitQuestionMutationVariables = Exact<{
+  gameId: Scalars['String'];
+  userId: Scalars['ObjectId'];
+  questionId: Scalars['String'];
+  submittedAnswer: Scalars['String'];
+}>;
+
+
+export type SubmitQuestionMutation = { submitQuestion: Pick<SubmitQuestion, 'isCorrect'> };
 
 export type UpdateGameMutationVariables = Exact<{
   gameId: Scalars['ObjectId'];
@@ -720,6 +752,45 @@ export const useCreateGameProgressMutation = <
     >(options?: UseMutationOptions<CreateGameProgressMutation, TError, CreateGameProgressMutationVariables, TContext>) => 
     useMutation<CreateGameProgressMutation, TError, CreateGameProgressMutationVariables, TContext>(
       (variables?: CreateGameProgressMutationVariables) => fetcher<CreateGameProgressMutation, CreateGameProgressMutationVariables>(CreateGameProgressDocument, variables)(),
+      options
+    );
+export const StartQuestionDocument = `
+    mutation StartQuestion($gameId: String!, $userId: ObjectId!, $questionProgress: QuestionProgressInput!) {
+  updateQuestionProgress(
+    gameId: $gameId
+    userId: $userId
+    questionProgress: $questionProgress
+  ) {
+    dateStarted
+  }
+}
+    `;
+export const useStartQuestionMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<StartQuestionMutation, TError, StartQuestionMutationVariables, TContext>) => 
+    useMutation<StartQuestionMutation, TError, StartQuestionMutationVariables, TContext>(
+      (variables?: StartQuestionMutationVariables) => fetcher<StartQuestionMutation, StartQuestionMutationVariables>(StartQuestionDocument, variables)(),
+      options
+    );
+export const SubmitQuestionDocument = `
+    mutation SubmitQuestion($gameId: String!, $userId: ObjectId!, $questionId: String!, $submittedAnswer: String!) {
+  submitQuestion(
+    gameId: $gameId
+    userId: $userId
+    questionId: $questionId
+    submittedAnswer: $submittedAnswer
+  ) {
+    isCorrect
+  }
+}
+    `;
+export const useSubmitQuestionMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<SubmitQuestionMutation, TError, SubmitQuestionMutationVariables, TContext>) => 
+    useMutation<SubmitQuestionMutation, TError, SubmitQuestionMutationVariables, TContext>(
+      (variables?: SubmitQuestionMutationVariables) => fetcher<SubmitQuestionMutation, SubmitQuestionMutationVariables>(SubmitQuestionDocument, variables)(),
       options
     );
 export const UpdateGameDocument = `

@@ -2,9 +2,9 @@ import React, { ReactElement } from 'react'
 import { useRouter } from 'next/router'
 import { useUser } from '../../../contexts/UserContext'
 import { Skeleton, Spinner, useToast } from '@chakra-ui/react'
-import { useGetGamePlayingProgressQuery} from '../../../graphql/generated'
+import { useGetGamePlayingProgressQuery } from '../../../graphql/generated'
 import GameplayManager from '../../../components/GameplayManager/GameplayManager'
-
+import { useStore } from '../../../components/GameplayManager/store'
 
 export default function PlayGame(): ReactElement {
 	const router = useRouter()
@@ -14,11 +14,21 @@ export default function PlayGame(): ReactElement {
 
 	const { user, isLoggedIn } = useUser()
 
-	const {data, isLoading, isError, error} = useGetGamePlayingProgressQuery({
-		userId: user!._id,
-		gameId: gameId
-	}, {enabled: isLoggedIn()})
-
+	const {
+		data,
+		isLoading,
+		isError,
+		error,
+		refetch,
+	} = useGetGamePlayingProgressQuery(
+		{
+			userId: user!._id,
+			gameId: gameId,
+		},
+		{ enabled: isLoggedIn() }
+	)
+	const updateRefetch = useStore((state) => state.updateRefetch)
+	updateRefetch(refetch)
 	React.useEffect(() => {
 		if (!isLoggedIn()) {
 			router.push(`/game/${gameId}`)
@@ -28,7 +38,7 @@ export default function PlayGame(): ReactElement {
 				isClosable: true,
 			})
 		}
-		if(isError) {
+		if (isError) {
 			router.push(`/game/${gameId}`)
 			toast({
 				title: 'Error playing game',
@@ -38,9 +48,6 @@ export default function PlayGame(): ReactElement {
 		}
 	}, [isError])
 
-
-	if(!data) return <Spinner/>
-	return (	
-			<GameplayManager data={data?.getGameProgressByUser!}/>
-	)
+	if (!data) return <Spinner />
+	return <GameplayManager data={data?.getGameProgressByUser!} />
 }

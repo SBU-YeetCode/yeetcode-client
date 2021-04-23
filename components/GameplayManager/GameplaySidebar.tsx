@@ -7,6 +7,7 @@ import { Button, ButtonGroup } from '@chakra-ui/button'
 import { IoMdExit } from 'react-icons/io'
 import { useStore } from './store'
 import { getInfoFor } from './utils'
+import Link from 'next/link'
 
 export default function GameplaySidebar({ data }: Props): ReactElement {
 	const selected = useStore((s) => s.selectedId)
@@ -46,9 +47,11 @@ export default function GameplaySidebar({ data }: Props): ReactElement {
 			</Heading>
 			<ButtonGroup variant='outline'>
 				<Button colorScheme='secondary'>View Achievements</Button>
-				<Button colorScheme='secondary' rightIcon={<IoMdExit />}>
+				<Link href={`/game/${data?.game._id}`}>
+				<Button  colorScheme='secondary' rightIcon={<IoMdExit />}>
 					Exit
 				</Button>
+				</Link>
 			</ButtonGroup>
 			<Divider colorScheme='teal' my={2} />
 			<Roadmap

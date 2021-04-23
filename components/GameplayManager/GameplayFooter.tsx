@@ -11,22 +11,26 @@ import {
 	Heading,
 	Wrap,
 	Icon,
+	useToast,
 } from '@chakra-ui/react'
 import { useUser } from '../../contexts/UserContext'
 import { calculatePoints, getInfoFor } from './utils'
 import { FaLightbulb } from 'react-icons/fa'
 import { AiFillHeart, AiOutlineHeart } from 'react-icons/ai'
 import {
+	Gametype,
 	HintInput,
 	Question,
 	QuestionProgress,
+	SubmittedAnswer,
 	useStartQuestionMutation,
 	useSubmitQuestionMutation,
 } from '../../graphql/generated'
 import { useQueryClient } from 'react-query'
-import { formatDistance, differenceInMilliseconds } from 'date-fns'
+import { formatDistanceStrict, differenceInMilliseconds, formatDuration } from 'date-fns'
 
 export default function GameplayFooter({ data }: Props): ReactElement {
+	const toast = useToast()
 	const [
 		selectedProgress,
 		kind,
@@ -68,16 +72,14 @@ export default function GameplayFooter({ data }: Props): ReactElement {
 						disabled={!selectedProgress?.completed}
 						color='secondary.400'
 						variant='outline'
-						onClick={handleNext}
-					>
+						onClick={handleNext}>
 						Next
 					</Button>
 				) : (
 					<Button
 						disabled={!selectedProgress?.completed}
 						color='secondary'
-						variant='outline'
-					>
+						variant='outline'>
 						Complete Game
 					</Button>
 				)}
@@ -98,7 +100,7 @@ export default function GameplayFooter({ data }: Props): ReactElement {
 interface QProps extends Props {
 	questionProgress: QuestionProgress
 	question: Question
-	selectedAnswer: string | null
+	selectedAnswer: SubmittedAnswer | null
 }
 
 function QuestionFooter({
@@ -108,13 +110,11 @@ function QuestionFooter({
 	selectedAnswer,
 }: QProps): ReactElement {
 	const refetch = useStore((s) => s.refetch)
+	const toast = useToast()
 
-	React.useEffect(() => {
-		console.log(data)
-	}, [data])
 	const {
 		isLoading: isLoadingStart,
-		mutate,
+		mutateAsync: mutateStart,
 		data: startData,
 	} = useStartQuestionMutation()
 	const {
@@ -124,21 +124,20 @@ function QuestionFooter({
 	} = useSubmitQuestionMutation()
 	const { user } = useUser()
 	const queryClient = useQueryClient()
-	const handleStart = () => {
-		mutate({
+	const handleStart = async () => {
+		await mutateStart({
 			gameId: data!.game._id,
 			userId: user?._id,
 			questionProgress: questionProgress,
 		})
+		await queryClient.refetchQueries(['GetGamePlayingProgress'])
+		toast({
+			title: 'Question Started',
+			duration: 4000,
+			status: 'error',
+			position: 'bottom-left',
+		})
 	}
-
-	React.useEffect(() => {
-		console.log(startData)
-		if (startData) {
-			console.log('hi')
-			queryClient.refetchQueries(['GetGamePlayingProgress'])
-		}
-	}, [startData])
 
 	const handleSubmit = async () => {
 		// Submit answer if one exists
@@ -149,17 +148,67 @@ function QuestionFooter({
 				questionId: question._id,
 				submittedAnswer: selectedAnswer,
 			})
-			refetch()
+			await queryClient.refetchQueries(['GetGamePlayingProgress'])
 		}
 	}
 
 	const [time, setTime] = React.useState(new Date())
-	React.useEffect(() => {
+	React.useEffect( () => {
 		const unsub = setInterval(() => {
 			setTime(new Date())
 		}, 1000)
 		return () => clearInterval(unsub)
 	}, [])
+	const submitAsync = async (gameId: string, userId: string, questionId: string, submittedAnswer: SubmittedAnswer) => {
+		await mutateSubmit({
+			gameId,
+			userId,
+			questionId,
+			submittedAnswer,
+		})
+		await queryClient.refetchQueries(['GetGamePlayingProgress'])
+		toast({
+			title: `You\'ve run out of time!`,
+			description: `You exceeded the time limit and the question has been automatically submitted.`,
+			status:'warning',
+			duration: 5000,
+			isClosable: true
+		})
+	}
+	React.useEffect(() => {
+		// Check if question is started and not completed
+		if (questionProgress.dateStarted && !questionProgress.completed && !isLoadingSubmit) {
+			// Check if time has run out
+			const timeDifference = new Date().getTime() - new Date(questionProgress.dateStarted).getTime()
+			if (timeDifference >= question.timeLimit ) {
+				// Set answer if one does not exist
+				const tempAnswer = {...selectedAnswer}
+				switch(question.gameType) {
+					case Gametype.Fillinblank: 
+						if (tempAnswer.fillInTheBlank == null)
+							tempAnswer.fillInTheBlank = []
+						break
+					case Gametype.Multiplechoice:
+						if (tempAnswer.multipleChoice == null)
+						tempAnswer.multipleChoice = ''
+						break
+					case Gametype.Spotthebug:
+						if (tempAnswer.spotTheBug == null || isNaN(parseInt(tempAnswer.spotTheBug)))
+						tempAnswer.spotTheBug = '0'
+						break
+					case Gametype.Livecoding:
+						if (tempAnswer.liveCoding == null)
+						tempAnswer.liveCoding = ''	
+						break
+					case Gametype.Matching:
+						if (tempAnswer.matching == null)
+						tempAnswer.matching = []
+						break
+				}
+				submitAsync(data?.game._id as string, user?._id as string, question._id as string, tempAnswer as SubmittedAnswer)
+			}
+		}
+	}, [time])
 	function getHintInfo(hint: HintInput, i: number) {
 		let color: string = 'gray.400'
 		let disabled: boolean = true
@@ -186,14 +235,12 @@ function QuestionFooter({
 			h='100%'
 			justify='space-around'
 			alignItems='center'
-			alignContent='center'
-		>
+			alignContent='center'>
 			<Flex
 				direction='column'
 				justify='space-evenly'
 				alignItems='center'
-				alignContent='center'
-			>
+				alignContent='center'>
 				<Heading as='h4' color='secondary.400' fontSize='xl'>
 					Hints
 				</Heading>
@@ -216,13 +263,14 @@ function QuestionFooter({
 					direction='column'
 					justify='space-evenly'
 					alignItems='center'
-					alignContent='center'
-				>
+					alignContent='center'>
 					<Heading as='h4' color='secondary.400' fontSize='xl'>
-						Time Spent
+						Time
 					</Heading>
 					<Heading as='h2' fontSize='2xl'>
-						{formatDistance(time, new Date(questionProgress.dateStarted))}
+						{`${formatDistanceStrict(questionProgress.completed ? new Date(questionProgress.dateCompleted) : time, new Date(questionProgress.dateStarted))}/${formatDuration({
+							seconds: question.timeLimit/1000
+						})}`}
 					</Heading>
 				</Flex>
 			)}
@@ -230,8 +278,7 @@ function QuestionFooter({
 				direction='column'
 				justify='space-evenly'
 				alignItems='center'
-				alignContent='center'
-			>
+				alignContent='center'>
 				<Heading as='h2' fontSize='2xl'>{`Points: ${
 					questionProgress.completed
 						? questionProgress.pointsReceived
@@ -246,8 +293,7 @@ function QuestionFooter({
 				direction='column'
 				justify='space-evenly'
 				alignItems='center'
-				alignContent='center'
-			>
+				alignContent='center'>
 				<Heading as='h4' color='secondary.400' fontSize='xl'>
 					{`${questionProgress.livesLeft} Lives left`}
 				</Heading>
@@ -267,13 +313,17 @@ function QuestionFooter({
 					isLoading={isLoadingStart}
 					variant='outline'
 					color='secondary.400'
-					onClick={handleStart}
-				>
+					onClick={handleStart}>
 					Start Question
 				</Button>
 			)}
 			{questionProgress.dateStarted && !questionProgress.completed && (
-				<Button variant='outline' color='secondary.400' onClick={handleSubmit}>
+				<Button
+					isLoading={isLoadingSubmit}
+					disabled={!selectedAnswer}
+					variant='outline'
+					color='secondary.400'
+					onClick={handleSubmit}>
 					Submit
 				</Button>
 			)}

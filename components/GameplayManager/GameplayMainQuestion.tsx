@@ -11,10 +11,12 @@ import Matching from './GameplayTypes/PlayMatching'
 import LiveCoding from './GameplayTypes/PlayLiveCoding'
 
 export default function GameplayMain(): ReactElement {
-	const [selectedProgress, selectedRoadmap, selectedValue] = useStore((s) => [
+	const [selectedProgress, selectedRoadmap, selectedValue, tabIndex, updateTab] = useStore((s) => [
 		s.selectedProgress as QuestionProgress,
 		s.selectedRoadmap,
 		s.selectedValue as Question,
+		s.selectedTabIndex,
+		s.updateTab
 	])
 
 	let started: boolean
@@ -46,26 +48,23 @@ export default function GameplayMain(): ReactElement {
 
 	return (
 		<Tabs
-			//index={tabIndex}
-			//onChange={(index) => setTabIndex(index)}
+			index={tabIndex ?? 0}
+			onChange={(newIndex) => updateTab(newIndex)}	
 			variant='soft-rounded'
 			isLazy
-			mx={2}
-		>
+			mx={2}>
 			<TabList borderRadius={15} p={2} mt={8} bg='background.dark.500'>
 				<Tab color='white'>Description</Tab>
 				<Tab
 					isDisabled={!started}
 					color={tabColor(started)}
-					cursor={tabCursor(started)}
-				>
+					cursor={tabCursor(started)}>
 					Question
 				</Tab>
 				<Tab
 					isDisabled={!selectedProgress.completed}
 					color={tabColor(selectedProgress.completed)}
-					cursor={tabCursor(selectedProgress.completed)}
-				>
+					cursor={tabCursor(selectedProgress.completed)}>
 					Solution
 				</Tab>
 			</TabList>
@@ -83,8 +82,7 @@ export default function GameplayMain(): ReactElement {
 								borderWidth={1}
 								bg='background.dark.500'
 								p={2}
-								w='100%'
-							>
+								w='100%'>
 								{selectedValue?.description}
 							</Text>
 						</VStack>

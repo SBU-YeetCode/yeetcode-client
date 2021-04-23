@@ -28,7 +28,9 @@ export default function PlayGame(): ReactElement {
 		{ enabled: isLoggedIn() }
 	)
 	const updateRefetch = useStore((state) => state.updateRefetch)
-	updateRefetch(refetch)
+	React.useEffect(() => {
+		updateRefetch(refetch)
+	}, [])
 	React.useEffect(() => {
 		if (!isLoggedIn()) {
 			router.push(`/game/${gameId}`)

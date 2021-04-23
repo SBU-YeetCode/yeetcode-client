@@ -5,7 +5,7 @@ export const SubmitQuestion = gql`
 		$gameId: String!
 		$userId: ObjectId!
 		$questionId: String!
-		$submittedAnswer: String!
+		$submittedAnswer: SubmittedAnswer!
 	) {
 		submitQuestion(
 			gameId: $gameId

@@ -40,25 +40,30 @@ export const GET_GAME_EDIT = gql`
 				}
 				gameType
 				multipleChoice {
+					_id
 					prompt
 					correctChoice
 					incorrectChoices
 				}
 				fillInTheBlank {
+					_id
 					prompt
 					solutions
 				}
 				spotTheBug {
+					_id
 					prompt
 					bugLine
 					code
 				}
 				liveCoding {
+					_id
 					prompt
 					exampleSolutionCode
 					exampleSolutionDescription
 				}
 				matching {
+					_id
 					prompt
 					matching {
 						pairOne

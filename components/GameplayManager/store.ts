@@ -7,15 +7,17 @@ import {
 	RoadmapObject,
 	Stage,
 	StageProgress,
+	SubmittedAnswer
 } from '../../graphql/generated'
 
 export interface StoreState extends State {
 	selectedId: string
+	selectedTabIndex: number | null
 	selectedValue: Level | Question | Stage | null
 	selectedProgress: LevelProgress | QuestionProgress | StageProgress | null
 	selectedRoadmap: RoadmapObject | null
 	kind: 'Level' | 'Stage' | 'Question' | null
-	selectedAnswer: string | null
+	selectedAnswer: SubmittedAnswer | null
 	refetch: any
 	updateRefetch: (fetcher: any) => void
 	updateSelected: (
@@ -24,10 +26,17 @@ export interface StoreState extends State {
 		progress: LevelProgress | QuestionProgress | StageProgress | null,
 		roadmap: RoadmapObject | null
 	) => void
-	updateAnswer: (answer: string | null) => void
+	updateAnswer: (answer: SubmittedAnswer | null) => void
+	updateTab: (newIndex: number) => void
 }
 
 export const useStore = create<StoreState>((set) => ({
+	selectedTabIndex: null,
+	updateTab: (newIndex) => {
+		set({
+			selectedTabIndex: newIndex
+		})
+	},
 	selectedId: '',
 	selectedValue: null,
 	selectedProgress: null,
@@ -41,6 +50,8 @@ export const useStore = create<StoreState>((set) => ({
 			selectedValue: value,
 			selectedProgress: progress,
 			selectedRoadmap: roadmap,
+			// @ts-expect-error
+			selectedTabIndex: progress?.completed ? 2 : progress?.dateStarted ? 1 : 0,
 		})
 	},
 	refetch: null,

@@ -58,7 +58,7 @@ export default function GameEdit() {
 	}, [])
 	const gameId: string = router.query['gameId'] as string
 	//@ts-ignore
-	const { data, isError, isLoading, refetch } = useGetGameEditQuery({
+	const { data, isLoading, refetch } = useGetGameEditQuery({
 		id: gameId,
 	})
 

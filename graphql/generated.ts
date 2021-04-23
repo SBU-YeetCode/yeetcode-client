@@ -260,7 +260,7 @@ export type MutationSubmitQuestionArgs = {
   userId: Scalars['ObjectId'];
   gameId: Scalars['String'];
   questionId: Scalars['String'];
-  submittedAnswer: Scalars['String'];
+  submittedAnswer: SubmittedAnswer;
 };
 
 
@@ -550,6 +550,7 @@ export type QuestionProgress = {
   livesLeft: Scalars['Int'];
   pointsReceived: Scalars['Int'];
   dateStarted?: Maybe<Scalars['Date']>;
+  dateCompleted?: Maybe<Scalars['Date']>;
   /** Number representing the index of the latest hint revealed */
   hintsRevealed?: Maybe<Scalars['Int']>;
 };
@@ -560,6 +561,7 @@ export type QuestionProgressInput = {
   livesLeft: Scalars['Int'];
   pointsReceived: Scalars['Int'];
   dateStarted?: Maybe<Scalars['Date']>;
+  dateCompleted?: Maybe<Scalars['Date']>;
   /** Number representing the index of the latest hint revealed */
   hintsRevealed?: Maybe<Scalars['Int']>;
 };
@@ -625,6 +627,14 @@ export type SubmitQuestion = {
   isCorrect: Scalars['Boolean'];
 };
 
+export type SubmittedAnswer = {
+  multipleChoice?: Maybe<Scalars['String']>;
+  fillInTheBlank?: Maybe<Array<Scalars['String']>>;
+  spotTheBug?: Maybe<Scalars['String']>;
+  liveCoding?: Maybe<Scalars['String']>;
+  matching?: Maybe<Array<MatchingCardInput>>;
+};
+
 export type User = {
   _id: Scalars['ObjectId'];
   name: Scalars['String'];
@@ -683,7 +693,7 @@ export type SubmitQuestionMutationVariables = Exact<{
   gameId: Scalars['String'];
   userId: Scalars['ObjectId'];
   questionId: Scalars['String'];
-  submittedAnswer: Scalars['String'];
+  submittedAnswer: SubmittedAnswer;
 }>;
 
 
@@ -726,8 +736,8 @@ export type GetGameEditQuery = { getGame?: Maybe<(
     Pick<Game, '_id' | 'createdBy' | 'title' | 'description' | 'codingLanguage' | 'difficulty' | 'tags'>
     & { roadmap: Array<Pick<RoadmapObject, '_id' | 'parent' | 'sequence' | 'kind' | 'refId'>>, levels: Array<Pick<LevelObject, '_id' | 'title' | 'description'>>, stages: Array<Pick<StageObject, '_id' | 'title' | 'description'>>, questions: Array<(
       Pick<QuestionObject, '_id' | 'title' | 'description' | 'timeLimit' | 'points' | 'lives' | 'gameType'>
-      & { hints: Array<Pick<Hint, '_id' | 'description' | 'timeToReveal'>>, multipleChoice?: Maybe<Pick<MultipleChoice, 'prompt' | 'correctChoice' | 'incorrectChoices'>>, fillInTheBlank?: Maybe<Pick<FillInTheBlank, 'prompt' | 'solutions'>>, spotTheBug?: Maybe<Pick<SpotTheBug, 'prompt' | 'bugLine' | 'code'>>, liveCoding?: Maybe<Pick<LiveCoding, 'prompt' | 'exampleSolutionCode' | 'exampleSolutionDescription'>>, matching?: Maybe<(
-        Pick<Matching, 'prompt'>
+      & { hints: Array<Pick<Hint, '_id' | 'description' | 'timeToReveal'>>, multipleChoice?: Maybe<Pick<MultipleChoice, '_id' | 'prompt' | 'correctChoice' | 'incorrectChoices'>>, fillInTheBlank?: Maybe<Pick<FillInTheBlank, '_id' | 'prompt' | 'solutions'>>, spotTheBug?: Maybe<Pick<SpotTheBug, '_id' | 'prompt' | 'bugLine' | 'code'>>, liveCoding?: Maybe<Pick<LiveCoding, '_id' | 'prompt' | 'exampleSolutionCode' | 'exampleSolutionDescription'>>, matching?: Maybe<(
+        Pick<Matching, '_id' | 'prompt'>
         & { matching: Array<Pick<MatchingCard, 'pairOne' | 'pairTwo'>> }
       )> }
     )> }
@@ -748,12 +758,12 @@ export type GetGamePlayingProgressQueryVariables = Exact<{
 
 export type GetGamePlayingProgressQuery = { getGameProgressByUser?: Maybe<(
     Pick<GameProgress, '_id' | 'completedAt' | 'isCompleted' | 'totalPoints'>
-    & { levels?: Maybe<Array<Pick<LevelProgress, 'levelId' | 'completed'>>>, stages?: Maybe<Array<Pick<StageProgress, 'stageId' | 'completed'>>>, questions?: Maybe<Array<Pick<QuestionProgress, 'questionId' | 'completed' | 'livesLeft' | 'pointsReceived' | 'hintsRevealed' | 'dateStarted'>>>, game: (
+    & { levels?: Maybe<Array<Pick<LevelProgress, 'levelId' | 'completed'>>>, stages?: Maybe<Array<Pick<StageProgress, 'stageId' | 'completed'>>>, questions?: Maybe<Array<Pick<QuestionProgress, 'questionId' | 'completed' | 'livesLeft' | 'pointsReceived' | 'hintsRevealed' | 'dateStarted' | 'dateCompleted'>>>, game: (
       Pick<Game, 'title' | '_id'>
       & { roadmap: Array<Pick<RoadmapObject, 'parent' | 'sequence' | 'kind' | 'refId' | '_id'>>, levels: Array<Pick<LevelObject, '_id' | 'title' | 'description'>>, stages: Array<Pick<StageObject, '_id' | 'title' | 'description'>>, questions: Array<(
         Pick<QuestionObject, '_id' | 'title' | 'description' | 'timeLimit' | 'points' | 'lives' | 'gameType'>
-        & { hints: Array<Pick<Hint, '_id' | 'description' | 'timeToReveal'>>, multipleChoice?: Maybe<Pick<MultipleChoice, 'prompt' | 'correctChoice' | 'incorrectChoices'>>, fillInTheBlank?: Maybe<Pick<FillInTheBlank, 'prompt' | 'solutions'>>, spotTheBug?: Maybe<Pick<SpotTheBug, 'prompt' | 'bugLine' | 'code'>>, liveCoding?: Maybe<Pick<LiveCoding, 'prompt' | 'exampleSolutionCode' | 'exampleSolutionDescription'>>, matching?: Maybe<(
-          Pick<Matching, 'prompt'>
+        & { hints: Array<Pick<Hint, '_id' | 'description' | 'timeToReveal'>>, multipleChoice?: Maybe<Pick<MultipleChoice, '_id' | 'prompt' | 'correctChoice' | 'incorrectChoices'>>, fillInTheBlank?: Maybe<Pick<FillInTheBlank, '_id' | 'prompt' | 'solutions'>>, spotTheBug?: Maybe<Pick<SpotTheBug, '_id' | 'prompt' | 'bugLine' | 'code'>>, liveCoding?: Maybe<Pick<LiveCoding, '_id' | 'prompt' | 'exampleSolutionCode' | 'exampleSolutionDescription'>>, matching?: Maybe<(
+          Pick<Matching, '_id' | 'prompt'>
           & { matching: Array<Pick<MatchingCard, 'pairOne' | 'pairTwo'>> }
         )> }
       )> }
@@ -841,7 +851,7 @@ export const useStartQuestionMutation = <
       options
     );
 export const SubmitQuestionDocument = `
-    mutation SubmitQuestion($gameId: String!, $userId: ObjectId!, $questionId: String!, $submittedAnswer: String!) {
+    mutation SubmitQuestion($gameId: String!, $userId: ObjectId!, $questionId: String!, $submittedAnswer: SubmittedAnswer!) {
   submitQuestion(
     gameId: $gameId
     userId: $userId
@@ -963,25 +973,30 @@ export const GetGameEditDocument = `
       }
       gameType
       multipleChoice {
+        _id
         prompt
         correctChoice
         incorrectChoices
       }
       fillInTheBlank {
+        _id
         prompt
         solutions
       }
       spotTheBug {
+        _id
         prompt
         bugLine
         code
       }
       liveCoding {
+        _id
         prompt
         exampleSolutionCode
         exampleSolutionDescription
       }
       matching {
+        _id
         prompt
         matching {
           pairOne
@@ -1058,6 +1073,7 @@ export const GetGamePlayingProgressDocument = `
       pointsReceived
       hintsRevealed
       dateStarted
+      dateCompleted
     }
     totalPoints
     game {
@@ -1094,25 +1110,30 @@ export const GetGamePlayingProgressDocument = `
         }
         gameType
         multipleChoice {
+          _id
           prompt
           correctChoice
           incorrectChoices
         }
         fillInTheBlank {
+          _id
           prompt
           solutions
         }
         spotTheBug {
+          _id
           prompt
           bugLine
           code
         }
         liveCoding {
+          _id
           prompt
           exampleSolutionCode
           exampleSolutionDescription
         }
         matching {
+          _id
           prompt
           matching {
             pairOne

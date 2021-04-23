@@ -83,8 +83,10 @@ export default function PlayMultipleChoice(): ReactElement {
 								bg='background.dark.500'
 								color='gray.900'
 								borderRadius={20}
-								onClick={() => updateAnswer(choice)}
-								isActive={selectedAnswer === choice}
+								onClick={() => updateAnswer({
+									multipleChoice: choice
+								})}
+								isActive={selectedAnswer?.multipleChoice === choice}
 								_active={{
 									bg: 'gray.200',
 								}}

@@ -53,30 +53,14 @@ export default function EditQuestion({
 	setSelectedInstance,
 	gameId,
 }: EditQuestionProps) {
-	let selectedInstanceTemp: Question = {
-		_id: 'somelongidhere',
-		title: 'Question Title',
-		description: 'Question description',
-		timeLimit: 40,
-		points: 30,
-		lives: 10,
-		hints: [
-			{ _id: new ObjectId(), description: 'hint desc', timeToReveal: 10 },
-		],
-		gameType: Gametype.Multiplechoice,
-		multipleChoice: {
-			_id: new ObjectId(),
-			correctChoice: '2',
-			incorrectChoices: ['1', '3', '5'],
-			prompt: 'What is 1 + 1?',
-		},
-	}
 	// State
 	const [instanceState, setInstanceState] = useState<Question>()
 
 	const queryClient = useQueryClient()
 	React.useEffect(() => {
-		setInstanceState(selectedInstance.item ?? selectedInstanceTemp)
+		console.log(selectedInstance)
+		setInstanceState(selectedInstance.item)
+		setSelectedMode(selectedInstance.item.gameType)
 	}, [selectedInstance])
 	const [tabIndex, setTabIndex] = useState(0)
 	const [questionNav, setQuestionNav] = useState([
@@ -85,11 +69,9 @@ export default function EditQuestion({
 		'Hints',
 		'Settings',
 	])
-	if (selectedInstanceTemp.gameType === Gametype.Livecoding)
-		questionNav.push('Test Cases')
 	const [selectedNav, setSelectedNav] = useState(questionNav[0])
 	const [selectedMode, setSelectedMode] = useState(
-		selectedInstanceTemp.gameType
+		selectedInstance.gameType
 	)
 
 	const { mutate, data, isLoading, error } = useUpdateQuestionMutation()

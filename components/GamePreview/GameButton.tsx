@@ -33,14 +33,21 @@ export default function GamePreviewButton({ gameId }: Props) {
 		isError: userProgError,
 	} = useGetGameProgressForGamePreviewQuery({ gameId, userId: user._id })
 	const {
-		mutateAsync,
+		mutate,
 		data: createProgData,
 		isLoading: createProgLoading,
 		isError: createProgError,
 	} = useCreateGameProgressMutation()
 	useEffect(() => {
 		// Redirect after mutate & success
-		if (mutateCalled && !createProgError) {
+		console.log(mutateCalled)
+		console.log(createProgData)
+		console.log(createProgError)
+		if (
+			mutateCalled &&
+			!createProgError &&
+			createProgData?.createGameProgress
+		) {
 			router.push(`/game/play/${gameId}`)
 			setMutateCalled(false)
 		} else if (mutateCalled && createProgError) {
@@ -55,7 +62,7 @@ export default function GamePreviewButton({ gameId }: Props) {
 			})
 			console.log(createProgData)
 		}
-	}, [createProgError, createProgLoading])
+	}, [createProgError, createProgLoading, createProgData])
 	return (
 		<Skeleton isLoaded={!userProgLoading}>
 			{userProgress?.getGameProgressByUser ? (
@@ -66,11 +73,10 @@ export default function GamePreviewButton({ gameId }: Props) {
 				<Button
 					isLoading={createProgLoading}
 					onClick={() => {
-						mutateAsync({ gameId, userId: user._id }).then(() => {
-							setMutateCalled(true)
-							queryClient.invalidateQueries('GetGameProgressForGamePreview')
-							queryClient.refetchQueries('GetGameProgressForGamePreview')
-						})
+						mutate({ gameId, userId: user._id })
+						setMutateCalled(true)
+						queryClient.invalidateQueries('GetGameProgressForGamePreview')
+						queryClient.refetchQueries('GetGameProgressForGamePreview')
 					}}
 				>
 					Start Game

@@ -14,7 +14,7 @@ import { Question } from '../../../graphql/generated'
 export default function PlayMultipleChoice(): ReactElement {
 	// https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
 	// Fisher-Yates (aka Knuth) Shuffle
-	function shuffleArray(array) {
+	function shuffleArray(array: any) {
 		var currentIndex = array.length,
 			temporaryValue,
 			randomIndex
@@ -42,9 +42,9 @@ export default function PlayMultipleChoice(): ReactElement {
 	// const [selectedAnswer, updateAnswer] = useState('')
 	// const choices = [...selectedValue.incorrectChoices]
 	// choices.push(selectedValue.correctChoice)
-	const [choices, setChoices] = useState([
-		...selectedValue.incorrectChoices,
-		selectedValue.correctChoice,
+	const [choices, setChoices] = useState<string[]>([
+		...selectedValue.multipleChoice?.incorrectChoices!,
+		selectedValue.multipleChoice?.correctChoice!,
 	])
 	React.useEffect(() => {
 		setChoices(shuffleArray(choices.slice(0)))
@@ -58,16 +58,18 @@ export default function PlayMultipleChoice(): ReactElement {
 						<Heading alignSelf='start' size='md'>
 							Question
 						</Heading>
-						<Text
-							borderRadius={5}
-							borderColor='white'
-							borderWidth={1}
-							bg='background.dark.500'
-							p={2}
-							w='100%'
-						>
-							{selectedValue?.toAnswer}
-						</Text>
+						{selectedValue.multipleChoice?.prompt && (
+							<Text
+								borderRadius={5}
+								borderColor='white'
+								borderWidth={1}
+								bg='background.dark.500'
+								p={2}
+								w='100%'
+							>
+								{selectedValue.multipleChoice?.prompt}
+							</Text>
+						)}
 					</VStack>
 				</Center>
 			</Box>

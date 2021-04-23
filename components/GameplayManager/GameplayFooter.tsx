@@ -13,7 +13,7 @@ import {
 	Icon,
 } from '@chakra-ui/react'
 import { useUser } from '../../contexts/UserContext'
-import { getInfoFor } from './utils'
+import { calculatePoints, getInfoFor } from './utils'
 import { FaLightbulb } from 'react-icons/fa'
 import { AiFillHeart, AiOutlineHeart } from 'react-icons/ai'
 import {
@@ -98,7 +98,7 @@ export default function GameplayFooter({ data }: Props): ReactElement {
 interface QProps extends Props {
 	questionProgress: QuestionProgress
 	question: Question
-	selectedAnswer: string
+	selectedAnswer: string | null
 }
 
 function QuestionFooter({
@@ -232,10 +232,15 @@ function QuestionFooter({
 				alignItems='center'
 				alignContent='center'
 			>
-				<Heading
-					as='h2'
-					fontSize='2xl'
-				>{`Points: ${questionProgress.pointsReceived}/${question.points}`}</Heading>
+				<Heading as='h2' fontSize='2xl'>{`Points: ${
+					questionProgress.completed
+						? questionProgress.pointsReceived
+						: calculatePoints(
+								question.timeLimit,
+								questionProgress.dateStarted,
+								question.points
+						  )
+				}/${question.points}`}</Heading>
 			</Flex>
 			<Flex
 				direction='column'

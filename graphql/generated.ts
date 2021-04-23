@@ -42,6 +42,18 @@ export type Deleted = {
   amountDeleted: Scalars['Int'];
 };
 
+export type FillInTheBlank = {
+  _id: Scalars['ObjectId'];
+  prompt: Array<Scalars['String']>;
+  solutions: Array<Scalars['String']>;
+};
+
+export type FillInTheBlankInput = {
+  _id: Scalars['ObjectId'];
+  prompt: Array<Scalars['String']>;
+  solutions: Array<Scalars['String']>;
+};
+
 export enum Gametype {
   Livecoding = 'LIVECODING',
   Multiplechoice = 'MULTIPLECHOICE',
@@ -128,16 +140,54 @@ export type LevelProgress = {
   completed: Scalars['Boolean'];
 };
 
+export type LiveCoding = {
+  _id: Scalars['ObjectId'];
+  prompt: Scalars['String'];
+  exampleSolutionCode: Scalars['String'];
+  exampleSolutionDescription: Scalars['String'];
+};
+
+export type LiveCodingInput = {
+  _id: Scalars['ObjectId'];
+  prompt: Scalars['String'];
+  exampleSolutionCode: Scalars['String'];
+  exampleSolutionDescription: Scalars['String'];
+};
+
 export type Matching = {
   _id: Scalars['ObjectId'];
+  prompt: Scalars['String'];
+  matching: Array<MatchingCard>;
+};
+
+export type MatchingCard = {
+  pairOne: Scalars['String'];
+  pairTwo: Scalars['String'];
+};
+
+export type MatchingCardInput = {
   pairOne: Scalars['String'];
   pairTwo: Scalars['String'];
 };
 
 export type MatchingInput = {
   _id: Scalars['ObjectId'];
-  pairOne: Scalars['String'];
-  pairTwo: Scalars['String'];
+  prompt: Scalars['String'];
+  matching: Array<MatchingCardInput>;
+};
+
+export type MultipleChoice = {
+  _id: Scalars['ObjectId'];
+  prompt: Scalars['String'];
+  correctChoice: Scalars['String'];
+  incorrectChoices: Array<Scalars['String']>;
+};
+
+export type MultipleChoiceInput = {
+  _id: Scalars['ObjectId'];
+  prompt: Scalars['String'];
+  correctChoice: Scalars['String'];
+  incorrectChoices: Array<Scalars['String']>;
 };
 
 export type Mutation = {
@@ -455,12 +505,11 @@ export type Question = {
   lives: Scalars['Int'];
   hints: Array<HintInput>;
   gameType: Gametype;
-  toAnswer: Scalars['String'];
-  exampleSolutionCode: Scalars['String'];
-  exampleSolutionDescription: Scalars['String'];
-  correctChoice: Scalars['String'];
-  incorrectChoices: Array<Scalars['String']>;
-  matchings: Array<MatchingInput>;
+  multipleChoice?: Maybe<MultipleChoiceInput>;
+  liveCoding?: Maybe<LiveCodingInput>;
+  fillInTheBlank?: Maybe<FillInTheBlankInput>;
+  matching?: Maybe<MatchingInput>;
+  spotTheBug?: Maybe<SpotTheBugInput>;
   _id: Scalars['ObjectId'];
 };
 
@@ -472,12 +521,11 @@ export type QuestionInput = {
   lives: Scalars['Int'];
   hints: Array<HintInput>;
   gameType: Gametype;
-  toAnswer: Scalars['String'];
-  exampleSolutionCode: Scalars['String'];
-  exampleSolutionDescription: Scalars['String'];
-  correctChoice: Scalars['String'];
-  incorrectChoices: Array<Scalars['String']>;
-  matchings: Array<MatchingInput>;
+  multipleChoice?: Maybe<MultipleChoiceInput>;
+  liveCoding?: Maybe<LiveCodingInput>;
+  fillInTheBlank?: Maybe<FillInTheBlankInput>;
+  matching?: Maybe<MatchingInput>;
+  spotTheBug?: Maybe<SpotTheBugInput>;
 };
 
 export type QuestionObject = {
@@ -488,12 +536,11 @@ export type QuestionObject = {
   lives: Scalars['Int'];
   hints: Array<Hint>;
   gameType: Gametype;
-  toAnswer: Scalars['String'];
-  exampleSolutionCode: Scalars['String'];
-  exampleSolutionDescription: Scalars['String'];
-  correctChoice: Scalars['String'];
-  incorrectChoices: Array<Scalars['String']>;
-  matchings: Array<Matching>;
+  multipleChoice?: Maybe<MultipleChoice>;
+  liveCoding?: Maybe<LiveCoding>;
+  fillInTheBlank?: Maybe<FillInTheBlank>;
+  matching?: Maybe<Matching>;
+  spotTheBug?: Maybe<SpotTheBug>;
   _id: Scalars['ObjectId'];
 };
 
@@ -537,6 +584,20 @@ export enum Sort_Options {
   Newest = 'NEWEST',
   PlayCount = 'PLAY_COUNT'
 }
+
+export type SpotTheBug = {
+  _id: Scalars['ObjectId'];
+  prompt: Scalars['String'];
+  bugLine: Scalars['Int'];
+  code: Scalars['String'];
+};
+
+export type SpotTheBugInput = {
+  _id: Scalars['ObjectId'];
+  prompt: Scalars['String'];
+  bugLine: Scalars['Int'];
+  code: Scalars['String'];
+};
 
 export type Stage = {
   title: Scalars['String'];
@@ -664,8 +725,11 @@ export type GetGameEditQueryVariables = Exact<{
 export type GetGameEditQuery = { getGame?: Maybe<(
     Pick<Game, '_id' | 'createdBy' | 'title' | 'description' | 'codingLanguage' | 'difficulty' | 'tags'>
     & { roadmap: Array<Pick<RoadmapObject, '_id' | 'parent' | 'sequence' | 'kind' | 'refId'>>, levels: Array<Pick<LevelObject, '_id' | 'title' | 'description'>>, stages: Array<Pick<StageObject, '_id' | 'title' | 'description'>>, questions: Array<(
-      Pick<QuestionObject, '_id' | 'title' | 'description' | 'timeLimit' | 'points' | 'lives' | 'gameType' | 'toAnswer' | 'exampleSolutionCode' | 'exampleSolutionDescription' | 'correctChoice' | 'incorrectChoices'>
-      & { hints: Array<Pick<Hint, '_id' | 'description' | 'timeToReveal'>>, matchings: Array<Pick<Matching, '_id' | 'pairOne' | 'pairTwo'>> }
+      Pick<QuestionObject, '_id' | 'title' | 'description' | 'timeLimit' | 'points' | 'lives' | 'gameType'>
+      & { hints: Array<Pick<Hint, '_id' | 'description' | 'timeToReveal'>>, multipleChoice?: Maybe<Pick<MultipleChoice, 'prompt' | 'correctChoice' | 'incorrectChoices'>>, fillInTheBlank?: Maybe<Pick<FillInTheBlank, 'prompt' | 'solutions'>>, spotTheBug?: Maybe<Pick<SpotTheBug, 'prompt' | 'bugLine' | 'code'>>, liveCoding?: Maybe<Pick<LiveCoding, 'prompt' | 'exampleSolutionCode' | 'exampleSolutionDescription'>>, matching?: Maybe<(
+        Pick<Matching, 'prompt'>
+        & { matching: Array<Pick<MatchingCard, 'pairOne' | 'pairTwo'>> }
+      )> }
     )> }
   )> };
 
@@ -687,8 +751,11 @@ export type GetGamePlayingProgressQuery = { getGameProgressByUser?: Maybe<(
     & { levels?: Maybe<Array<Pick<LevelProgress, 'levelId' | 'completed'>>>, stages?: Maybe<Array<Pick<StageProgress, 'stageId' | 'completed'>>>, questions?: Maybe<Array<Pick<QuestionProgress, 'questionId' | 'completed' | 'livesLeft' | 'pointsReceived' | 'hintsRevealed' | 'dateStarted'>>>, game: (
       Pick<Game, 'title' | '_id'>
       & { roadmap: Array<Pick<RoadmapObject, 'parent' | 'sequence' | 'kind' | 'refId' | '_id'>>, levels: Array<Pick<LevelObject, '_id' | 'title' | 'description'>>, stages: Array<Pick<StageObject, '_id' | 'title' | 'description'>>, questions: Array<(
-        Pick<QuestionObject, '_id' | 'title' | 'correctChoice' | 'incorrectChoices' | 'description' | 'timeLimit' | 'points' | 'lives' | 'gameType' | 'toAnswer' | 'exampleSolutionCode' | 'exampleSolutionDescription'>
-        & { matchings: Array<Pick<Matching, '_id' | 'pairOne' | 'pairTwo'>>, hints: Array<Pick<Hint, '_id' | 'description' | 'timeToReveal'>> }
+        Pick<QuestionObject, '_id' | 'title' | 'description' | 'timeLimit' | 'points' | 'lives' | 'gameType'>
+        & { hints: Array<Pick<Hint, '_id' | 'description' | 'timeToReveal'>>, multipleChoice?: Maybe<Pick<MultipleChoice, 'prompt' | 'correctChoice' | 'incorrectChoices'>>, fillInTheBlank?: Maybe<Pick<FillInTheBlank, 'prompt' | 'solutions'>>, spotTheBug?: Maybe<Pick<SpotTheBug, 'prompt' | 'bugLine' | 'code'>>, liveCoding?: Maybe<Pick<LiveCoding, 'prompt' | 'exampleSolutionCode' | 'exampleSolutionDescription'>>, matching?: Maybe<(
+          Pick<Matching, 'prompt'>
+          & { matching: Array<Pick<MatchingCard, 'pairOne' | 'pairTwo'>> }
+        )> }
       )> }
     ) }
   )> };
@@ -895,15 +962,31 @@ export const GetGameEditDocument = `
         timeToReveal
       }
       gameType
-      toAnswer
-      exampleSolutionCode
-      exampleSolutionDescription
-      correctChoice
-      incorrectChoices
-      matchings {
-        _id
-        pairOne
-        pairTwo
+      multipleChoice {
+        prompt
+        correctChoice
+        incorrectChoices
+      }
+      fillInTheBlank {
+        prompt
+        solutions
+      }
+      spotTheBug {
+        prompt
+        bugLine
+        code
+      }
+      liveCoding {
+        prompt
+        exampleSolutionCode
+        exampleSolutionDescription
+      }
+      matching {
+        prompt
+        matching {
+          pairOne
+          pairTwo
+        }
       }
     }
   }
@@ -1000,14 +1083,6 @@ export const GetGamePlayingProgressDocument = `
       questions {
         _id
         title
-        correctChoice
-        incorrectChoices
-        matchings {
-          _id
-          pairOne
-          pairTwo
-        }
-        _id
         description
         timeLimit
         points
@@ -1018,9 +1093,32 @@ export const GetGamePlayingProgressDocument = `
           timeToReveal
         }
         gameType
-        toAnswer
-        exampleSolutionCode
-        exampleSolutionDescription
+        multipleChoice {
+          prompt
+          correctChoice
+          incorrectChoices
+        }
+        fillInTheBlank {
+          prompt
+          solutions
+        }
+        spotTheBug {
+          prompt
+          bugLine
+          code
+        }
+        liveCoding {
+          prompt
+          exampleSolutionCode
+          exampleSolutionDescription
+        }
+        matching {
+          prompt
+          matching {
+            pairOne
+            pairTwo
+          }
+        }
       }
     }
   }

@@ -38,8 +38,8 @@ export default function MultipleChoice({
 	const toast = useToast()
 	const [choices, setChoices] = useState(
 		buildChoiceState(
-			instanceState.correctChoice,
-			instanceState.incorrectChoices
+			instanceState.multipleChoice?.correctChoice ?? '',
+			instanceState.multipleChoice?.incorrectChoices ?? []
 		)
 	)
 
@@ -59,8 +59,11 @@ export default function MultipleChoice({
 		)
 		setInstanceState({
 			...instanceState,
-			correctChoice: correctChoice?.choice,
-			incorrectChoices,
+			multipleChoice: {
+				...instanceState.multipleChoice,
+				correctChoice: correctChoice?.choice,
+				incorrectChoices,
+			},
 		})
 	}, [choices])
 	return (

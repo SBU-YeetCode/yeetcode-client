@@ -1,7 +1,8 @@
 import { Button, IconButton } from '@chakra-ui/button'
 import { CloseIcon } from '@chakra-ui/icons'
-import { Box, Center, Flex, Heading, HStack, Spacer, } from '@chakra-ui/layout'
+import { Box, Center, Flex, Heading, HStack, Spacer } from '@chakra-ui/layout'
 import { useQueryClient } from 'react-query'
+import ObjectId from 'bson-objectid'
 import {
 	FormControl,
 	FormLabel,
@@ -39,6 +40,14 @@ const SELECT: { [key: string]: string } = {
 	Spotthebug: 'Spot the bug',
 }
 
+const GAMETYPE_INFO: { [key: string]: keyof Question } = {
+	LIVECODING: 'liveCoding',
+	MULTIPLECHOICE: 'multipleChoice',
+	FILLINBLANK: 'fillInTheBlank',
+	MATCHING: 'matching',
+	SPOTTHEBUG: 'spotTheBug',
+}
+
 export default function EditQuestion({
 	selectedInstance,
 	setSelectedInstance,
@@ -51,19 +60,20 @@ export default function EditQuestion({
 		timeLimit: 40,
 		points: 30,
 		lives: 10,
-		hints: [{ _id: 'hintid1', description: 'hint desc', timeToReveal: 10 }],
-		gameType: Gametype.Multiplechoice,
-		toAnswer: 'What is 1+1?',
-		exampleSolutionCode: 'example solution',
-		exampleSolutionDescription: 'example solution description',
-		correctChoice: 'correct choice',
-		incorrectChoices: ['incorrect choice 1', 'incorrect choice 2'],
-		matchings: [
-			{ pairOne: 'Pair one', pairTwo: 'Pair two', _id: 'matchingid' },
+		hints: [
+			{ _id: new ObjectId(), description: 'hint desc', timeToReveal: 10 },
 		],
+		gameType: Gametype.Multiplechoice,
+		multipleChoice: {
+			_id: new ObjectId(),
+			correctChoice: '2',
+			incorrectChoices: ['1', '3', '5'],
+			prompt: 'What is 1 + 1?',
+		},
 	}
 	// State
 	const [instanceState, setInstanceState] = useState<Question>()
+
 	const queryClient = useQueryClient()
 	React.useEffect(() => {
 		setInstanceState(selectedInstance.item ?? selectedInstanceTemp)
@@ -173,11 +183,19 @@ export default function EditQuestion({
 								<FormControl>
 									<FormLabel size='md'>Question</FormLabel>
 									<Textarea
-										value={instanceState.toAnswer}
+										value={
+											instanceState[GAMETYPE_INFO[instanceState.gameType]]
+												.prompt
+										}
 										onChange={(e) =>
 											setInstanceState({
 												...instanceState,
-												toAnswer: e.target.value,
+												[GAMETYPE_INFO[instanceState.gameType]]: {
+													...instanceState[
+														GAMETYPE_INFO[instanceState.gameType]
+													],
+													prompt: e.target.value,
+												},
 											})
 										}
 										placeholder='Ask the question here...'
@@ -221,7 +239,12 @@ export default function EditQuestion({
 						{/* Hints Panel */}
 						<Flex direction='column' justify='center' alignItems='center'>
 							<Heading>Hints</Heading>
-							<HintEditor hints={instanceState.hints} setHints={(newHints: HintInput[]) => setInstanceState({...instanceState, hints: newHints})}/>
+							<HintEditor
+								hints={instanceState.hints}
+								setHints={(newHints: HintInput[]) =>
+									setInstanceState({ ...instanceState, hints: newHints })
+								}
+							/>
 						</Flex>
 					</TabPanel>
 					<TabPanel>

@@ -9,6 +9,7 @@ import {
 	Heading,
 } from '@chakra-ui/react'
 import { Question } from '../../../graphql/generated'
+import Editor from '@monaco-editor/react'
 
 export default function PlaySpotTheBug(): ReactElement {
 	const [selectedValue, updateAnswer, selectedAnswer] = useStore((s) => [
@@ -25,22 +26,19 @@ export default function PlaySpotTheBug(): ReactElement {
 						<Heading alignSelf='start' size='md'>
 							{selectedValue.spotTheBug?.prompt}
 						</Heading>
-						{selectedValue.spotTheBug?.prompt && (
-							<Text
-								borderRadius={5}
-								borderColor='white'
-								borderWidth={1}
-								bg='background.dark.500'
-								p={2}
-								w='100%'
-							>
-								{selectedValue.spotTheBug?.code}
-							</Text>
-						)}
+						{selectedValue.spotTheBug?.prompt}
 					</VStack>
 				</Center>
 			</Box>
-			<Input variant='filled' type='number' value={selectedAnswer?.spotTheBug ?? ''} onChange={(e) => { // parseInt('') === NaN
+			<Editor
+				height='35vh'
+				width='60vw'
+				defaultLanguage='javascript'
+				defaultValue={selectedValue.spotTheBug?.code.replaceAll(/\\n/g, '\n')}
+				theme='vs-dark'
+				
+			/>
+			<Input variant='filled' type='number' value={selectedAnswer?.spotTheBug ?? ''} onChange={(e) => {
 				updateAnswer({
 					spotTheBug: e.target.value
 				})

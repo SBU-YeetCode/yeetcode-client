@@ -22,7 +22,7 @@ export default function PlayGame(): ReactElement {
 		refetch,
 	} = useGetGamePlayingProgressQuery(
 		{
-			userId: user!._id,
+			userId: user?._id,
 			gameId: gameId,
 		},
 		{ enabled: isLoggedIn() }

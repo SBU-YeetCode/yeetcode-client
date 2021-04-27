@@ -8,11 +8,16 @@ import {
 	PopoverContent,
 	Input,
 	Button,
+	FormControl,
+	FormLabel,
+	Textarea,
+	FormHelperText
 } from '@chakra-ui/react'
 import { Switch } from '@chakra-ui/switch'
 import { useToast } from '@chakra-ui/toast'
 import { useEffect, useState } from 'react'
 import { Question } from '../../graphql/generated'
+import ObjectID from 'bson-objectid'
 
 type MultipleChoiceProps = {
 	instanceState: Question
@@ -60,6 +65,7 @@ export default function MultipleChoice({
 		setInstanceState({
 			...instanceState,
 			multipleChoice: {
+				_id: new ObjectID(),
 				...instanceState.multipleChoice,
 				correctChoice: correctChoice?.choice,
 				incorrectChoices,
@@ -67,8 +73,31 @@ export default function MultipleChoice({
 		})
 	}, [choices])
 	return (
-		<Center mt={8}>
+		<Center mt={8} >
 			<VStack spacing={4}>
+				<Center>
+					<Box w='100%' boxShadow='lg'>
+						<FormControl>
+							<FormLabel size='md'>Question</FormLabel>
+							<Textarea
+								value={instanceState.multipleChoice?.prompt}
+								onChange={(e) => {
+									setInstanceState({
+										...instanceState,
+										multipleChoice: {
+											...(instanceState.multipleChoice ?? {}),
+											prompt: e.target.value,
+										},
+									})
+								}}
+								placeholder='Ask the question here...'
+							/>
+							<FormHelperText>
+								Type the question to ask the player above
+							</FormHelperText>
+						</FormControl>
+					</Box>
+				</Center>
 				{choices.map((choice, index) => {
 					return (
 						<HStack spacing={4} key={index}>
@@ -76,8 +105,7 @@ export default function MultipleChoice({
 								paddingX={6}
 								paddingY={2}
 								bg='background.dark.500'
-								borderRadius={20}
-							>
+								borderRadius={20}>
 								{choice.choice}
 							</Box>
 							<IconButton
@@ -167,8 +195,7 @@ export default function MultipleChoice({
 									])
 									setNewChoice('')
 									close()
-								}}
-							>
+								}}>
 								Add
 							</Button>
 						</Center>

@@ -199,6 +199,7 @@ export type Mutation = {
   deleteGameProgress: Deleted;
   updateQuestionProgress: QuestionProgress;
   submitQuestion: SubmitQuestion;
+  revealHints: GameProgress;
   createGame: Game;
   updateGame: Game;
   updateRoadmap: Array<RoadmapObject>;
@@ -261,6 +262,13 @@ export type MutationSubmitQuestionArgs = {
   gameId: Scalars['String'];
   questionId: Scalars['String'];
   submittedAnswer: SubmittedAnswer;
+};
+
+
+export type MutationRevealHintsArgs = {
+  questionId: Scalars['String'];
+  gameProgressId: Scalars['ObjectId'];
+  userId: Scalars['ObjectId'];
 };
 
 
@@ -551,8 +559,7 @@ export type QuestionProgress = {
   pointsReceived: Scalars['Int'];
   dateStarted?: Maybe<Scalars['Date']>;
   dateCompleted?: Maybe<Scalars['Date']>;
-  /** Number representing the index of the latest hint revealed */
-  hintsRevealed?: Maybe<Scalars['Int']>;
+  hintsRevealed: Array<Scalars['String']>;
 };
 
 export type QuestionProgressInput = {
@@ -562,8 +569,7 @@ export type QuestionProgressInput = {
   pointsReceived: Scalars['Int'];
   dateStarted?: Maybe<Scalars['Date']>;
   dateCompleted?: Maybe<Scalars['Date']>;
-  /** Number representing the index of the latest hint revealed */
-  hintsRevealed?: Maybe<Scalars['Int']>;
+  hintsRevealed: Array<Scalars['String']>;
 };
 
 export type RoadmapInput = {
@@ -680,6 +686,15 @@ export type CreateGameProgressMutationVariables = Exact<{
 
 export type CreateGameProgressMutation = { createGameProgress: Pick<GameProgress, '_id' | 'startedAt' | 'isCompleted' | 'userId' | 'gameId'> };
 
+export type RevealHintsMutationVariables = Exact<{
+  gameProgressId: Scalars['ObjectId'];
+  userId: Scalars['ObjectId'];
+  questionId: Scalars['String'];
+}>;
+
+
+export type RevealHintsMutation = { revealHints: Pick<GameProgress, '_id'> };
+
 export type StartQuestionMutationVariables = Exact<{
   gameId: Scalars['String'];
   userId: Scalars['ObjectId'];
@@ -748,7 +763,7 @@ export type GamePreviewQueryVariables = Exact<{
 }>;
 
 
-export type GamePreviewQuery = { getGame?: Maybe<Pick<Game, '_id' | 'title' | 'description' | 'tags' | 'lastUpdated' | 'totalStars' | 'rating' | 'playCount' | 'codingLanguage' | 'difficulty'>> };
+export type GamePreviewQuery = { getGame?: Maybe<Pick<Game, 'createdBy' | '_id' | 'title' | 'description' | 'tags' | 'lastUpdated' | 'totalStars' | 'rating' | 'playCount' | 'codingLanguage' | 'difficulty'>> };
 
 export type GetGamePlayingProgressQueryVariables = Exact<{
   userId: Scalars['ObjectId'];
@@ -829,6 +844,25 @@ export const useCreateGameProgressMutation = <
     >(options?: UseMutationOptions<CreateGameProgressMutation, TError, CreateGameProgressMutationVariables, TContext>) => 
     useMutation<CreateGameProgressMutation, TError, CreateGameProgressMutationVariables, TContext>(
       (variables?: CreateGameProgressMutationVariables) => fetcher<CreateGameProgressMutation, CreateGameProgressMutationVariables>(CreateGameProgressDocument, variables)(),
+      options
+    );
+export const RevealHintsDocument = `
+    mutation RevealHints($gameProgressId: ObjectId!, $userId: ObjectId!, $questionId: String!) {
+  revealHints(
+    gameProgressId: $gameProgressId
+    userId: $userId
+    questionId: $questionId
+  ) {
+    _id
+  }
+}
+    `;
+export const useRevealHintsMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<RevealHintsMutation, TError, RevealHintsMutationVariables, TContext>) => 
+    useMutation<RevealHintsMutation, TError, RevealHintsMutationVariables, TContext>(
+      (variables?: RevealHintsMutationVariables) => fetcher<RevealHintsMutation, RevealHintsMutationVariables>(RevealHintsDocument, variables)(),
       options
     );
 export const StartQuestionDocument = `
@@ -1024,6 +1058,7 @@ useGetGameEditQuery.getKey = (variables: GetGameEditQueryVariables) => ['GetGame
 export const GamePreviewDocument = `
     query GamePreview($gameId: String!) {
   getGame(id: $gameId) {
+    createdBy
     _id
     title
     description

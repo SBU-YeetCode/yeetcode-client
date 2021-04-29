@@ -7,6 +7,7 @@ import { useGamePreviewQuery } from '../../graphql/generated'
 import GamePreviewButton from '../../components/GamePreview/GameButton'
 import { format, formatDistance, formatRelative, subDays } from 'date-fns'
 import Tag from '../../components/Tag'
+import CommentsDisplay from '../../components/GamePreview/Comments'
 
 interface Props {}
 
@@ -23,9 +24,12 @@ export default function GamePreview({}: Props): ReactElement {
 	const toast = useToast()
 	const gameId = router.query['gameId'] as string
 	// Get Game
-	const {data, isError, isFetched, error} = useGamePreviewQuery({gameId})
+	const { data, isError, isFetched, error } = useGamePreviewQuery({ gameId }, { enabled: !!gameId })
 	console.log(data?.getGame?.lastUpdated)
-	let lastUpdated = isFetched && !isError ? formatDistance(new Date(data?.getGame?.lastUpdated), new Date(), {addSuffix: true}) : null
+	let lastUpdated =
+		isFetched && !isError
+			? formatDistance(new Date(data?.getGame?.lastUpdated), new Date(), { addSuffix: true })
+			: null
 	console.log(data)
 	if (isError) {
 		toast({
@@ -34,7 +38,7 @@ export default function GamePreview({}: Props): ReactElement {
 			description: error.message,
 			duration: 5000,
 			status: 'error',
-			isClosable: true
+			isClosable: true,
 		})
 		router.push('/')
 		return <></>
@@ -42,8 +46,8 @@ export default function GamePreview({}: Props): ReactElement {
 	return (
 		<Flex direction='row' justifyContent='space-around' p={2} m={2}>
 			<Box flexGrow={1} margin={4} w='1200px'>
-				<Heading sz='md'>Details</Heading>
-				<Box >
+				<Heading size='lg'>Details</Heading>
+				<Box>
 					<Box bg='background.dark.700' p={4} borderRadius={10}>
 						<Skeleton isLoaded={isFetched}>
 							<Text>Author: {}</Text>
@@ -51,7 +55,7 @@ export default function GamePreview({}: Props): ReactElement {
 							<Text>Language: {LANGUAGE[data?.getGame?.codingLanguage!]}</Text>
 							<Text>Difficulty: {data?.getGame?.difficulty}</Text>
 							{data?.getGame?.tags.map((tag, index) => {
-								return <Tag label={tag} key={index} />
+								return <Tag m={1} label={tag} key={index} />
 							})}
 						</Skeleton>
 					</Box>
@@ -64,18 +68,16 @@ export default function GamePreview({}: Props): ReactElement {
 			</Box>
 			<Flex direction='column' flexGrow={5} margin={4}>
 				<Box>
-					<Heading>Overview</Heading>
+					<Heading size='lg'>Overview</Heading>
 					<Box bg='background.dark.700' p={4} borderRadius={10}>
-						<Skeleton isLoaded={isFetched}>
-							{data?.getGame?.description}
-						</Skeleton>
+						<Skeleton isLoaded={isFetched}>{data?.getGame?.description}</Skeleton>
 					</Box>
 				</Box>
 				<Box mt={6}>
-					<Heading>Reviews</Heading>
+					<Heading size='lg'>Reviews</Heading>
 					<Box bg='background.dark.700' p={4} borderRadius={10}>
 						<Skeleton isLoaded={isFetched}>
-							{data?.getGame?.rating}
+							<CommentsDisplay gameId={gameId} rating={data?.getGame?.rating!} />
 						</Skeleton>
 					</Box>
 				</Box>

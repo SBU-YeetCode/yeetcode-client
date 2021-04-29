@@ -734,6 +734,24 @@ export type UpdateQuestionMutationVariables = Exact<{
 
 export type UpdateQuestionMutation = { updateQuestions: Array<Pick<QuestionObject, '_id'>> };
 
+export type GamePreviewCommentsQueryVariables = Exact<{
+  gameId: Scalars['String'];
+  amount?: Maybe<Scalars['Int']>;
+  cursor?: Maybe<Scalars['String']>;
+}>;
+
+
+export type GamePreviewCommentsQuery = { getGameComments: (
+    Pick<PaginatedCommentResponse, 'hasMore' | 'nextCursor'>
+    & { nodes: Array<(
+      Pick<Comment, '_id' | 'review' | 'rating' | 'lastUpdated'>
+      & { userInfo: (
+        Pick<User, 'username'>
+        & { profilePicture: Pick<ProfilePicture, 'avatar'> }
+      ) }
+    )> }
+  ) };
+
 export type GetGameProgressForGamePreviewQueryVariables = Exact<{
   gameId: Scalars['ObjectId'];
   userId: Scalars['ObjectId'];
@@ -804,6 +822,13 @@ export type GetSearchResultsQuery = { getSearch: (
     Pick<PaginatedGameResponse, 'hasMore' | 'nextCursor'>
     & { nodes: Array<Pick<Game, 'title' | 'rating' | 'createdBy' | 'tags' | 'codingLanguage' | 'difficulty' | 'description' | 'playCount'>> }
   ) };
+
+export type GetUserQueryVariables = Exact<{
+  userId: Scalars['ObjectId'];
+}>;
+
+
+export type GetUserQuery = { getUser?: Maybe<Pick<User, '_id' | 'name' | 'username'>> };
 
 
 export const CreateGameDocument = `
@@ -941,6 +966,40 @@ export const useUpdateQuestionMutation = <
       (variables?: UpdateQuestionMutationVariables) => fetcher<UpdateQuestionMutation, UpdateQuestionMutationVariables>(UpdateQuestionDocument, variables)(),
       options
     );
+export const GamePreviewCommentsDocument = `
+    query GamePreviewComments($gameId: String!, $amount: Int, $cursor: String) {
+  getGameComments(gameId: $gameId, amount: $amount, cursor: $cursor) {
+    hasMore
+    nextCursor
+    nodes {
+      _id
+      review
+      rating
+      lastUpdated
+      userInfo {
+        username
+        profilePicture {
+          avatar
+        }
+      }
+    }
+  }
+}
+    `;
+export const useGamePreviewCommentsQuery = <
+      TData = GamePreviewCommentsQuery,
+      TError = unknown
+    >(
+      variables: GamePreviewCommentsQueryVariables, 
+      options?: UseQueryOptions<GamePreviewCommentsQuery, TError, TData>
+    ) => 
+    useQuery<GamePreviewCommentsQuery, TError, TData>(
+      ['GamePreviewComments', variables],
+      fetcher<GamePreviewCommentsQuery, GamePreviewCommentsQueryVariables>(GamePreviewCommentsDocument, variables),
+      options
+    );
+useGamePreviewCommentsQuery.getKey = (variables: GamePreviewCommentsQueryVariables) => ['GamePreviewComments', variables];
+
 export const GetGameProgressForGamePreviewDocument = `
     query GetGameProgressForGamePreview($gameId: ObjectId!, $userId: ObjectId!) {
   getGameProgressByUser(gameId: $gameId, userId: $userId) {
@@ -1255,3 +1314,26 @@ export const useGetSearchResultsQuery = <
       options
     );
 useGetSearchResultsQuery.getKey = (variables: GetSearchResultsQueryVariables) => ['GetSearchResults', variables];
+
+export const GetUserDocument = `
+    query GetUser($userId: ObjectId!) {
+  getUser(id: $userId) {
+    _id
+    name
+    username
+  }
+}
+    `;
+export const useGetUserQuery = <
+      TData = GetUserQuery,
+      TError = unknown
+    >(
+      variables: GetUserQueryVariables, 
+      options?: UseQueryOptions<GetUserQuery, TError, TData>
+    ) => 
+    useQuery<GetUserQuery, TError, TData>(
+      ['GetUser', variables],
+      fetcher<GetUserQuery, GetUserQueryVariables>(GetUserDocument, variables),
+      options
+    );
+useGetUserQuery.getKey = (variables: GetUserQueryVariables) => ['GetUser', variables];

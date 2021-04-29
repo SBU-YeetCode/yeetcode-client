@@ -41,11 +41,36 @@ const SELECT: { [key: string]: string } = {
 }
 
 const GAMETYPE_INFO: { [key: string]: keyof Question } = {
-	LIVECODING: 'liveCoding',
-	MULTIPLECHOICE: 'multipleChoice',
-	FILLINBLANK: 'fillInTheBlank',
-	MATCHING: 'matching',
-	SPOTTHEBUG: 'spotTheBug',
+	Livecoding: 'liveCoding',
+	Multiplechoice: 'multipleChoice',
+	Fillinblank: 'fillInTheBlank',
+	Matching: 'matching',
+	Spotthebug: 'spotTheBug',
+}
+
+const DefaultQuestionState: Partial<Question> = {
+	matching: {
+		_id: new ObjectId(),
+		matching: [],
+		prompt: 'Match the following',
+	},
+	fillInTheBlank: {
+		_id: new ObjectId(),
+		prompt: [],
+		solutions: [],
+	},
+	liveCoding: {
+		_id: new ObjectId(),
+		exampleSolutionCode: '',
+		exampleSolutionDescription: '',
+		prompt: '',
+	},
+	multipleChoice: {
+		_id: new ObjectId(),
+		correctChoice: '',
+		incorrectChoices: [],
+		prompt: 'Multiple Choice',
+	},
 }
 
 export default function EditQuestion({
@@ -55,13 +80,20 @@ export default function EditQuestion({
 }: EditQuestionProps) {
 	// State
 	const [instanceState, setInstanceState] = useState<Question>()
-
 	const queryClient = useQueryClient()
 	React.useEffect(() => {
-		console.log(selectedInstance)
 		setInstanceState(selectedInstance.item)
-		setSelectedMode(selectedInstance.item.gameType)
 	}, [selectedInstance])
+
+	function handleSelectedModeChange(e: React.ChangeEvent<HTMLSelectElement>) {
+		const newMode = e.target.value
+		setInstanceState({
+			...instanceState!,
+			// @ts-ignore
+			gameType: Gametype[newMode],
+			[GAMETYPE_INFO[newMode]]: DefaultQuestionState[GAMETYPE_INFO[newMode]],
+		})
+	}
 	const [tabIndex, setTabIndex] = useState(0)
 	const [questionNav, setQuestionNav] = useState([
 		'Question',
@@ -69,15 +101,9 @@ export default function EditQuestion({
 		'Hints',
 		'Settings',
 	])
-	const [selectedNav, setSelectedNav] = useState(questionNav[0])
-	const [selectedMode, setSelectedMode] = useState(
-		selectedInstance.gameType
-	)
-
-	const { mutate, data, isLoading, error } = useUpdateQuestionMutation()
-
+	const { mutate, isLoading } = useUpdateQuestionMutation()
 	React.useEffect(() => {
-		if (selectedMode === Gametype.Livecoding) {
+		if (instanceState?.gameType === Gametype.Livecoding) {
 			setQuestionNav([
 				...questionNav.filter((n) => n !== 'Test Cases'),
 				'Test Cases',
@@ -86,7 +112,7 @@ export default function EditQuestion({
 			setQuestionNav(questionNav.filter((n) => n !== 'Test Cases'))
 			setTabIndex(0)
 		}
-	}, [selectedMode])
+	}, [selectedInstance.gameType])
 
 	function getKeyByValue(object: any, value: any) {
 		return Object.keys(object).find((key) => object[key] === value)
@@ -108,8 +134,7 @@ export default function EditQuestion({
 						})
 						queryClient.invalidateQueries('GetGameEdit')
 						queryClient.refetchQueries('GetGameEdit')
-					}}
-				>
+					}}>
 					Save
 				</Button>
 				<IconButton
@@ -126,12 +151,8 @@ export default function EditQuestion({
 					<FormControl isRequired>
 						<FormLabel>Question Mode</FormLabel>
 						<Select
-							value={getKeyByValue(Gametype, selectedMode)}
-							onChange={(e) => {
-								// @ts-ignore
-								setSelectedMode(Gametype[e.target.value])
-							}}
-						>
+							value={getKeyByValue(Gametype, instanceState.gameType)}
+							onChange={handleSelectedModeChange}>
 							{Object.keys(SELECT).map((gametype: string) => (
 								// @ts-ignore */
 								<option key={gametype} value={gametype}>
@@ -150,8 +171,7 @@ export default function EditQuestion({
 				onChange={(index) => setTabIndex(index)}
 				variant='soft-rounded'
 				colorScheme='green'
-				isLazy
-			>
+				isLazy>
 				<TabList borderRadius={15} p={2} mt={8} bg='background.dark.500'>
 					{questionNav.map((navItem, index) => (
 						<Tab key={index}>{navItem}</Tab>
@@ -160,35 +180,7 @@ export default function EditQuestion({
 				<TabPanels>
 					<TabPanel>
 						{/* Question Panel */}
-						<Center>
-							<Box mt={6} p={4} w='80%' boxShadow='lg'>
-								<FormControl>
-									<FormLabel size='md'>Question</FormLabel>
-									<Textarea
-										value={
-											instanceState[GAMETYPE_INFO[instanceState.gameType]]
-												.prompt
-										}
-										onChange={(e) =>
-											setInstanceState({
-												...instanceState,
-												[GAMETYPE_INFO[instanceState.gameType]]: {
-													...instanceState[
-														GAMETYPE_INFO[instanceState.gameType]
-													],
-													prompt: e.target.value,
-												},
-											})
-										}
-										placeholder='Ask the question here...'
-									/>
-									<FormHelperText>
-										Type the question to ask the player above
-									</FormHelperText>
-								</FormControl>
-							</Box>
-						</Center>
-						{selectedMode === Gametype.Multiplechoice && (
+						{instanceState.gameType === Gametype.Multiplechoice && (
 							<MultipleChoice
 								instanceState={instanceState}
 								setInstanceState={setInstanceState}
@@ -256,7 +248,7 @@ export default function EditQuestion({
 							</Box>
 						</Center>
 					</TabPanel>
-					{selectedMode === Gametype.Livecoding && (
+					{instanceState.gameType === Gametype.Livecoding && (
 						<TabPanel> Test Cases</TabPanel>
 					)}
 				</TabPanels>

@@ -199,6 +199,7 @@ export type Mutation = {
   deleteGameProgress: Deleted;
   updateQuestionProgress: QuestionProgress;
   submitQuestion: SubmitQuestion;
+  revealHints: GameProgress;
   createGame: Game;
   updateGame: Game;
   updateRoadmap: Array<RoadmapObject>;
@@ -261,6 +262,13 @@ export type MutationSubmitQuestionArgs = {
   gameId: Scalars['String'];
   questionId: Scalars['String'];
   submittedAnswer: SubmittedAnswer;
+};
+
+
+export type MutationRevealHintsArgs = {
+  questionId: Scalars['String'];
+  gameProgressId: Scalars['ObjectId'];
+  userId: Scalars['ObjectId'];
 };
 
 
@@ -384,6 +392,7 @@ export type Query = {
   getComment?: Maybe<Comment>;
   getGameComments: PaginatedCommentResponse;
   getUserReviews: Array<Comment>;
+  getUserGameReview?: Maybe<Comment>;
   getGameProgress?: Maybe<GameProgress>;
   getGameProgressByUser?: Maybe<GameProgress>;
   getUserCompletedGames: Array<GameProgress>;
@@ -424,6 +433,12 @@ export type QueryGetGameCommentsArgs = {
 
 
 export type QueryGetUserReviewsArgs = {
+  userId: Scalars['String'];
+};
+
+
+export type QueryGetUserGameReviewArgs = {
+  gameId: Scalars['String'];
   userId: Scalars['String'];
 };
 
@@ -551,8 +566,7 @@ export type QuestionProgress = {
   pointsReceived: Scalars['Int'];
   dateStarted?: Maybe<Scalars['Date']>;
   dateCompleted?: Maybe<Scalars['Date']>;
-  /** Number representing the index of the latest hint revealed */
-  hintsRevealed?: Maybe<Scalars['Int']>;
+  hintsRevealed: Array<Scalars['String']>;
 };
 
 export type QuestionProgressInput = {
@@ -562,8 +576,7 @@ export type QuestionProgressInput = {
   pointsReceived: Scalars['Int'];
   dateStarted?: Maybe<Scalars['Date']>;
   dateCompleted?: Maybe<Scalars['Date']>;
-  /** Number representing the index of the latest hint revealed */
-  hintsRevealed?: Maybe<Scalars['Int']>;
+  hintsRevealed: Array<Scalars['String']>;
 };
 
 export type RoadmapInput = {
@@ -661,6 +674,14 @@ export type UserInput = {
   roles: Array<Scalars['String']>;
 };
 
+export type CreateCommentMutationVariables = Exact<{
+  comment: CommentInput;
+  userId: Scalars['ObjectId'];
+}>;
+
+
+export type CreateCommentMutation = { createComment: Pick<Comment, '_id'> };
+
 export type CreateGameMutationVariables = Exact<{
   title?: Maybe<Scalars['String']>;
   codingLanguage?: Maybe<Scalars['String']>;
@@ -679,6 +700,15 @@ export type CreateGameProgressMutationVariables = Exact<{
 
 
 export type CreateGameProgressMutation = { createGameProgress: Pick<GameProgress, '_id' | 'startedAt' | 'isCompleted' | 'userId' | 'gameId'> };
+
+export type RevealHintsMutationVariables = Exact<{
+  gameProgressId: Scalars['ObjectId'];
+  userId: Scalars['ObjectId'];
+  questionId: Scalars['String'];
+}>;
+
+
+export type RevealHintsMutation = { revealHints: Pick<GameProgress, '_id'> };
 
 export type StartQuestionMutationVariables = Exact<{
   gameId: Scalars['String'];
@@ -719,6 +749,24 @@ export type UpdateQuestionMutationVariables = Exact<{
 
 export type UpdateQuestionMutation = { updateQuestions: Array<Pick<QuestionObject, '_id'>> };
 
+export type GamePreviewCommentsQueryVariables = Exact<{
+  gameId: Scalars['String'];
+  amount?: Maybe<Scalars['Int']>;
+  cursor?: Maybe<Scalars['String']>;
+}>;
+
+
+export type GamePreviewCommentsQuery = { getGameComments: (
+    Pick<PaginatedCommentResponse, 'hasMore' | 'nextCursor'>
+    & { nodes: Array<(
+      Pick<Comment, '_id' | 'review' | 'rating' | 'lastUpdated'>
+      & { userInfo: (
+        Pick<User, 'username'>
+        & { profilePicture: Pick<ProfilePicture, 'avatar'> }
+      ) }
+    )> }
+  ) };
+
 export type GetGameProgressForGamePreviewQueryVariables = Exact<{
   gameId: Scalars['ObjectId'];
   userId: Scalars['ObjectId'];
@@ -748,7 +796,7 @@ export type GamePreviewQueryVariables = Exact<{
 }>;
 
 
-export type GamePreviewQuery = { getGame?: Maybe<Pick<Game, '_id' | 'title' | 'description' | 'tags' | 'lastUpdated' | 'totalStars' | 'rating' | 'playCount' | 'codingLanguage' | 'difficulty'>> };
+export type GamePreviewQuery = { getGame?: Maybe<Pick<Game, 'createdBy' | '_id' | 'title' | 'description' | 'tags' | 'lastUpdated' | 'totalStars' | 'rating' | 'playCount' | 'codingLanguage' | 'difficulty'>> };
 
 export type GetGamePlayingProgressQueryVariables = Exact<{
   userId: Scalars['ObjectId'];
@@ -790,7 +838,37 @@ export type GetSearchResultsQuery = { getSearch: (
     & { nodes: Array<Pick<Game, 'title' | 'rating' | 'createdBy' | 'tags' | 'codingLanguage' | 'difficulty' | 'description' | 'playCount'>> }
   ) };
 
+export type GetUserQueryVariables = Exact<{
+  userId: Scalars['ObjectId'];
+}>;
 
+
+export type GetUserQuery = { getUser?: Maybe<Pick<User, '_id' | 'name' | 'username'>> };
+
+export type GetUserGameReviewQueryVariables = Exact<{
+  userId: Scalars['String'];
+  gameId: Scalars['String'];
+}>;
+
+
+export type GetUserGameReviewQuery = { getUserGameReview?: Maybe<Pick<Comment, 'review' | 'rating' | 'gameId' | 'userId'>> };
+
+
+export const CreateCommentDocument = `
+    mutation CreateComment($comment: CommentInput!, $userId: ObjectId!) {
+  createComment(comment: $comment, userId: $userId) {
+    _id
+  }
+}
+    `;
+export const useCreateCommentMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<CreateCommentMutation, TError, CreateCommentMutationVariables, TContext>) => 
+    useMutation<CreateCommentMutation, TError, CreateCommentMutationVariables, TContext>(
+      (variables?: CreateCommentMutationVariables) => fetcher<CreateCommentMutation, CreateCommentMutationVariables>(CreateCommentDocument, variables)(),
+      options
+    );
 export const CreateGameDocument = `
     mutation createGame($title: String, $codingLanguage: String, $difficulty: String, $description: String, $tags: [String!]) {
   createGame(
@@ -829,6 +907,25 @@ export const useCreateGameProgressMutation = <
     >(options?: UseMutationOptions<CreateGameProgressMutation, TError, CreateGameProgressMutationVariables, TContext>) => 
     useMutation<CreateGameProgressMutation, TError, CreateGameProgressMutationVariables, TContext>(
       (variables?: CreateGameProgressMutationVariables) => fetcher<CreateGameProgressMutation, CreateGameProgressMutationVariables>(CreateGameProgressDocument, variables)(),
+      options
+    );
+export const RevealHintsDocument = `
+    mutation RevealHints($gameProgressId: ObjectId!, $userId: ObjectId!, $questionId: String!) {
+  revealHints(
+    gameProgressId: $gameProgressId
+    userId: $userId
+    questionId: $questionId
+  ) {
+    _id
+  }
+}
+    `;
+export const useRevealHintsMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<RevealHintsMutation, TError, RevealHintsMutationVariables, TContext>) => 
+    useMutation<RevealHintsMutation, TError, RevealHintsMutationVariables, TContext>(
+      (variables?: RevealHintsMutationVariables) => fetcher<RevealHintsMutation, RevealHintsMutationVariables>(RevealHintsDocument, variables)(),
       options
     );
 export const StartQuestionDocument = `
@@ -907,6 +1004,40 @@ export const useUpdateQuestionMutation = <
       (variables?: UpdateQuestionMutationVariables) => fetcher<UpdateQuestionMutation, UpdateQuestionMutationVariables>(UpdateQuestionDocument, variables)(),
       options
     );
+export const GamePreviewCommentsDocument = `
+    query GamePreviewComments($gameId: String!, $amount: Int, $cursor: String) {
+  getGameComments(gameId: $gameId, amount: $amount, cursor: $cursor) {
+    hasMore
+    nextCursor
+    nodes {
+      _id
+      review
+      rating
+      lastUpdated
+      userInfo {
+        username
+        profilePicture {
+          avatar
+        }
+      }
+    }
+  }
+}
+    `;
+export const useGamePreviewCommentsQuery = <
+      TData = GamePreviewCommentsQuery,
+      TError = unknown
+    >(
+      variables: GamePreviewCommentsQueryVariables, 
+      options?: UseQueryOptions<GamePreviewCommentsQuery, TError, TData>
+    ) => 
+    useQuery<GamePreviewCommentsQuery, TError, TData>(
+      ['GamePreviewComments', variables],
+      fetcher<GamePreviewCommentsQuery, GamePreviewCommentsQueryVariables>(GamePreviewCommentsDocument, variables),
+      options
+    );
+useGamePreviewCommentsQuery.getKey = (variables: GamePreviewCommentsQueryVariables) => ['GamePreviewComments', variables];
+
 export const GetGameProgressForGamePreviewDocument = `
     query GetGameProgressForGamePreview($gameId: ObjectId!, $userId: ObjectId!) {
   getGameProgressByUser(gameId: $gameId, userId: $userId) {
@@ -1024,6 +1155,7 @@ useGetGameEditQuery.getKey = (variables: GetGameEditQueryVariables) => ['GetGame
 export const GamePreviewDocument = `
     query GamePreview($gameId: String!) {
   getGame(id: $gameId) {
+    createdBy
     _id
     title
     description
@@ -1220,3 +1352,50 @@ export const useGetSearchResultsQuery = <
       options
     );
 useGetSearchResultsQuery.getKey = (variables: GetSearchResultsQueryVariables) => ['GetSearchResults', variables];
+
+export const GetUserDocument = `
+    query GetUser($userId: ObjectId!) {
+  getUser(id: $userId) {
+    _id
+    name
+    username
+  }
+}
+    `;
+export const useGetUserQuery = <
+      TData = GetUserQuery,
+      TError = unknown
+    >(
+      variables: GetUserQueryVariables, 
+      options?: UseQueryOptions<GetUserQuery, TError, TData>
+    ) => 
+    useQuery<GetUserQuery, TError, TData>(
+      ['GetUser', variables],
+      fetcher<GetUserQuery, GetUserQueryVariables>(GetUserDocument, variables),
+      options
+    );
+useGetUserQuery.getKey = (variables: GetUserQueryVariables) => ['GetUser', variables];
+
+export const GetUserGameReviewDocument = `
+    query GetUserGameReview($userId: String!, $gameId: String!) {
+  getUserGameReview(userId: $userId, gameId: $gameId) {
+    review
+    rating
+    gameId
+    userId
+  }
+}
+    `;
+export const useGetUserGameReviewQuery = <
+      TData = GetUserGameReviewQuery,
+      TError = unknown
+    >(
+      variables: GetUserGameReviewQueryVariables, 
+      options?: UseQueryOptions<GetUserGameReviewQuery, TError, TData>
+    ) => 
+    useQuery<GetUserGameReviewQuery, TError, TData>(
+      ['GetUserGameReview', variables],
+      fetcher<GetUserGameReviewQuery, GetUserGameReviewQueryVariables>(GetUserGameReviewDocument, variables),
+      options
+    );
+useGetUserGameReviewQuery.getKey = (variables: GetUserGameReviewQueryVariables) => ['GetUserGameReview', variables];

@@ -39,7 +39,6 @@ export default function Login() {
 			</Center>
 			<Box position='absolute' bottom='0'>
 				<Image src='/combined.png' width={701} height={609} />
-				{/* <Image src='/colors.png' width={667} height={662} /> */}
 			</Box>
 		</Box>
 	)

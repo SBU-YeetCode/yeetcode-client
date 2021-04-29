@@ -392,6 +392,7 @@ export type Query = {
   getComment?: Maybe<Comment>;
   getGameComments: PaginatedCommentResponse;
   getUserReviews: Array<Comment>;
+  getUserGameReview?: Maybe<Comment>;
   getGameProgress?: Maybe<GameProgress>;
   getGameProgressByUser?: Maybe<GameProgress>;
   getUserCompletedGames: Array<GameProgress>;
@@ -432,6 +433,12 @@ export type QueryGetGameCommentsArgs = {
 
 
 export type QueryGetUserReviewsArgs = {
+  userId: Scalars['String'];
+};
+
+
+export type QueryGetUserGameReviewArgs = {
+  gameId: Scalars['String'];
   userId: Scalars['String'];
 };
 
@@ -667,6 +674,14 @@ export type UserInput = {
   roles: Array<Scalars['String']>;
 };
 
+export type CreateCommentMutationVariables = Exact<{
+  comment: CommentInput;
+  userId: Scalars['ObjectId'];
+}>;
+
+
+export type CreateCommentMutation = { createComment: Pick<Comment, '_id'> };
+
 export type CreateGameMutationVariables = Exact<{
   title?: Maybe<Scalars['String']>;
   codingLanguage?: Maybe<Scalars['String']>;
@@ -830,7 +845,30 @@ export type GetUserQueryVariables = Exact<{
 
 export type GetUserQuery = { getUser?: Maybe<Pick<User, '_id' | 'name' | 'username'>> };
 
+export type GetUserGameReviewQueryVariables = Exact<{
+  userId: Scalars['String'];
+  gameId: Scalars['String'];
+}>;
 
+
+export type GetUserGameReviewQuery = { getUserGameReview?: Maybe<Pick<Comment, 'review' | 'rating' | 'gameId' | 'userId'>> };
+
+
+export const CreateCommentDocument = `
+    mutation CreateComment($comment: CommentInput!, $userId: ObjectId!) {
+  createComment(comment: $comment, userId: $userId) {
+    _id
+  }
+}
+    `;
+export const useCreateCommentMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<CreateCommentMutation, TError, CreateCommentMutationVariables, TContext>) => 
+    useMutation<CreateCommentMutation, TError, CreateCommentMutationVariables, TContext>(
+      (variables?: CreateCommentMutationVariables) => fetcher<CreateCommentMutation, CreateCommentMutationVariables>(CreateCommentDocument, variables)(),
+      options
+    );
 export const CreateGameDocument = `
     mutation createGame($title: String, $codingLanguage: String, $difficulty: String, $description: String, $tags: [String!]) {
   createGame(
@@ -1337,3 +1375,27 @@ export const useGetUserQuery = <
       options
     );
 useGetUserQuery.getKey = (variables: GetUserQueryVariables) => ['GetUser', variables];
+
+export const GetUserGameReviewDocument = `
+    query GetUserGameReview($userId: String!, $gameId: String!) {
+  getUserGameReview(userId: $userId, gameId: $gameId) {
+    review
+    rating
+    gameId
+    userId
+  }
+}
+    `;
+export const useGetUserGameReviewQuery = <
+      TData = GetUserGameReviewQuery,
+      TError = unknown
+    >(
+      variables: GetUserGameReviewQueryVariables, 
+      options?: UseQueryOptions<GetUserGameReviewQuery, TError, TData>
+    ) => 
+    useQuery<GetUserGameReviewQuery, TError, TData>(
+      ['GetUserGameReview', variables],
+      fetcher<GetUserGameReviewQuery, GetUserGameReviewQueryVariables>(GetUserGameReviewDocument, variables),
+      options
+    );
+useGetUserGameReviewQuery.getKey = (variables: GetUserGameReviewQueryVariables) => ['GetUserGameReview', variables];

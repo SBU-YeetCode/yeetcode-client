@@ -172,11 +172,11 @@ export function AccordionItem({ item, ...other }: Props) {
 			<AccordionPanel>
 				{item.children?.map((subItem, index) =>
 					subItem.children.length > 0 ? (
-						<Accordion allowMultiple>
-							<AccordionItem key={subItem.sequence} item={subItem} {...other} />
+						<Accordion allowMultiple key={index}>
+							<AccordionItem key={subItem.sequence} item={subItem} {...other} /> 
 						</Accordion>
 					) : (
-						<HStack>
+						<HStack key={index}>
 							<Item key={subItem.sequence} item={subItem} {...other} />
 						</HStack>
 					)
@@ -196,9 +196,10 @@ export default function Roadmap({
 	data,
 	gameTitle,
 	showTitle = true,
+	onAction,
 	...style
 }: RoadmapProps & Partial<BoxProps>): ReactElement {
-	function onAction(action: 'edit' | 'delete' | 'add' | 'click', item: RoadmapData) {
+	function defaultOnAction(action: 'edit' | 'delete' | 'add' | 'click', item: RoadmapData) {
 		switch (action) {
 			case 'edit': {
 				setSelectedInstance(item.refId, item.kind as any)
@@ -231,7 +232,7 @@ export default function Roadmap({
 						refId: undefined,
 					}}
 					selected={'false'}
-					onAction={onAction}
+					onAction={onAction ?? defaultOnAction}
 					showActions={showActions}
 					showReorder={showReorder}
 				/>
@@ -244,7 +245,7 @@ export default function Roadmap({
 						item={item}
 						showActions={showActions}
 						showReorder={showReorder}
-						onAction={onAction}
+						onAction={onAction ?? defaultOnAction}
 					/>
 				))}
 			</Accordion>
@@ -271,4 +272,5 @@ interface RoadmapProps extends Omit<Props, 'selected' | 'item'> {
 	refId?: string | undefined
 	data: RoadmapData[]
 	gameTitle: string
+	onAction?: (action: 'edit' | 'delete' | 'add' | 'click', item: RoadmapData) => void
 }

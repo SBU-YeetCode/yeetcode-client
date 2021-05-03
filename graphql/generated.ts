@@ -207,6 +207,8 @@ export type Mutation = {
   createLevel: LevelObject;
   createQuestion: QuestionObject;
   createStage: StageObject;
+  /** Used to create a Level, Stage, or Question */
+  createInstance: RoadmapObject;
   updateQuestions: Array<QuestionObject>;
   updateStages: Array<StageObject>;
   deleteGame: Deleted;
@@ -318,6 +320,15 @@ export type MutationCreateQuestionArgs = {
 export type MutationCreateStageArgs = {
   gameId: Scalars['String'];
   stage: StageInput;
+};
+
+
+export type MutationCreateInstanceArgs = {
+  userId: Scalars['ObjectId'];
+  gameId: Scalars['String'];
+  title: Scalars['String'];
+  kind: Scalars['String'];
+  roadmapId?: Maybe<Scalars['String']>;
 };
 
 
@@ -603,14 +614,14 @@ export enum Sort_Options {
 export type SpotTheBug = {
   _id: Scalars['ObjectId'];
   prompt: Scalars['String'];
-  bugLine: Scalars['Int'];
+  bugLine: Scalars['String'];
   code: Scalars['String'];
 };
 
 export type SpotTheBugInput = {
   _id: Scalars['ObjectId'];
   prompt: Scalars['String'];
-  bugLine: Scalars['Int'];
+  bugLine: Scalars['String'];
   code: Scalars['String'];
 };
 
@@ -701,6 +712,17 @@ export type CreateGameProgressMutationVariables = Exact<{
 
 export type CreateGameProgressMutation = { createGameProgress: Pick<GameProgress, '_id' | 'startedAt' | 'isCompleted' | 'userId' | 'gameId'> };
 
+export type CreateInstanceMutationVariables = Exact<{
+  roadmapId?: Maybe<Scalars['String']>;
+  gameId: Scalars['String'];
+  userId: Scalars['ObjectId'];
+  title: Scalars['String'];
+  kind: Scalars['String'];
+}>;
+
+
+export type CreateInstanceMutation = { createInstance: Pick<RoadmapObject, '_id'> };
+
 export type RevealHintsMutationVariables = Exact<{
   gameProgressId: Scalars['ObjectId'];
   userId: Scalars['ObjectId'];
@@ -741,6 +763,14 @@ export type UpdateGameMutationVariables = Exact<{
 
 export type UpdateGameMutation = { updateGame: Pick<Game, '_id'> };
 
+export type UpdateStagesMutationVariables = Exact<{
+  gameId: Scalars['String'];
+  stagesToUpdate: Array<Stage> | Stage;
+}>;
+
+
+export type UpdateStagesMutation = { updateStages: Array<Pick<StageObject, '_id'>> };
+
 export type UpdateQuestionMutationVariables = Exact<{
   gameId: Scalars['String'];
   questionsToUpdate: Array<Question> | Question;
@@ -748,6 +778,14 @@ export type UpdateQuestionMutationVariables = Exact<{
 
 
 export type UpdateQuestionMutation = { updateQuestions: Array<Pick<QuestionObject, '_id'>> };
+
+export type UpdateLevelsMutationVariables = Exact<{
+  gameId: Scalars['String'];
+  levelsToUpdate: Array<Level> | Level;
+}>;
+
+
+export type UpdateLevelsMutation = { updateLevels: Array<Pick<LevelObject, '_id'>> };
 
 export type GamePreviewCommentsQueryVariables = Exact<{
   gameId: Scalars['String'];
@@ -909,6 +947,27 @@ export const useCreateGameProgressMutation = <
       (variables?: CreateGameProgressMutationVariables) => fetcher<CreateGameProgressMutation, CreateGameProgressMutationVariables>(CreateGameProgressDocument, variables)(),
       options
     );
+export const CreateInstanceDocument = `
+    mutation createInstance($roadmapId: String, $gameId: String!, $userId: ObjectId!, $title: String!, $kind: String!) {
+  createInstance(
+    roadmapId: $roadmapId
+    gameId: $gameId
+    userId: $userId
+    title: $title
+    kind: $kind
+  ) {
+    _id
+  }
+}
+    `;
+export const useCreateInstanceMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<CreateInstanceMutation, TError, CreateInstanceMutationVariables, TContext>) => 
+    useMutation<CreateInstanceMutation, TError, CreateInstanceMutationVariables, TContext>(
+      (variables?: CreateInstanceMutationVariables) => fetcher<CreateInstanceMutation, CreateInstanceMutationVariables>(CreateInstanceDocument, variables)(),
+      options
+    );
 export const RevealHintsDocument = `
     mutation RevealHints($gameProgressId: ObjectId!, $userId: ObjectId!, $questionId: String!) {
   revealHints(
@@ -989,6 +1048,21 @@ export const useUpdateGameMutation = <
       (variables?: UpdateGameMutationVariables) => fetcher<UpdateGameMutation, UpdateGameMutationVariables>(UpdateGameDocument, variables)(),
       options
     );
+export const UpdateStagesDocument = `
+    mutation updateStages($gameId: String!, $stagesToUpdate: [Stage!]!) {
+  updateStages(gameId: $gameId, stagesToUpdate: $stagesToUpdate) {
+    _id
+  }
+}
+    `;
+export const useUpdateStagesMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<UpdateStagesMutation, TError, UpdateStagesMutationVariables, TContext>) => 
+    useMutation<UpdateStagesMutation, TError, UpdateStagesMutationVariables, TContext>(
+      (variables?: UpdateStagesMutationVariables) => fetcher<UpdateStagesMutation, UpdateStagesMutationVariables>(UpdateStagesDocument, variables)(),
+      options
+    );
 export const UpdateQuestionDocument = `
     mutation updateQuestion($gameId: String!, $questionsToUpdate: [Question!]!) {
   updateQuestions(gameId: $gameId, questionsToUpdate: $questionsToUpdate) {
@@ -1002,6 +1076,21 @@ export const useUpdateQuestionMutation = <
     >(options?: UseMutationOptions<UpdateQuestionMutation, TError, UpdateQuestionMutationVariables, TContext>) => 
     useMutation<UpdateQuestionMutation, TError, UpdateQuestionMutationVariables, TContext>(
       (variables?: UpdateQuestionMutationVariables) => fetcher<UpdateQuestionMutation, UpdateQuestionMutationVariables>(UpdateQuestionDocument, variables)(),
+      options
+    );
+export const UpdateLevelsDocument = `
+    mutation updateLevels($gameId: String!, $levelsToUpdate: [Level!]!) {
+  updateLevels(gameId: $gameId, levelsToUpdate: $levelsToUpdate) {
+    _id
+  }
+}
+    `;
+export const useUpdateLevelsMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<UpdateLevelsMutation, TError, UpdateLevelsMutationVariables, TContext>) => 
+    useMutation<UpdateLevelsMutation, TError, UpdateLevelsMutationVariables, TContext>(
+      (variables?: UpdateLevelsMutationVariables) => fetcher<UpdateLevelsMutation, UpdateLevelsMutationVariables>(UpdateLevelsDocument, variables)(),
       options
     );
 export const GamePreviewCommentsDocument = `

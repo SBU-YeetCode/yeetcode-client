@@ -15,16 +15,17 @@ import {
 	TabPanel,
 	Tab,
 	Input,
+	useToast,
+	NumberInput,
+	NumberInputField,
 } from '@chakra-ui/react'
-import {
-	Question,
-	Gametype,
-	useUpdateQuestionMutation,
-	HintInput,
-} from '../../graphql/generated'
-import React, { useState } from 'react'
+import { Question, Gametype, useUpdateQuestionMutation, HintInput } from '../../graphql/generated'
+import React, { useState, useCallback } from 'react'
 import MultipleChoice from './MultipleChoice'
 import HintEditor from './HintEditor'
+import useConfirm from '../../hooks/useConfirm'
+import SpotTheBug from './SpotTheBug'
+import FillInBlank from './FillInBlank'
 
 type EditQuestionProps = {
 	selectedInstance: any
@@ -71,13 +72,15 @@ const DefaultQuestionState: Partial<Question> = {
 		incorrectChoices: [],
 		prompt: 'Multiple Choice',
 	},
+	spotTheBug: {
+		_id: new ObjectId(),
+		code: 'console.log(hello)',
+		bugLine: 'console.log(hello)',
+		prompt: 'Spot the bug in the code',
+	},
 }
 
-export default function EditQuestion({
-	selectedInstance,
-	setSelectedInstance,
-	gameId,
-}: EditQuestionProps) {
+export default function EditQuestion({ selectedInstance, setSelectedInstance, gameId }: EditQuestionProps) {
 	// State
 	const [instanceState, setInstanceState] = useState<Question>()
 	const queryClient = useQueryClient()
@@ -95,19 +98,20 @@ export default function EditQuestion({
 		})
 	}
 	const [tabIndex, setTabIndex] = useState(0)
-	const [questionNav, setQuestionNav] = useState([
-		'Question',
-		'Description',
-		'Hints',
-		'Settings',
-	])
-	const { mutate, isLoading } = useUpdateQuestionMutation()
+	const [questionNav, setQuestionNav] = useState(['Question', 'Description', 'Hints', 'Settings'])
+	const { mutateAsync, isLoading, isError } = useUpdateQuestionMutation()
+
+	const confirm = useConfirm()
+	const toast = useToast()
+	function close() {
+		confirm(() => {
+			setSelectedInstance({ item: undefined })
+		})
+	}
+
 	React.useEffect(() => {
 		if (instanceState?.gameType === Gametype.Livecoding) {
-			setQuestionNav([
-				...questionNav.filter((n) => n !== 'Test Cases'),
-				'Test Cases',
-			])
+			setQuestionNav([...questionNav.filter((n) => n !== 'Test Cases'), 'Test Cases'])
 		} else {
 			setQuestionNav(questionNav.filter((n) => n !== 'Test Cases'))
 			setTabIndex(0)
@@ -117,6 +121,22 @@ export default function EditQuestion({
 	function getKeyByValue(object: any, value: any) {
 		return Object.keys(object).find((key) => object[key] === value)
 	}
+	async function save() {
+		await mutateAsync({
+			gameId: gameId,
+			// @ts-ignore
+			questionsToUpdate: [instanceState],
+		})
+		queryClient.invalidateQueries(['GetGameEdit'])
+		toast({
+			title: isError ? 'Error' : 'Saved',
+			description: isError ? 'Not saved' : 'Successfully Saved',
+			status: isError ? 'error' : 'success',
+			position: 'bottom-left',
+			duration: isError ? 4000 : 1000,
+		})
+	}
+
 	if (!instanceState) return <> </>
 	return (
 		<>
@@ -124,22 +144,11 @@ export default function EditQuestion({
 				<Spacer />
 				<Heading textAlign='center'>{instanceState.title}</Heading>
 				<Spacer />
-				<Button
-					bg='primary.300'
-					isLoading={isLoading}
-					onClick={(e) => {
-						mutate({
-							gameId: gameId,
-							questionsToUpdate: [instanceState],
-						})
-						queryClient.invalidateQueries('GetGameEdit')
-						queryClient.refetchQueries('GetGameEdit')
-					}}>
+				<Button bg='primary.300' isLoading={isLoading} onClick={save}>
 					Save
 				</Button>
 				<IconButton
-					// TODO: Are you sure you want to close?
-					onClick={() => setSelectedInstance({ item: undefined })}
+					onClick={close}
 					borderRadius={100}
 					bg='primary.300'
 					aria-label='Close Question'
@@ -152,7 +161,8 @@ export default function EditQuestion({
 						<FormLabel>Question Mode</FormLabel>
 						<Select
 							value={getKeyByValue(Gametype, instanceState.gameType)}
-							onChange={handleSelectedModeChange}>
+							onChange={handleSelectedModeChange}
+						>
 							{Object.keys(SELECT).map((gametype: string) => (
 								// @ts-ignore */
 								<option key={gametype} value={gametype}>
@@ -160,9 +170,7 @@ export default function EditQuestion({
 								</option>
 							))}
 						</Select>
-						<FormHelperText>
-							Select between different question modes
-						</FormHelperText>
+						<FormHelperText>Select between different question modes</FormHelperText>
 					</FormControl>
 				</Box>
 			</Center>
@@ -171,7 +179,8 @@ export default function EditQuestion({
 				onChange={(index) => setTabIndex(index)}
 				variant='soft-rounded'
 				colorScheme='green'
-				isLazy>
+				isLazy
+			>
 				<TabList borderRadius={15} p={2} mt={8} bg='background.dark.500'>
 					{questionNav.map((navItem, index) => (
 						<Tab key={index}>{navItem}</Tab>
@@ -181,10 +190,13 @@ export default function EditQuestion({
 					<TabPanel>
 						{/* Question Panel */}
 						{instanceState.gameType === Gametype.Multiplechoice && (
-							<MultipleChoice
-								instanceState={instanceState}
-								setInstanceState={setInstanceState}
-							/>
+							<MultipleChoice instanceState={instanceState} setInstanceState={setInstanceState} />
+						)}
+						{instanceState.gameType === Gametype.Spotthebug && (
+							<SpotTheBug instanceState={instanceState} setInstanceState={setInstanceState} />
+						)}
+						{instanceState.gameType === Gametype.Fillinblank && (
+							<FillInBlank instanceState={instanceState} setInstanceState={setInstanceState} />
 						)}
 					</TabPanel>
 					<TabPanel>
@@ -202,9 +214,7 @@ export default function EditQuestion({
 											})
 										}
 									/>
-									<FormHelperText>
-										Type the description for the player above
-									</FormHelperText>
+									<FormHelperText>Type the description for the player above</FormHelperText>
 								</FormControl>
 							</Box>
 						</Center>
@@ -227,30 +237,50 @@ export default function EditQuestion({
 							<Box mt={6} p={4} w='80%' boxShadow='lg'>
 								<FormControl isRequired>
 									<FormLabel size='md'>Total Point Value</FormLabel>
-									<Input
+									<NumberInput
 										value={instanceState.points}
-										onChange={(e) =>
+										onChange={(value) =>
 											setInstanceState({
 												...instanceState,
-												points: parseInt(e.target.value),
+												points: parseInt(value),
 											})
 										}
-									/>
+									>
+										<NumberInputField />
+									</NumberInput>
 								</FormControl>
 								<FormControl isRequired>
-									<FormLabel size='md'>Point Loss Method</FormLabel>
-									<Input />
+									<FormLabel size='md'>Number Of Lives</FormLabel>
+									<NumberInput
+										value={instanceState.lives}
+										onChange={(valueString) =>
+											setInstanceState({
+												...instanceState,
+												lives: parseInt(valueString === '' ? '0' : valueString),
+											})
+										}
+									>
+										<NumberInputField />
+									</NumberInput>
 								</FormControl>
 								<FormControl isRequired>
-									<FormLabel size='md'>Point Loss After Each Hint</FormLabel>
-									<Input />
+									<FormLabel size='md'>Time Limit</FormLabel>
+									<NumberInput
+										value={instanceState.timeLimit}
+										onChange={(valueString) =>
+											setInstanceState({
+												...instanceState,
+												timeLimit: parseInt(valueString === '' ? '0' : valueString),
+											})
+										}
+									>
+										<NumberInputField />
+									</NumberInput>
 								</FormControl>
 							</Box>
 						</Center>
 					</TabPanel>
-					{instanceState.gameType === Gametype.Livecoding && (
-						<TabPanel> Test Cases</TabPanel>
-					)}
+					{instanceState.gameType === Gametype.Livecoding && <TabPanel> Test Cases</TabPanel>}
 				</TabPanels>
 			</Tabs>
 		</>

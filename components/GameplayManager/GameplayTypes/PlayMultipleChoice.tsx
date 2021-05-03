@@ -49,7 +49,6 @@ export default function PlayMultipleChoice(): ReactElement {
 	React.useEffect(() => {
 		setChoices(shuffleArray(choices.slice(0)))
 	}, [])
-	console.log(selectedAnswer)
 	return (
 		<VStack>
 			<Box mt={6} p={4} w='80%' boxShadow='lg'>

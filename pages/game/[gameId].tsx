@@ -25,12 +25,10 @@ export default function GamePreview({}: Props): ReactElement {
 	const gameId = router.query['gameId'] as string
 	// Get Game
 	const { data, isError, isFetched, error } = useGamePreviewQuery({ gameId }, { enabled: !!gameId })
-	console.log(data?.getGame?.lastUpdated)
 	let lastUpdated =
 		isFetched && !isError
 			? formatDistance(new Date(data?.getGame?.lastUpdated), new Date(), { addSuffix: true })
 			: null
-	console.log(data)
 	if (isError) {
 		toast({
 			title: 'Error viewing game.',
@@ -44,7 +42,7 @@ export default function GamePreview({}: Props): ReactElement {
 		return <></>
 	}
 	// https://source.unsplash.com/random/2000x200
-	https: return (
+	return (
 		<>
 			<Image
 				w='100%'

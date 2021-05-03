@@ -27,7 +27,6 @@ export default function GameplayMain(): ReactElement {
 	const renderSwitch = () => {
 		switch (selectedValue.gameType) {
 			case 'MULTIPLECHOICE':
-				console.log('multiple')
 				return <MultipleChoice />
 			case 'FILLINBLANK':
 				return <FillInTheBlank />

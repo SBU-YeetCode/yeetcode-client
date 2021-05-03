@@ -17,7 +17,6 @@ export default function SearchResults(): ReactElement {
 	const router = useRouter()
 	const { q } = router.query
 	const next = () => {
-		console.log('next')
 		refetch()
 	}
 	const [nextCursor, setNextCursor] = React.useState<string | null>(null)

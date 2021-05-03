@@ -124,6 +124,8 @@ function QuestionFooter({
 		isLoading: isLoadingSubmit,
 		mutateAsync: mutateSubmit,
 		data: submitData,
+		isError,
+		isSuccess,
 	} = useSubmitQuestionMutation()
 	const { user } = useUser()
 	const queryClient = useQueryClient()
@@ -136,9 +138,9 @@ function QuestionFooter({
 		await queryClient.refetchQueries(['GetGamePlayingProgress'])
 		toast({
 			title: 'Question Started',
-			duration: 4000,
+			duration: 3000,
 			status: 'error',
-			position: 'bottom-left',
+			position: 'top-left',
 		})
 	}
 
@@ -158,6 +160,18 @@ function QuestionFooter({
 	const [time, setTime] = React.useState(new Date())
 	const [hintsOpen, _setHintsOpen] = React.useState(false)
 	const setHintsOpen = () => _setHintsOpen(!hintsOpen)
+	React.useEffect(() => {
+		if (isSuccess && !isError) {
+			toast({
+				status: 'info',
+				title: 'Question submitted',
+				description: submitData?.submitQuestion.isCorrect ? 'You got it right!' : 'Wrong answer, try again.',
+				duration: 6000,
+				isClosable: true,
+				position: 'bottom-right'
+			})
+		}
+	}, [isSuccess])
 	React.useEffect(() => {
 		const unsub = setInterval(() => {
 			setTime(new Date())
@@ -252,6 +266,7 @@ function QuestionFooter({
 							const { color, disabled } = getHintInfo(hint, i, questionProgress, time)
 							return (
 								<IconButton
+									key={i}
 									onClick={setHintsOpen}
 									aria-label={`hint-${i + 1}`}
 									as={FaLightbulb}

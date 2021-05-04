@@ -879,8 +879,13 @@ export type ContextGetMeQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type ContextGetMeQuery = { getMe?: Maybe<(
     Pick<User, '_id' | 'email' | 'name' | 'roles' | 'username'>
-    & { profilePicture: Pick<ProfilePicture, 'avatar' | 'large'> }
+    & { profilePicture: Pick<ProfilePicture, 'avatar' | 'large'>, gamesRecent: Array<{ game: Pick<Game, '_id' | 'title' | 'createdBy' | 'rating'> }> }
   )> };
+
+export type GetPopularGamesQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetPopularGamesQuery = { getFilterGames: { nodes: Array<Pick<Game, 'createdBy' | 'title' | 'rating' | '_id'>> } };
 
 export type GetSearchResultsQueryVariables = Exact<{
   query: Scalars['String'];
@@ -1425,6 +1430,14 @@ export const ContextGetMeDocument = `
     }
     roles
     username
+    gamesRecent {
+      game {
+        _id
+        title
+        createdBy
+        rating
+      }
+    }
   }
 }
     `;
@@ -1441,6 +1454,32 @@ export const useContextGetMeQuery = <
       options
     );
 useContextGetMeQuery.getKey = (variables?: ContextGetMeQueryVariables) => ['ContextGetMe', variables];
+
+export const GetPopularGamesDocument = `
+    query getPopularGames {
+  getFilterGames(amount: 4, cursor: null, sort: PLAY_COUNT, sortDir: 1) {
+    nodes {
+      createdBy
+      title
+      rating
+      _id
+    }
+  }
+}
+    `;
+export const useGetPopularGamesQuery = <
+      TData = GetPopularGamesQuery,
+      TError = unknown
+    >(
+      variables?: GetPopularGamesQueryVariables, 
+      options?: UseQueryOptions<GetPopularGamesQuery, TError, TData>
+    ) => 
+    useQuery<GetPopularGamesQuery, TError, TData>(
+      ['getPopularGames', variables],
+      fetcher<GetPopularGamesQuery, GetPopularGamesQueryVariables>(GetPopularGamesDocument, variables),
+      options
+    );
+useGetPopularGamesQuery.getKey = (variables?: GetPopularGamesQueryVariables) => ['getPopularGames', variables];
 
 export const GetSearchResultsDocument = `
     query GetSearchResults($query: String!, $cursor: String, $amount: Int) {

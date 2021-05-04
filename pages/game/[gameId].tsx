@@ -26,7 +26,7 @@ export default function GamePreview({}: Props): ReactElement {
 	// Get Game
 	const { data, isError, isFetched, error } = useGamePreviewQuery({ gameId }, { enabled: !!gameId })
 	let lastUpdated =
-		isFetched && !isError
+		data !== undefined && !isError
 			? formatDistance(new Date(data?.getGame?.lastUpdated), new Date(), { addSuffix: true })
 			: null
 	if (isError) {

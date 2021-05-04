@@ -43,6 +43,24 @@ const config: any = {
 	initialColorMode: 'dark',
 }
 
-const theme = extendTheme({ colors, config })
+const styles: any = {
+	global: {
+		body: {
+			overflowX: 'hidden',
+		},
+		a: {
+			backgroundImage: `linear-gradient(120deg, teal 0%, teal 100%)`,
+			backgroundRepeat: 'no-repeat',
+			backgroundSize: '100% 0.2em',
+			backgroundPosition: '0 88%',
+			transition: 'background-size 0.25s ease-in',
+			'&:hover': {
+				backgroundSize: '100% 88%',
+			},
+		},
+	},
+}
+
+const theme = extendTheme({ colors, config, styles })
 
 export default theme

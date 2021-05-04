@@ -7,6 +7,7 @@ query GetSearchResults($query: String!, $cursor: String, $amount: Int) {
         hasMore
         nextCursor
         nodes {
+            _id
             title
             rating
             createdBy

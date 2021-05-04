@@ -209,6 +209,8 @@ export type Mutation = {
   createStage: StageObject;
   /** Used to create a Level, Stage, or Question */
   createInstance: RoadmapObject;
+  /** Used to delete a Level, Stage, or Question */
+  deleteInstance: Array<RoadmapObject>;
   updateQuestions: Array<QuestionObject>;
   updateStages: Array<StageObject>;
   deleteGame: Deleted;
@@ -329,6 +331,13 @@ export type MutationCreateInstanceArgs = {
   title: Scalars['String'];
   kind: Scalars['String'];
   roadmapId?: Maybe<Scalars['String']>;
+};
+
+
+export type MutationDeleteInstanceArgs = {
+  userId: Scalars['ObjectId'];
+  gameId: Scalars['String'];
+  roadmapId: Scalars['String'];
 };
 
 
@@ -723,6 +732,15 @@ export type CreateInstanceMutationVariables = Exact<{
 
 export type CreateInstanceMutation = { createInstance: Pick<RoadmapObject, '_id'> };
 
+export type DeleteInstanceMutationVariables = Exact<{
+  gameId: Scalars['String'];
+  userId: Scalars['ObjectId'];
+  roadmapId: Scalars['String'];
+}>;
+
+
+export type DeleteInstanceMutation = { deleteInstance: Array<Pick<RoadmapObject, '_id'>> };
+
 export type RevealHintsMutationVariables = Exact<{
   gameProgressId: Scalars['ObjectId'];
   userId: Scalars['ObjectId'];
@@ -873,7 +891,7 @@ export type GetSearchResultsQueryVariables = Exact<{
 
 export type GetSearchResultsQuery = { getSearch: (
     Pick<PaginatedGameResponse, 'hasMore' | 'nextCursor'>
-    & { nodes: Array<Pick<Game, 'title' | 'rating' | 'createdBy' | 'tags' | 'codingLanguage' | 'difficulty' | 'description' | 'playCount'>> }
+    & { nodes: Array<Pick<Game, '_id' | 'title' | 'rating' | 'createdBy' | 'tags' | 'codingLanguage' | 'difficulty' | 'description' | 'playCount'>> }
   ) };
 
 export type GetUserQueryVariables = Exact<{
@@ -966,6 +984,21 @@ export const useCreateInstanceMutation = <
     >(options?: UseMutationOptions<CreateInstanceMutation, TError, CreateInstanceMutationVariables, TContext>) => 
     useMutation<CreateInstanceMutation, TError, CreateInstanceMutationVariables, TContext>(
       (variables?: CreateInstanceMutationVariables) => fetcher<CreateInstanceMutation, CreateInstanceMutationVariables>(CreateInstanceDocument, variables)(),
+      options
+    );
+export const DeleteInstanceDocument = `
+    mutation deleteInstance($gameId: String!, $userId: ObjectId!, $roadmapId: String!) {
+  deleteInstance(gameId: $gameId, userId: $userId, roadmapId: $roadmapId) {
+    _id
+  }
+}
+    `;
+export const useDeleteInstanceMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<DeleteInstanceMutation, TError, DeleteInstanceMutationVariables, TContext>) => 
+    useMutation<DeleteInstanceMutation, TError, DeleteInstanceMutationVariables, TContext>(
+      (variables?: DeleteInstanceMutationVariables) => fetcher<DeleteInstanceMutation, DeleteInstanceMutationVariables>(DeleteInstanceDocument, variables)(),
       options
     );
 export const RevealHintsDocument = `
@@ -1415,6 +1448,7 @@ export const GetSearchResultsDocument = `
     hasMore
     nextCursor
     nodes {
+      _id
       title
       rating
       createdBy

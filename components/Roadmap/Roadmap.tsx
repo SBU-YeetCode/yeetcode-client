@@ -219,7 +219,7 @@ export default function Roadmap({
 		}
 	}
 	return (
-		<Box bg='gray.700' borderRadius={10} {...style}>
+		<Box bg='gray.700' {...style} maxH='100%' overflow='auto'>
 			{showTitle &&<HStack>
 				<Item
 					item={{

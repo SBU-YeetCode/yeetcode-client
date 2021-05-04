@@ -36,7 +36,7 @@ export default function GameplaySidebar({ data }: Props): ReactElement {
 	return (
 		<Flex
 
-			my={4}
+			pt={4}
 			justify='flex-start'
 			alignItems='center'
 			direction='column'

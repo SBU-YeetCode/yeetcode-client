@@ -1,6 +1,7 @@
-import { Flex, useToast } from '@chakra-ui/react'
+import { Flex, useToast, Spinner, Center, Box } from '@chakra-ui/react'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
+import { useQueryClient } from 'react-query'
 import AddInstanceModal from '../../../components/GameEditor/AddInstanceModal'
 import GameEditor from '../../../components/GameEditor/GameEditor'
 import Roadmap, { RoadmapData } from '../../../components/Roadmap/Roadmap'
@@ -10,24 +11,27 @@ import {
 	Level,
 	Question,
 	Stage,
-	useGetGameEditQuery
+	useDeleteInstanceMutation,
+	useGetGameEditQuery,
 } from '../../../graphql/generated'
+import useConfirm from '../../../hooks/useConfirm'
 import { convertToRoadmap } from '../../../utils/convertToRoadmap'
 
 export default function GameEdit() {
 	const router = useRouter()
-	const { isLoggedIn } = useUser()
+	const confirm = useConfirm()
+	const { isLoggedIn, user } = useUser()
 	const toast = useToast()
 	const [roadmapData, setRoadmapData] = useState<RoadmapData[]>([])
 	const [addModal, setAddModal] = useState<string | undefined>()
+	const [deleting, setDeleting] = useState(false)
 	const [selectedInstance, setSelectedInstance] = useState<SelectedInstance>({
 		item: undefined,
 		kind: undefined,
 	})
-	const updateSelectedInstance = (
-		id: string | undefined,
-		kind: SelectedInstance['kind']
-	) => {
+	const deleteMutate = useDeleteInstanceMutation()
+	const queryClient = useQueryClient()
+	const updateSelectedInstance = (id: string | undefined, kind: SelectedInstance['kind']) => {
 		;``
 		switch (kind) {
 			case 'Level':
@@ -60,17 +64,17 @@ export default function GameEdit() {
 
 	useEffect(() => {
 		if (!isLoggedIn()) router.push('/')
-		if(isError) {
+		if (isError) {
 			router.push('/')
 			toast({
 				title: 'Cannot edit game.',
 				//@ts-ignore
 				description: error.message,
 				isClosable: true,
-				status: 'error'
+				status: 'error',
 			})
 		}
-	},[isError])
+	}, [isError])
 
 	useEffect(() => {
 		if (!isLoading && data) {
@@ -84,17 +88,35 @@ export default function GameEdit() {
 		}
 	}, [data, isLoading])
 
-	async function handleDeleteInstance(sequence: number) {
-
+	async function handleDeleteInstance(roadmapId: string) {
+		confirm(async () => {
+			setDeleting(true)
+			console.log(user?._id)
+			await deleteMutate.mutateAsync({
+				gameId,
+				roadmapId,
+				userId: user!._id,
+			})
+			queryClient.invalidateQueries(['GetGameEdit'])
+			setDeleting(false)
+			const isError = deleteMutate.isError
+			toast({
+				title: isError ? 'Error' : 'Deleted',
+				description: isError ? 'Not saved' : 'Successfully Deleted',
+				status: isError ? 'error' : 'success',
+				position: 'bottom-left',
+				duration: isError ? 4000 : 1000,
+			})
+		})
 	}
 	function handleRoadmapAction(action: 'edit' | 'delete' | 'add' | 'click', item: RoadmapData) {
-		switch(action) {
+		switch (action) {
 			case 'add': {
 				setAddModal(item.id)
 				break
 			}
 			case 'delete': {
-				handleDeleteInstance(item.sequence)
+				handleDeleteInstance(item.id)
 				break
 			}
 			case 'edit': {
@@ -102,7 +124,7 @@ export default function GameEdit() {
 				break
 			}
 			case 'click': {
-				updateSelectedInstance(item.refId, item.kind as any)
+				// updateSelectedInstance(item.refId, item.kind as any)
 				break
 			}
 		}
@@ -110,8 +132,18 @@ export default function GameEdit() {
 
 	// if (data?.getGame?.createdBy !== user?._id && !isLoading) router.push('/') // Don't have permission to edit
 	return (
-		<Flex w='100%'>
-			 <AddInstanceModal gameId={gameId} id={addModal} onClose={() => setAddModal(undefined)} isOpen={addModal !== undefined}/>
+		<Flex w='100%' h='100%'>
+			{deleting && (
+				<Box position='absolute' bottom='8px' right='12px'>
+					<Spinner />
+				</Box>
+			)}
+			<AddInstanceModal
+				gameId={gameId}
+				id={addModal}
+				onClose={() => setAddModal(undefined)}
+				isOpen={addModal !== undefined}
+			/>
 			{selectedInstance.item && (
 				<GameEditor
 					selectedInstance={selectedInstance}

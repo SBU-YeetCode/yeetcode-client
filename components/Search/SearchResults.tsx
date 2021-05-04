@@ -12,42 +12,28 @@ import { useQuery } from 'react-query'
 import { StarIcon } from '@chakra-ui/icons'
 import SearchBar from './SearchBar'
 import { useRouter } from 'next/router'
+import Link from 'next/link'
 
 export default function SearchResults(): ReactElement {
 	const router = useRouter()
 	const { q } = router.query
 	const next = () => {
-		console.log('next')
 		refetch()
 	}
 	const [nextCursor, setNextCursor] = React.useState<string | null>(null)
 	const [results, setResults] = React.useState<
 		Pick<
 			Game,
-			| 'title'
-			| 'rating'
-			| 'createdBy'
-			| 'tags'
-			| 'codingLanguage'
-			| 'description'
-			| 'difficulty'
-			| 'playCount'
+			'title' | 'rating' | 'createdBy' | 'tags' | 'codingLanguage' | 'description' | 'difficulty' | 'playCount' | '_id'
 		>[]
 	>([])
-	const { data, isLoading, refetch } = useQuery<
-		GetSearchResultsQuery,
-		unknown,
-		GetSearchResultsQuery
-	>(
+	const { data, isLoading, refetch } = useQuery<GetSearchResultsQuery, unknown, GetSearchResultsQuery>(
 		['GetSearchResults', q],
-		fetcher<GetSearchResultsQuery, GetSearchResultsQueryVariables>(
-			GetSearchResultsDocument,
-			{
-				query: q as string,
-				amount: 5,
-				cursor: nextCursor,
-			}
-		)
+		fetcher<GetSearchResultsQuery, GetSearchResultsQueryVariables>(GetSearchResultsDocument, {
+			query: q as string,
+			amount: 5,
+			cursor: nextCursor,
+		})
 	)
 	React.useEffect(() => {
 		if (!isLoading && data !== undefined) {
@@ -62,7 +48,7 @@ export default function SearchResults(): ReactElement {
 		<Flex direction='column' alignItems='center' justify='center' m={6} p={4}>
 			<SearchBar
 				onSubmit={(query: string) => {
-					if (query !== q && query !=='') {
+					if (query !== q && query !== '') {
 						setResults([])
 						router.push(
 							{
@@ -92,7 +78,8 @@ export default function SearchResults(): ReactElement {
 						<p style={{ textAlign: 'center' }}>
 							<b>Yay! You have seen it all</b>
 						</p>
-					}>
+					}
+				>
 					{results.map((r, i) => (
 						<SearchResult result={r} i={i} />
 					))}
@@ -105,30 +92,19 @@ export default function SearchResults(): ReactElement {
 interface ResultProp {
 	result: Pick<
 		Game,
-		| 'title'
-		| 'rating'
-		| 'createdBy'
-		| 'tags'
-		| 'codingLanguage'
-		| 'description'
-		| 'difficulty'
-		| 'playCount'
+		'title' | 'rating' | 'createdBy' | 'tags' | 'codingLanguage' | 'description' | 'difficulty' | 'playCount' | '_id'
 	>
 	i: number
 }
 
 export function SearchResult({ result, i }: ResultProp) {
 	return (
-		<Box
-			maxW='xl'
-			borderWidth='1px'
-			borderRadius='lg'
-			overflow='hidden'
-			mb='2em'>
+		<Box maxW='xl' borderWidth='1px' borderRadius='lg' overflow='hidden' mb='2em'>
 			<Image
 				minW='400'
 				minH='400'
 				src={`https://source.unsplash.com/random/400x400?sig=${i}`}
+				objectFit='cover'
 			/>
 			<Box p='6'>
 				<Box d='flex' alignItems='baseline'>
@@ -138,30 +114,23 @@ export function SearchResult({ result, i }: ResultProp) {
 						letterSpacing='wide'
 						fontSize='xs'
 						textTransform='uppercase'
-						ml='2'>
+						ml='2'
+					>
 						{result.codingLanguage} &bull; Difficulty: {result.difficulty}
 					</Box>
 				</Box>
-
-				<Box
-					mt='1'
-					fontWeight='semibold'
-					as='h4'
-					lineHeight='tight'
-					isTruncated>
-					{result.title}
-				</Box>
-
+					<Box mt='1' fontWeight='semibold' lineHeight='tight' isTruncated>
+				<Link href={`/game/${result._id}`}>
+						{result.title}
+				</Link>
+					</Box>
 				<Box>{result.description}</Box>
 
 				<Box d='flex' mt='2' alignItems='center'>
 					{Array(5)
 						.fill('')
 						.map((_, i) => (
-							<StarIcon
-								key={i}
-								color={i < result.rating ? 'teal.500' : 'gray.300'}
-							/>
+							<StarIcon key={i} color={i < result.rating ? 'teal.500' : 'gray.300'} />
 						))}
 					<Box as='span' ml='2' color='gray.600' fontSize='sm'>
 						Played {result.playCount} times

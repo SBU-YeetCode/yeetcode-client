@@ -1,16 +1,8 @@
-import { Button, IconButton } from '@chakra-ui/button'
-import { CloseIcon } from '@chakra-ui/icons'
-import { Box, Heading, HStack, Spacer } from '@chakra-ui/layout'
-import {
-	FormControl,
-	FormLabel,
-	FormHelperText,
-	Select,
-	Flex,
-} from '@chakra-ui/react'
+import { Box } from '@chakra-ui/layout'
 import React from 'react'
 import { GetGameEditQuery } from '../../graphql/generated'
 import EditQuestion from './EditQuestion'
+import EditStageOrLevel from './EditStageOrLevel'
 import GameInformation from './GameInformation'
 
 type GameEditorProps = {
@@ -51,6 +43,13 @@ export default function GameEditorProps({
 					selectedInstance={selectedInstance}
 					setSelectedInstance={setSelectedInstance}
 				/>
+			)}
+			{(selectedInstance.kind === 'Stage' || selectedInstance.kind === 'Level') && (
+				<EditStageOrLevel
+				gameId={gameId}
+				selectedInstance={selectedInstance}
+				setSelectedInstance={setSelectedInstance}
+/>
 			)}
 		</Box>
 	)

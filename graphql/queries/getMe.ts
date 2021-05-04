@@ -11,6 +11,14 @@ export const GET_ME = gql`
 			}
 			roles
 			username
+			gamesRecent {
+				game {
+					_id
+					title
+					createdBy
+					rating
+				}
+			}
 		}
 	}
 `

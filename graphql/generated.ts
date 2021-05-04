@@ -207,6 +207,10 @@ export type Mutation = {
   createLevel: LevelObject;
   createQuestion: QuestionObject;
   createStage: StageObject;
+  /** Used to create a Level, Stage, or Question */
+  createInstance: RoadmapObject;
+  /** Used to delete a Level, Stage, or Question */
+  deleteInstance: Array<RoadmapObject>;
   updateQuestions: Array<QuestionObject>;
   updateStages: Array<StageObject>;
   deleteGame: Deleted;
@@ -318,6 +322,22 @@ export type MutationCreateQuestionArgs = {
 export type MutationCreateStageArgs = {
   gameId: Scalars['String'];
   stage: StageInput;
+};
+
+
+export type MutationCreateInstanceArgs = {
+  userId: Scalars['ObjectId'];
+  gameId: Scalars['String'];
+  title: Scalars['String'];
+  kind: Scalars['String'];
+  roadmapId?: Maybe<Scalars['String']>;
+};
+
+
+export type MutationDeleteInstanceArgs = {
+  userId: Scalars['ObjectId'];
+  gameId: Scalars['String'];
+  roadmapId: Scalars['String'];
 };
 
 
@@ -603,14 +623,14 @@ export enum Sort_Options {
 export type SpotTheBug = {
   _id: Scalars['ObjectId'];
   prompt: Scalars['String'];
-  bugLine: Scalars['Int'];
+  bugLine: Scalars['String'];
   code: Scalars['String'];
 };
 
 export type SpotTheBugInput = {
   _id: Scalars['ObjectId'];
   prompt: Scalars['String'];
-  bugLine: Scalars['Int'];
+  bugLine: Scalars['String'];
   code: Scalars['String'];
 };
 
@@ -701,6 +721,26 @@ export type CreateGameProgressMutationVariables = Exact<{
 
 export type CreateGameProgressMutation = { createGameProgress: Pick<GameProgress, '_id' | 'startedAt' | 'isCompleted' | 'userId' | 'gameId'> };
 
+export type CreateInstanceMutationVariables = Exact<{
+  roadmapId?: Maybe<Scalars['String']>;
+  gameId: Scalars['String'];
+  userId: Scalars['ObjectId'];
+  title: Scalars['String'];
+  kind: Scalars['String'];
+}>;
+
+
+export type CreateInstanceMutation = { createInstance: Pick<RoadmapObject, '_id'> };
+
+export type DeleteInstanceMutationVariables = Exact<{
+  gameId: Scalars['String'];
+  userId: Scalars['ObjectId'];
+  roadmapId: Scalars['String'];
+}>;
+
+
+export type DeleteInstanceMutation = { deleteInstance: Array<Pick<RoadmapObject, '_id'>> };
+
 export type RevealHintsMutationVariables = Exact<{
   gameProgressId: Scalars['ObjectId'];
   userId: Scalars['ObjectId'];
@@ -741,6 +781,14 @@ export type UpdateGameMutationVariables = Exact<{
 
 export type UpdateGameMutation = { updateGame: Pick<Game, '_id'> };
 
+export type UpdateStagesMutationVariables = Exact<{
+  gameId: Scalars['String'];
+  stagesToUpdate: Array<Stage> | Stage;
+}>;
+
+
+export type UpdateStagesMutation = { updateStages: Array<Pick<StageObject, '_id'>> };
+
 export type UpdateQuestionMutationVariables = Exact<{
   gameId: Scalars['String'];
   questionsToUpdate: Array<Question> | Question;
@@ -748,6 +796,14 @@ export type UpdateQuestionMutationVariables = Exact<{
 
 
 export type UpdateQuestionMutation = { updateQuestions: Array<Pick<QuestionObject, '_id'>> };
+
+export type UpdateLevelsMutationVariables = Exact<{
+  gameId: Scalars['String'];
+  levelsToUpdate: Array<Level> | Level;
+}>;
+
+
+export type UpdateLevelsMutation = { updateLevels: Array<Pick<LevelObject, '_id'>> };
 
 export type GamePreviewCommentsQueryVariables = Exact<{
   gameId: Scalars['String'];
@@ -823,8 +879,13 @@ export type ContextGetMeQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type ContextGetMeQuery = { getMe?: Maybe<(
     Pick<User, '_id' | 'email' | 'name' | 'roles' | 'username'>
-    & { profilePicture: Pick<ProfilePicture, 'avatar' | 'large'> }
+    & { profilePicture: Pick<ProfilePicture, 'avatar' | 'large'>, gamesRecent: Array<{ game: Pick<Game, '_id' | 'title' | 'createdBy' | 'rating'> }> }
   )> };
+
+export type GetPopularGamesQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetPopularGamesQuery = { getFilterGames: { nodes: Array<Pick<Game, 'createdBy' | 'title' | 'rating' | '_id'>> } };
 
 export type GetSearchResultsQueryVariables = Exact<{
   query: Scalars['String'];
@@ -835,7 +896,7 @@ export type GetSearchResultsQueryVariables = Exact<{
 
 export type GetSearchResultsQuery = { getSearch: (
     Pick<PaginatedGameResponse, 'hasMore' | 'nextCursor'>
-    & { nodes: Array<Pick<Game, 'title' | 'rating' | 'createdBy' | 'tags' | 'codingLanguage' | 'difficulty' | 'description' | 'playCount'>> }
+    & { nodes: Array<Pick<Game, '_id' | 'title' | 'rating' | 'createdBy' | 'tags' | 'codingLanguage' | 'difficulty' | 'description' | 'playCount'>> }
   ) };
 
 export type GetUserQueryVariables = Exact<{
@@ -907,6 +968,42 @@ export const useCreateGameProgressMutation = <
     >(options?: UseMutationOptions<CreateGameProgressMutation, TError, CreateGameProgressMutationVariables, TContext>) => 
     useMutation<CreateGameProgressMutation, TError, CreateGameProgressMutationVariables, TContext>(
       (variables?: CreateGameProgressMutationVariables) => fetcher<CreateGameProgressMutation, CreateGameProgressMutationVariables>(CreateGameProgressDocument, variables)(),
+      options
+    );
+export const CreateInstanceDocument = `
+    mutation createInstance($roadmapId: String, $gameId: String!, $userId: ObjectId!, $title: String!, $kind: String!) {
+  createInstance(
+    roadmapId: $roadmapId
+    gameId: $gameId
+    userId: $userId
+    title: $title
+    kind: $kind
+  ) {
+    _id
+  }
+}
+    `;
+export const useCreateInstanceMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<CreateInstanceMutation, TError, CreateInstanceMutationVariables, TContext>) => 
+    useMutation<CreateInstanceMutation, TError, CreateInstanceMutationVariables, TContext>(
+      (variables?: CreateInstanceMutationVariables) => fetcher<CreateInstanceMutation, CreateInstanceMutationVariables>(CreateInstanceDocument, variables)(),
+      options
+    );
+export const DeleteInstanceDocument = `
+    mutation deleteInstance($gameId: String!, $userId: ObjectId!, $roadmapId: String!) {
+  deleteInstance(gameId: $gameId, userId: $userId, roadmapId: $roadmapId) {
+    _id
+  }
+}
+    `;
+export const useDeleteInstanceMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<DeleteInstanceMutation, TError, DeleteInstanceMutationVariables, TContext>) => 
+    useMutation<DeleteInstanceMutation, TError, DeleteInstanceMutationVariables, TContext>(
+      (variables?: DeleteInstanceMutationVariables) => fetcher<DeleteInstanceMutation, DeleteInstanceMutationVariables>(DeleteInstanceDocument, variables)(),
       options
     );
 export const RevealHintsDocument = `
@@ -989,6 +1086,21 @@ export const useUpdateGameMutation = <
       (variables?: UpdateGameMutationVariables) => fetcher<UpdateGameMutation, UpdateGameMutationVariables>(UpdateGameDocument, variables)(),
       options
     );
+export const UpdateStagesDocument = `
+    mutation updateStages($gameId: String!, $stagesToUpdate: [Stage!]!) {
+  updateStages(gameId: $gameId, stagesToUpdate: $stagesToUpdate) {
+    _id
+  }
+}
+    `;
+export const useUpdateStagesMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<UpdateStagesMutation, TError, UpdateStagesMutationVariables, TContext>) => 
+    useMutation<UpdateStagesMutation, TError, UpdateStagesMutationVariables, TContext>(
+      (variables?: UpdateStagesMutationVariables) => fetcher<UpdateStagesMutation, UpdateStagesMutationVariables>(UpdateStagesDocument, variables)(),
+      options
+    );
 export const UpdateQuestionDocument = `
     mutation updateQuestion($gameId: String!, $questionsToUpdate: [Question!]!) {
   updateQuestions(gameId: $gameId, questionsToUpdate: $questionsToUpdate) {
@@ -1002,6 +1114,21 @@ export const useUpdateQuestionMutation = <
     >(options?: UseMutationOptions<UpdateQuestionMutation, TError, UpdateQuestionMutationVariables, TContext>) => 
     useMutation<UpdateQuestionMutation, TError, UpdateQuestionMutationVariables, TContext>(
       (variables?: UpdateQuestionMutationVariables) => fetcher<UpdateQuestionMutation, UpdateQuestionMutationVariables>(UpdateQuestionDocument, variables)(),
+      options
+    );
+export const UpdateLevelsDocument = `
+    mutation updateLevels($gameId: String!, $levelsToUpdate: [Level!]!) {
+  updateLevels(gameId: $gameId, levelsToUpdate: $levelsToUpdate) {
+    _id
+  }
+}
+    `;
+export const useUpdateLevelsMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<UpdateLevelsMutation, TError, UpdateLevelsMutationVariables, TContext>) => 
+    useMutation<UpdateLevelsMutation, TError, UpdateLevelsMutationVariables, TContext>(
+      (variables?: UpdateLevelsMutationVariables) => fetcher<UpdateLevelsMutation, UpdateLevelsMutationVariables>(UpdateLevelsDocument, variables)(),
       options
     );
 export const GamePreviewCommentsDocument = `
@@ -1303,6 +1430,14 @@ export const ContextGetMeDocument = `
     }
     roles
     username
+    gamesRecent {
+      game {
+        _id
+        title
+        createdBy
+        rating
+      }
+    }
   }
 }
     `;
@@ -1320,12 +1455,39 @@ export const useContextGetMeQuery = <
     );
 useContextGetMeQuery.getKey = (variables?: ContextGetMeQueryVariables) => ['ContextGetMe', variables];
 
+export const GetPopularGamesDocument = `
+    query getPopularGames {
+  getFilterGames(amount: 4, cursor: null, sort: PLAY_COUNT, sortDir: 1) {
+    nodes {
+      createdBy
+      title
+      rating
+      _id
+    }
+  }
+}
+    `;
+export const useGetPopularGamesQuery = <
+      TData = GetPopularGamesQuery,
+      TError = unknown
+    >(
+      variables?: GetPopularGamesQueryVariables, 
+      options?: UseQueryOptions<GetPopularGamesQuery, TError, TData>
+    ) => 
+    useQuery<GetPopularGamesQuery, TError, TData>(
+      ['getPopularGames', variables],
+      fetcher<GetPopularGamesQuery, GetPopularGamesQueryVariables>(GetPopularGamesDocument, variables),
+      options
+    );
+useGetPopularGamesQuery.getKey = (variables?: GetPopularGamesQueryVariables) => ['getPopularGames', variables];
+
 export const GetSearchResultsDocument = `
     query GetSearchResults($query: String!, $cursor: String, $amount: Int) {
   getSearch(query: $query, cursor: $cursor, amount: $amount) {
     hasMore
     nextCursor
     nodes {
+      _id
       title
       rating
       createdBy

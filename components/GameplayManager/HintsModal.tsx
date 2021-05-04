@@ -74,7 +74,7 @@ export default function HintsModal({
 							const { revealed, color } = getHintInfo(hint, i, progress, time)
 							if (!revealed) {
 								return (
-									<Box padding='6' boxShadow='lg'>
+									<Box padding='6' boxShadow='lg' key={i}>
 										<HStack>
 											<Icon boxSize={10} as={FaLightbulb} color={color} />
 											<Heading>{`Hint ${i + 1}`}</Heading>
@@ -90,7 +90,7 @@ export default function HintsModal({
 								)
 							} else if (revealed) {
 								return (
-									<Box padding='6' boxShadow='lg'>
+									<Box padding='6' boxShadow='lg' key={i}>
 										<HStack>
 											<Icon boxSize={10} as={FaLightbulb} color={color} />
 											<Heading>{`Hint ${i + 1}`}</Heading>

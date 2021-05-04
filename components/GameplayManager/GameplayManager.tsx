@@ -38,7 +38,7 @@ export default function GameplayManager({ data }: Props): ReactElement {
 				<Box className='gameplay' bg='background.dark.primary'>
 					<Main data={data} />
 				</Box>
-				<Box className='sidebar' bg='background.dark.700'>
+				<Box className='sidebar' bg='background.dark.700' overflowY='auto' overflowX='hidden' h='100%'>
 					<Sidebar data={data} />
 				</Box>
 			</Box>

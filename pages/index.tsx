@@ -1,17 +1,15 @@
 import Head from 'next/head'
 import styles from '../styles/Home.module.css'
+import HomePage from '../components/HomePage'
 
-export default function Home() {
+export default function index() {
 	return (
-		<div className={styles.container}>
+		<>
 			<Head>
-				<title>Create Next App</title>
+				<title>YeetCode</title>
 				<link rel='icon' href='/favicon.ico' />
 			</Head>
-
-			<main className={styles.main}>
-				<h1 className={styles.title}>Welcome to Yeetcode</h1>
-			</main>
-		</div>
+			<HomePage/>
+		</>
 	)
 }

@@ -1,32 +1,37 @@
+import { Flex, useToast, Spinner, Center, Box } from '@chakra-ui/react'
 import { useRouter } from 'next/router'
+import { useEffect, useState } from 'react'
+import { useQueryClient } from 'react-query'
+import AddInstanceModal from '../../../components/GameEditor/AddInstanceModal'
+import GameEditor from '../../../components/GameEditor/GameEditor'
+import Roadmap, { RoadmapData } from '../../../components/Roadmap/Roadmap'
 import { useUser } from '../../../contexts/UserContext'
 import {
 	Game,
 	Level,
 	Question,
 	Stage,
+	useDeleteInstanceMutation,
 	useGetGameEditQuery,
 } from '../../../graphql/generated'
-import { useEffect, useState } from 'react'
-import { Skeleton, SkeletonCircle, SkeletonText, Flex } from '@chakra-ui/react'
-import Roadmap, { RoadmapData } from '../../../components/Roadmap/Roadmap'
-import GameEditor from '../../../components/GameEditor/GameEditor'
+import useConfirm from '../../../hooks/useConfirm'
 import { convertToRoadmap } from '../../../utils/convertToRoadmap'
 
 export default function GameEdit() {
-	// This page handles the route for /game/edit/:gameId
 	const router = useRouter()
-	const { user, isLoggedIn } = useUser()
+	const confirm = useConfirm()
+	const { isLoggedIn, user } = useUser()
+	const toast = useToast()
 	const [roadmapData, setRoadmapData] = useState<RoadmapData[]>([])
+	const [addModal, setAddModal] = useState<string | undefined>()
+	const [deleting, setDeleting] = useState(false)
 	const [selectedInstance, setSelectedInstance] = useState<SelectedInstance>({
 		item: undefined,
 		kind: undefined,
 	})
-
-	const updateSelectedInstance = (
-		id: string | undefined,
-		kind: SelectedInstance['kind']
-	) => {
+	const deleteMutate = useDeleteInstanceMutation()
+	const queryClient = useQueryClient()
+	const updateSelectedInstance = (id: string | undefined, kind: SelectedInstance['kind']) => {
 		;``
 		switch (kind) {
 			case 'Level':
@@ -52,15 +57,24 @@ export default function GameEdit() {
 				setSelectedInstance({ kind: 'Game', item: data?.getGame ?? undefined })
 		}
 	}
+	const gameId: string = router.query['gameId'] as string
+	const { data, isLoading, refetch, isError, error } = useGetGameEditQuery({
+		id: gameId || '',
+	})
 
 	useEffect(() => {
 		if (!isLoggedIn()) router.push('/')
-	}, [])
-	const gameId: string = router.query['gameId'] as string
-	//@ts-ignore
-	const { data, isLoading, refetch } = useGetGameEditQuery({
-		id: gameId,
-	})
+		if (isError) {
+			router.push('/')
+			toast({
+				title: 'Cannot edit game.',
+				//@ts-ignore
+				description: error.message,
+				isClosable: true,
+				status: 'error',
+			})
+		}
+	}, [isError])
 
 	useEffect(() => {
 		if (!isLoading && data) {
@@ -74,9 +88,62 @@ export default function GameEdit() {
 		}
 	}, [data, isLoading])
 
+	async function handleDeleteInstance(roadmapId: string) {
+		confirm(async () => {
+			setDeleting(true)
+			console.log(user?._id)
+			await deleteMutate.mutateAsync({
+				gameId,
+				roadmapId,
+				userId: user!._id,
+			})
+			queryClient.invalidateQueries(['GetGameEdit'])
+			setDeleting(false)
+			const isError = deleteMutate.isError
+			toast({
+				title: isError ? 'Error' : 'Deleted',
+				description: isError ? 'Not saved' : 'Successfully Deleted',
+				status: isError ? 'error' : 'success',
+				position: 'bottom-left',
+				duration: isError ? 4000 : 1000,
+			})
+		})
+	}
+	function handleRoadmapAction(action: 'edit' | 'delete' | 'add' | 'click', item: RoadmapData) {
+		switch (action) {
+			case 'add': {
+				setAddModal(item.id)
+				break
+			}
+			case 'delete': {
+				handleDeleteInstance(item.id)
+				break
+			}
+			case 'edit': {
+				updateSelectedInstance(item.refId, item.kind as any)
+				break
+			}
+			case 'click': {
+				// updateSelectedInstance(item.refId, item.kind as any)
+				break
+			}
+		}
+	}
+
 	// if (data?.getGame?.createdBy !== user?._id && !isLoading) router.push('/') // Don't have permission to edit
 	return (
-		<Flex w='100%'>
+		<Flex w='100%' h='100%'>
+			{deleting && (
+				<Box position='absolute' bottom='8px' right='12px'>
+					<Spinner />
+				</Box>
+			)}
+			<AddInstanceModal
+				gameId={gameId}
+				id={addModal}
+				onClose={() => setAddModal(undefined)}
+				isOpen={addModal !== undefined}
+			/>
 			{selectedInstance.item && (
 				<GameEditor
 					selectedInstance={selectedInstance}
@@ -97,6 +164,7 @@ export default function GameEdit() {
 				w={selectedInstance.item === undefined ? '90%' : '35%'}
 				showActions={selectedInstance.item === undefined}
 				gameTitle={data?.getGame?.title || ''}
+				onAction={handleRoadmapAction}
 			/>
 		</Flex>
 	)

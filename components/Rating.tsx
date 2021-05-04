@@ -15,7 +15,7 @@ export default function Rating({ rating, editable=false, onChange, boxSize }: Pr
 				.fill('')
 				.map((_, i) =>
 					editable ? (
-						<IconButton boxSize={boxSize ?? 10} color={i < rating ? 'yellow.500' : 'gray.300'} onClick={() => onChange && onChange(i+1)} variant='ghost' aria-label={'star-icon'} icon={<StarIcon />} />
+						<IconButton boxSize={boxSize ?? 10} key={i} color={i < rating ? 'yellow.500' : 'gray.300'} onClick={() => onChange && onChange(i+1)} variant='ghost' aria-label={'star-icon'} icon={<StarIcon />} />
 					) : (
 						<StarIcon boxSize={boxSize ?? 5} mr={1} key={i} color={i < rating ? 'yellow.500' : 'gray.300'} />
 					)

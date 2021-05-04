@@ -61,7 +61,6 @@ export default function CommentsDisplay({ gameId, rating }: Props) {
 	}, [data, isFetched])
 
 	if (isError) return <p>Error loading comments</p>
-	console.log(data)
 	return (
 		<>
 			<CreateCommentModal isOpen={createOpen} onClose={setCreateOpen} gameId={gameId} userId={user?._id!} />

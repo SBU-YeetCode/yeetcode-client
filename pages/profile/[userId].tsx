@@ -6,7 +6,7 @@ export default function Profile() {
     //temp user
 	const { user, isLoggedIn } = useUser()
     console.log(user)
-
+    if(!user) return <></>
     return (
         <Box bg='background.dark.500'>
             <HStack>

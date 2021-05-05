@@ -38,7 +38,7 @@ export default function HomeGameDisplay({ games, title, resumeButton, allGamesBu
 										<Button>View Game</Button>
 									</Link>
 									{resumeButton && (
-										<Link href={`/game/${game._id}/play`}>
+										<Link href={`/game/play/${game._id}`}>
 											<Button>Resume</Button>
 										</Link>
 									)}

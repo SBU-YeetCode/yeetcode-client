@@ -3,7 +3,7 @@ import NewGameForm from '../../components/NewGameForm'
 import { Flex, Button, Box, Text, Skeleton, Heading, useToast, Center, Image } from '@chakra-ui/react'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
-import { useGamePreviewQuery } from '../../graphql/generated'
+import { useGamePreviewQuery, useGetUserQuery } from '../../graphql/generated'
 import GamePreviewButton from '../../components/GamePreview/GameButton'
 import { format, formatDistance, formatRelative, subDays } from 'date-fns'
 import Tag from '../../components/Tag'
@@ -73,7 +73,7 @@ export default function GamePreview({}: Props): ReactElement {
 						</Center>
 					</Box>
 				</Box>
-				<Flex direction='column' flexGrow={5} margin={4}>
+				<Flex direction='column' flexGrow={4} margin={4}>
 					<Box>
 						<Heading size='lg'>Overview</Heading>
 						<Box bg='background.dark.700' p={4} borderRadius={10}>

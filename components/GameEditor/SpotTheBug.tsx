@@ -24,7 +24,7 @@ import dynamic from 'next/dynamic'
 
 type SpotTheBugProps = {
 	instanceState: Question
-	setInstanceState: any
+	setInstanceState: any // $Hook/$ hey
 }
 
 // const DynamicMonaco = dynamic(() => import('@monaco-editor/react'), { ssr: false })

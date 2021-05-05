@@ -11,7 +11,11 @@ import {
 } from '@chakra-ui/react'
 import { Question } from '../../../graphql/generated'
 
-export default function PlayMultipleChoice(): ReactElement {
+interface Props {
+	canSelect?: boolean
+}
+
+export default function PlayMultipleChoice({canSelect = true}: Props): ReactElement {
 	// https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
 	// Fisher-Yates (aka Knuth) Shuffle
 	function shuffleArray(array: any) {
@@ -82,13 +86,11 @@ export default function PlayMultipleChoice(): ReactElement {
 								bg='background.dark.500'
 								color='gray.900'
 								borderRadius={20}
-								onClick={() => updateAnswer({
-									multipleChoice: choice
-								})}
-								isActive={selectedAnswer?.multipleChoice === choice}
-								_active={{
-									bg: 'gray.200',
+								onClick={() => {
+									if (canSelect) updateAnswer({ multipleChoice: choice })
 								}}
+								isActive={canSelect ? selectedAnswer?.multipleChoice === choice : selectedValue.multipleChoice?.correctChoice! === choice}
+								_active={canSelect ? {bg: 'gray.200'} : {bg: 'green.200'}}
 								_hover={{
 									bg: 'gray.300',
 								}}

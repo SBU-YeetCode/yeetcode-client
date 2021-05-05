@@ -18,6 +18,7 @@ import {
 	useToast,
 	NumberInput,
 	NumberInputField,
+	VStack
 } from '@chakra-ui/react'
 import { Question, Gametype, useUpdateQuestionMutation, HintInput } from '../../graphql/generated'
 import React, { useState, useCallback } from 'react'
@@ -156,23 +157,34 @@ export default function EditQuestion({ selectedInstance, setSelectedInstance, ga
 				/>
 			</HStack>
 			<Center mt={2}>
-				<Box mt={6} p={4} w='50%' boxShadow='lg'>
-					<FormControl isRequired>
-						<FormLabel>Question Mode</FormLabel>
-						<Select
-							value={getKeyByValue(Gametype, instanceState.gameType)}
-							onChange={handleSelectedModeChange}
-						>
-							{Object.keys(SELECT).map((gametype: string) => (
-								// @ts-ignore */
-								<option key={gametype} value={gametype}>
-									{SELECT[gametype]}
-								</option>
-							))}
-						</Select>
-						<FormHelperText>Select between different question modes</FormHelperText>
-					</FormControl>
-				</Box>
+				<VStack w='100%'>
+					<Box mt={6} p={4}>
+						<FormControl isRequired>
+							<Input
+								value={instanceState.title}
+								onChange={(e) => setInstanceState({ ...instanceState, title: e.target.value })}
+							/>
+							<FormHelperText>Title</FormHelperText>
+						</FormControl>
+					</Box>
+					<Box mt={6} p={4} w='50%' boxShadow='lg'>
+						<FormControl isRequired>
+							<FormLabel>Question Mode</FormLabel>
+							<Select
+								value={getKeyByValue(Gametype, instanceState.gameType)}
+								onChange={handleSelectedModeChange}
+							>
+								{Object.keys(SELECT).map((gametype: string) => (
+									// @ts-ignore */
+									<option key={gametype} value={gametype}>
+										{SELECT[gametype]}
+									</option>
+								))}
+							</Select>
+							<FormHelperText>Select between different question modes</FormHelperText>
+						</FormControl>
+					</Box>
+				</VStack>
 			</Center>
 			<Tabs
 				index={tabIndex}

@@ -24,7 +24,7 @@ export default function GameplayMain(): ReactElement {
 	const tabColor = (bool: boolean) => (bool ? 'white' : 'gray.700')
 	const tabCursor = (bool: boolean) => (bool ? 'pointer' : 'not-allowed')
 
-	const renderSwitch = () => {
+	const renderQuestion = () => {
 		switch (selectedValue.gameType) {
 			case 'MULTIPLECHOICE':
 				return <MultipleChoice />
@@ -40,6 +40,27 @@ export default function GameplayMain(): ReactElement {
 				return (
 					<Center mt={6}>
 						<Text>No instance selected</Text>
+					</Center>
+				)
+		}
+	}
+
+	const renderSolution = () => {
+		switch (selectedValue.gameType) {
+			case 'MULTIPLECHOICE':
+				return <MultipleChoice canSelect={false} />
+			case 'FILLINBLANK':
+				return <FillInTheBlank isEditable={false} />
+			// case 'SPOTTHEBUG':
+			// 	return <SpotTheBug />
+			// case 'MATCHING':
+			// 	return <Matching />
+			// case 'LIVECODING':
+			// 	return <LiveCoding />
+			default:
+				return (
+					<Center mt={6}>
+						<Text>No solutions available</Text>
 					</Center>
 				)
 		}
@@ -89,12 +110,12 @@ export default function GameplayMain(): ReactElement {
 				</TabPanel>
 				<TabPanel>
 					{/* Question Panel */}
-					<Center>{renderSwitch()}</Center>
+					<Center>{renderQuestion()}</Center>
 				</TabPanel>
 				<TabPanel>
 					{/* Solution Panel */}
 					<Center>
-						<Box mt={6} p={4} w='80%' boxShadow='lg'></Box>
+					{renderSolution()}
 					</Center>
 				</TabPanel>
 			</TabPanels>

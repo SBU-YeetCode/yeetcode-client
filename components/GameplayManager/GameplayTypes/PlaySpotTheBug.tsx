@@ -1,13 +1,6 @@
-import React, { ReactElement, useState, useEffect } from 'react'
+import React, { ReactElement, useState, useEffect, useRef } from 'react'
 import { useStore } from '../store'
-import {
-	Box,
-	Center,
-	VStack,
-	Input,
-	Text,
-	Heading,
-} from '@chakra-ui/react'
+import { Box, Center, VStack, Input, Text, Heading } from '@chakra-ui/react'
 import { Question } from '../../../graphql/generated'
 import Editor from '@monaco-editor/react'
 
@@ -17,6 +10,20 @@ export default function PlaySpotTheBug(): ReactElement {
 		s.updateAnswer,
 		s.selectedAnswer,
 	])
+	const editorRef = useRef<any>(null)
+	useEffect(() => {
+		// @ts-ignore
+		const interval = setInterval(() => {
+			if (editorRef.current !== null) {
+				const selected = editorRef.current.getModel().getValueInRange(editorRef.current.getSelection())
+				if (selected !== '' && selected !== selectedAnswer?.spotTheBug)
+					updateAnswer({
+						spotTheBug: selected,
+					})
+			}
+		}, 100)
+		return () => clearInterval(interval)
+	}, [])
 
 	return (
 		<VStack>
@@ -32,17 +39,22 @@ export default function PlaySpotTheBug(): ReactElement {
 			</Box>
 			<Editor
 				height='35vh'
+				onMount={(editor) => (editorRef.current = editor)}
 				width='60vw'
 				defaultLanguage='javascript'
 				defaultValue={selectedValue.spotTheBug?.code.replaceAll(/\\n/g, '\n')}
 				theme='vs-dark'
-				
 			/>
-			<Input variant='filled' type='number' value={selectedAnswer?.spotTheBug ?? ''} onChange={(e) => {
-				updateAnswer({
-					spotTheBug: e.target.value
-				})
-			}} placeholder='Enter the line with the bug' />
+			<Input
+				variant='filled'
+				value={selectedAnswer?.spotTheBug ?? ''}
+				onChange={(e) => {
+					updateAnswer({
+						spotTheBug: e.target.value,
+					})
+				}}
+				placeholder='Select Code In The Editor with the bug in it'
+			/>
 		</VStack>
 	)
 }

@@ -65,7 +65,7 @@ export default function Navbar() {
 					alignItems='center'
 				>
 					{['Leaderboards', 'Games'].map((a) => (
-						<NavLink key={a} href={a.toLowerCase()}>
+						<NavLink key={a} href={`/${a.toLowerCase()}`}>
 							{a}
 						</NavLink>
 					))}

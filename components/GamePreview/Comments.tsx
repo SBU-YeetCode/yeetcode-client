@@ -41,7 +41,7 @@ export default function CommentsDisplay({ gameId, rating }: Props) {
 	// const { data, isFetched, isError, refetch } = useGamePreviewCommentsQuery({gameId, cursor: cursorState, amount: 2})
 
 	const { data, isFetched, isError, refetch } = useQuery<GamePreviewCommentsQuery, unknown, GamePreviewCommentsQuery>(
-		['GamePreviewComments', cursorState],
+		['GamePreviewComments', cursorState, gameId],
 		fetcher<GamePreviewCommentsQuery, GamePreviewCommentsQueryVariables>(GamePreviewCommentsDocument, {
 			gameId,
 			amount: 2,

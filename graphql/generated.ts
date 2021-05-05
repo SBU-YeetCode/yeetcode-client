@@ -831,6 +831,20 @@ export type GetGameProgressForGamePreviewQueryVariables = Exact<{
 
 export type GetGameProgressForGamePreviewQuery = { getGameProgressByUser?: Maybe<Pick<GameProgress, '_id' | 'startedAt' | 'isCompleted' | 'userId' | 'gameId'>> };
 
+export type GetFilterGamesQueryVariables = Exact<{
+  amount: Scalars['Int'];
+  cursor?: Maybe<Scalars['String']>;
+  language?: Maybe<Languages>;
+  sort?: Maybe<Sort_Options>;
+  sortDir?: Maybe<Scalars['Int']>;
+}>;
+
+
+export type GetFilterGamesQuery = { getFilterGames: (
+    Pick<PaginatedGameResponse, 'hasMore' | 'nextCursor'>
+    & { nodes: Array<Pick<Game, 'title' | 'difficulty' | 'createdBy' | 'rating' | 'description' | 'codingLanguage' | '_id'>> }
+  ) };
+
 export type GetGameEditQueryVariables = Exact<{
   id: Scalars['String'];
 }>;
@@ -1189,6 +1203,43 @@ export const useGetGameProgressForGamePreviewQuery = <
       options
     );
 useGetGameProgressForGamePreviewQuery.getKey = (variables: GetGameProgressForGamePreviewQueryVariables) => ['GetGameProgressForGamePreview', variables];
+
+export const GetFilterGamesDocument = `
+    query getFilterGames($amount: Int!, $cursor: String, $language: LANGUAGES, $sort: SORT_OPTIONS, $sortDir: Int) {
+  getFilterGames(
+    amount: $amount
+    cursor: $cursor
+    language: $language
+    sort: $sort
+    sortDir: $sortDir
+  ) {
+    nodes {
+      title
+      difficulty
+      createdBy
+      rating
+      description
+      codingLanguage
+      _id
+    }
+    hasMore
+    nextCursor
+  }
+}
+    `;
+export const useGetFilterGamesQuery = <
+      TData = GetFilterGamesQuery,
+      TError = unknown
+    >(
+      variables: GetFilterGamesQueryVariables, 
+      options?: UseQueryOptions<GetFilterGamesQuery, TError, TData>
+    ) => 
+    useQuery<GetFilterGamesQuery, TError, TData>(
+      ['getFilterGames', variables],
+      fetcher<GetFilterGamesQuery, GetFilterGamesQueryVariables>(GetFilterGamesDocument, variables),
+      options
+    );
+useGetFilterGamesQuery.getKey = (variables: GetFilterGamesQueryVariables) => ['getFilterGames', variables];
 
 export const GetGameEditDocument = `
     query GetGameEdit($id: String!) {

@@ -9,18 +9,11 @@ import { useStore } from '../../../components/GameplayManager/store'
 export default function PlayGame(): ReactElement {
 	const router = useRouter()
 	const gameId = router.query.gameId as string
-	if (!gameId) return <></>
 	const toast = useToast()
 
 	const { user, isLoggedIn } = useUser()
 
-	const {
-		data,
-		isLoading,
-		isError,
-		error,
-		refetch,
-	} = useGetGamePlayingProgressQuery(
+	const { data, isLoading, isError, error, refetch } = useGetGamePlayingProgressQuery(
 		{
 			userId: user?._id,
 			gameId: gameId,
@@ -50,6 +43,7 @@ export default function PlayGame(): ReactElement {
 		}
 	}, [isError])
 
+	if (!gameId) return <></>
 	if (!data) return <Spinner />
 	return <GameplayManager data={data?.getGameProgressByUser!} />
 }

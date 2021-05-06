@@ -24,7 +24,15 @@ export default function SearchResults(): ReactElement {
 	const [results, setResults] = React.useState<
 		Pick<
 			Game,
-			'title' | 'rating' | 'createdBy' | 'tags' | 'codingLanguage' | 'description' | 'difficulty' | 'playCount' | '_id'
+			| 'title'
+			| 'rating'
+			| 'createdBy'
+			| 'tags'
+			| 'codingLanguage'
+			| 'description'
+			| 'difficulty'
+			| 'playCount'
+			| '_id'
 		>[]
 	>([])
 	const { data, isLoading, refetch } = useQuery<GetSearchResultsQuery, unknown, GetSearchResultsQuery>(
@@ -92,7 +100,15 @@ export default function SearchResults(): ReactElement {
 interface ResultProp {
 	result: Pick<
 		Game,
-		'title' | 'rating' | 'createdBy' | 'tags' | 'codingLanguage' | 'description' | 'difficulty' | 'playCount' | '_id'
+		| 'title'
+		| 'rating'
+		| 'createdBy'
+		| 'tags'
+		| 'codingLanguage'
+		| 'description'
+		| 'difficulty'
+		| 'playCount'
+		| '_id'
 	>
 	i: number
 }
@@ -103,7 +119,7 @@ export function SearchResult({ result, i }: ResultProp) {
 			<Image
 				minW='400'
 				minH='400'
-				src={`https://source.unsplash.com/random/400x400?sig=${i}`}
+				src={`https://source.unsplash.com/collection/335434/400x400?sig=${i}`}
 				objectFit='cover'
 			/>
 			<Box p='6'>
@@ -119,11 +135,9 @@ export function SearchResult({ result, i }: ResultProp) {
 						{result.codingLanguage} &bull; Difficulty: {result.difficulty}
 					</Box>
 				</Box>
-					<Box mt='1' fontWeight='semibold' lineHeight='tight' isTruncated>
-				<Link href={`/game/${result._id}`}>
-						{result.title}
-				</Link>
-					</Box>
+				<Box mt='1' fontWeight='semibold' lineHeight='tight' isTruncated>
+					<Link href={`/game/${result._id}`}>{result.title}</Link>
+				</Box>
 				<Box>{result.description}</Box>
 
 				<Box d='flex' mt='2' alignItems='center'>

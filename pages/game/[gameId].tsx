@@ -41,15 +41,9 @@ export default function GamePreview({}: Props): ReactElement {
 		router.push('/')
 		return <></>
 	}
-	// https://source.unsplash.com/random/2000x200
 	return (
 		<>
-			<Image
-				w='100%'
-				h='20vh'
-				objectFit='cover'
-				src='https://images.unsplash.com/photo-1485856407642-7f9ba0268b51?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=&q=80'
-			/>
+			<Image w='100%' h='20vh' objectFit='cover' src='https://source.unsplash.com/collection/335434/2000x200' />
 			<Heading ml={8}>{data?.getGame?.title}</Heading>
 			<Flex direction='row' justifyContent='space-around' p={2} m={2}>
 				<Box flexGrow={1} margin={4} w='1200px'>

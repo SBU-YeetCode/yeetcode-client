@@ -11,7 +11,13 @@ interface Props extends BoxProps {
 	allGamesButton: boolean
 }
 
-export default function HomeGameDisplay({ games, title, resumeButton, allGamesButton, ...boxProps }: Props): ReactElement {
+export default function HomeGameDisplay({
+	games,
+	title,
+	resumeButton,
+	allGamesButton,
+	...boxProps
+}: Props): ReactElement {
 	return (
 		<Box w='80%' bg='gray.700' p={3} {...boxProps}>
 			<Heading as='a' fontSize='xl'>
@@ -24,7 +30,7 @@ export default function HomeGameDisplay({ games, title, resumeButton, allGamesBu
 							<Image
 								minW='250'
 								minH='200'
-								src={`https://source.unsplash.com/random/200x200?sig=${i}`}
+								src={`https://source.unsplash.com/collection/335434/200x200?sig=${i}`}
 								objectFit='contain'
 							/>
 							<Box my='3' px='2'>

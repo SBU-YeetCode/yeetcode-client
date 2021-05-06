@@ -27,6 +27,7 @@ import HintEditor from './HintEditor'
 import useConfirm from '../../hooks/useConfirm'
 import SpotTheBug from './SpotTheBug'
 import FillInBlank from './FillInBlank'
+import Matching from './Matching'
 
 type EditQuestionProps = {
 	selectedInstance: any
@@ -209,6 +210,9 @@ export default function EditQuestion({ selectedInstance, setSelectedInstance, ga
 						)}
 						{instanceState.gameType === Gametype.Fillinblank && (
 							<FillInBlank instanceState={instanceState} setInstanceState={setInstanceState} />
+						)}
+						{instanceState.gameType === Gametype.Matching && (
+							<Matching instanceState={instanceState} setInstanceState={setInstanceState} />
 						)}
 					</TabPanel>
 					<TabPanel>

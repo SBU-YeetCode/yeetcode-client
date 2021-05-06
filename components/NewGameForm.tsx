@@ -156,7 +156,7 @@ export default function NewGameForm({
 				</HStack>
 			)}
 
-			<Center>
+			<Center padding='10'>
 				<FormControl id='newGame' m={10}>
 					<FormLabel>Game Title</FormLabel>
 					<Input

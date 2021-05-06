@@ -1,6 +1,7 @@
 import React, { ReactElement } from 'react'
 import { HomeGameInfo } from './HomePage'
-import { Box, Heading, Wrap, WrapItem, Image, ButtonGroup, Button, HStack, Spacer, BoxProps } from '@chakra-ui/react'
+import { Box, Heading, Wrap, WrapItem, ButtonGroup, Button, HStack, Spacer, BoxProps } from '@chakra-ui/react'
+import Image from './Image'
 import { StarIcon } from '@chakra-ui/icons'
 import Link from 'next/link'
 import Rating from './Rating'
@@ -28,8 +29,10 @@ export default function HomeGameDisplay({
 					<WrapItem key={`${game.title}-${i}`}>
 						<Box maxW='250' borderWidth='1px' borderRadius='lg' overflow='hidden' mb='2em'>
 							<Image
-								minW='250'
-								minH='200'
+								w='250'
+								width={250}
+								height={200}
+								h='200'
 								src={`https://source.unsplash.com/collection/335434/200x200?sig=${i}`}
 								objectFit='contain'
 							/>

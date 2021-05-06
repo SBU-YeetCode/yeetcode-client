@@ -888,6 +888,21 @@ export type GetGamePlayingProgressQuery = { getGameProgressByUser?: Maybe<(
     ) }
   )> };
 
+export type GetLeaderboardsQueryVariables = Exact<{
+  cursor?: Maybe<Scalars['String']>;
+  language?: Maybe<Languages>;
+  amount?: Maybe<Scalars['Int']>;
+}>;
+
+
+export type GetLeaderboardsQuery = { getLeaderboard: (
+    Pick<PaginatedUserResponse, 'hasMore' | 'nextCursor'>
+    & { nodes: Array<(
+      Pick<User, '_id' | 'username'>
+      & { points: Pick<Points, 'c' | 'cpp' | 'javascript' | 'java' | 'python'>, profilePicture: Pick<ProfilePicture, 'avatar'> }
+    )> }
+  ) };
+
 export type ContextGetMeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -1468,6 +1483,42 @@ export const useGetGamePlayingProgressQuery = <
       options
     );
 useGetGamePlayingProgressQuery.getKey = (variables: GetGamePlayingProgressQueryVariables) => ['GetGamePlayingProgress', variables];
+
+export const GetLeaderboardsDocument = `
+    query getLeaderboards($cursor: String, $language: LANGUAGES, $amount: Int) {
+  getLeaderboard(amount: $amount, cursor: $cursor, language: $language) {
+    nodes {
+      _id
+      username
+      points {
+        c
+        cpp
+        javascript
+        java
+        python
+      }
+      profilePicture {
+        avatar
+      }
+    }
+    hasMore
+    nextCursor
+  }
+}
+    `;
+export const useGetLeaderboardsQuery = <
+      TData = GetLeaderboardsQuery,
+      TError = unknown
+    >(
+      variables?: GetLeaderboardsQueryVariables, 
+      options?: UseQueryOptions<GetLeaderboardsQuery, TError, TData>
+    ) => 
+    useQuery<GetLeaderboardsQuery, TError, TData>(
+      ['getLeaderboards', variables],
+      fetcher<GetLeaderboardsQuery, GetLeaderboardsQueryVariables>(GetLeaderboardsDocument, variables),
+      options
+    );
+useGetLeaderboardsQuery.getKey = (variables?: GetLeaderboardsQueryVariables) => ['getLeaderboards', variables];
 
 export const ContextGetMeDocument = `
     query ContextGetMe {

@@ -119,7 +119,7 @@ export function SearchResult({ result, i }: ResultProp) {
 			<Image
 				minW='400'
 				minH='400'
-				src={`https://source.unsplash.com/collection/335434/400x400?sig=${i}`}
+				src={`https://source.unsplash.com/collection/335434/400x400?sig=${i}&q=0`}
 				objectFit='cover'
 			/>
 			<Box p='6'>

@@ -43,7 +43,7 @@ export default function GamePreview({}: Props): ReactElement {
 	}
 	return (
 		<>
-			<Image w='100%' h='20vh' objectFit='cover' src='https://source.unsplash.com/collection/335434/2000x200' />
+			<Image w='100%' h='20vh' objectFit='cover' src='https://source.unsplash.com/collection/335434/2000x200?q=0' />
 			<Heading ml={8}>{data?.getGame?.title}</Heading>
 			<Flex direction='row' justifyContent='space-around' p={2} m={2}>
 				<Box flexGrow={1} margin={4} w='1200px'>

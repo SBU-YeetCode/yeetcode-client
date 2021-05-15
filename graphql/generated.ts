@@ -408,6 +408,7 @@ export type ProfilePictureInput = {
 export type Query = {
   getMe?: Maybe<User>;
   getUser?: Maybe<User>;
+  getUserByUsername?: Maybe<User>;
   getLeaderboard: PaginatedUserResponse;
   getComment?: Maybe<Comment>;
   getGameComments: PaginatedCommentResponse;
@@ -430,6 +431,11 @@ export type Query = {
 
 export type QueryGetUserArgs = {
   id: Scalars['ObjectId'];
+};
+
+
+export type QueryGetUserByUsernameArgs = {
+  username: Scalars['String'];
 };
 
 
@@ -942,6 +948,16 @@ export type GetUserGameReviewQueryVariables = Exact<{
 
 
 export type GetUserGameReviewQuery = { getUserGameReview?: Maybe<Pick<Comment, 'review' | 'rating' | 'gameId' | 'userId'>> };
+
+export type GetUserProfileQueryVariables = Exact<{
+  username: Scalars['String'];
+}>;
+
+
+export type GetUserProfileQuery = { getUserByUsername?: Maybe<(
+    Pick<User, '_id' | 'name' | 'username'>
+    & { profilePicture: Pick<ProfilePicture, 'avatar' | 'large'>, comments: Array<Pick<Comment, 'review' | 'rating' | 'gameId'>>, gamesCompleted: Array<{ game: Pick<Game, '_id' | 'createdBy' | 'difficulty' | 'title' | 'rating' | 'codingLanguage'> }>, gamesCreated: Array<Pick<Game, '_id' | 'createdBy' | 'difficulty' | 'title' | 'rating' | 'codingLanguage'>>, gamesRecent: Array<{ game: Pick<Game, '_id' | 'createdBy' | 'difficulty' | 'title' | 'rating' | 'codingLanguage'> }> }
+  )> };
 
 
 export const CreateCommentDocument = `
@@ -1663,3 +1679,63 @@ export const useGetUserGameReviewQuery = <
       options
     );
 useGetUserGameReviewQuery.getKey = (variables: GetUserGameReviewQueryVariables) => ['GetUserGameReview', variables];
+
+export const GetUserProfileDocument = `
+    query getUserProfile($username: String!) {
+  getUserByUsername(username: $username) {
+    _id
+    name
+    username
+    profilePicture {
+      avatar
+      large
+    }
+    comments {
+      review
+      rating
+      gameId
+    }
+    gamesCompleted {
+      game {
+        _id
+        createdBy
+        difficulty
+        title
+        rating
+        codingLanguage
+      }
+    }
+    gamesCreated {
+      _id
+      createdBy
+      difficulty
+      title
+      rating
+      codingLanguage
+    }
+    gamesRecent {
+      game {
+        _id
+        createdBy
+        difficulty
+        title
+        rating
+        codingLanguage
+      }
+    }
+  }
+}
+    `;
+export const useGetUserProfileQuery = <
+      TData = GetUserProfileQuery,
+      TError = unknown
+    >(
+      variables: GetUserProfileQueryVariables, 
+      options?: UseQueryOptions<GetUserProfileQuery, TError, TData>
+    ) => 
+    useQuery<GetUserProfileQuery, TError, TData>(
+      ['getUserProfile', variables],
+      fetcher<GetUserProfileQuery, GetUserProfileQueryVariables>(GetUserProfileDocument, variables),
+      options
+    );
+useGetUserProfileQuery.getKey = (variables: GetUserProfileQueryVariables) => ['getUserProfile', variables];

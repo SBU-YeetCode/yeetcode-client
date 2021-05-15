@@ -33,7 +33,7 @@ export default function HomeGameDisplay({
 								width={250}
 								height={200}
 								h='200'
-								src={`https://source.unsplash.com/collection/335434/200x200?sig=${i}`}
+								src={`https://source.unsplash.com/collection/335434/200x200?sig=${i}&q=0`}
 								objectFit='contain'
 							/>
 							<Box my='3' px='2'>

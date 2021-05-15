@@ -117,14 +117,14 @@ export default function Leaderboards() {
 							<ListItem key={i} w='100%' p={4} my={2} _even={{ bg: 'gray.700' }} as='button'>
 								<HStack>
 									<Text>{i + 1}</Text>
-									<Link href={`/profile/${user._id}`}>
+									<Link href={`/profile/${user.username}`}>
 										<Avatar
 											cursor='pointer'
 											alt={`${user.username}'s profile picture`}
 											src={user.profilePicture.avatar}
 										/>
 									</Link>
-									<Link href={`/profile/${user._id}`}>
+									<Link href={`/profile/${user.username}`}>
 										<Text as='a' cursor='pointer'>
 											{user.username}
 										</Text>

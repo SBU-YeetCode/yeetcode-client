@@ -81,6 +81,7 @@ export type Game = {
   questions: Array<QuestionObject>;
   roadmap: Array<RoadmapObject>;
   _id: Scalars['ObjectId'];
+  authorInfo: User;
 };
 
 export type GameProgress = {
@@ -145,6 +146,9 @@ export type LiveCoding = {
   prompt: Scalars['String'];
   exampleSolutionCode: Scalars['String'];
   exampleSolutionDescription: Scalars['String'];
+  /** The expected stdout */
+  expectedOutput: Scalars['String'];
+  stdin: Scalars['String'];
 };
 
 export type LiveCodingInput = {
@@ -152,6 +156,9 @@ export type LiveCodingInput = {
   prompt: Scalars['String'];
   exampleSolutionCode: Scalars['String'];
   exampleSolutionDescription: Scalars['String'];
+  /** The expected stdout */
+  expectedOutput: Scalars['String'];
+  stdin: Scalars['String'];
 };
 
 export type Matching = {
@@ -872,7 +879,10 @@ export type GamePreviewQueryVariables = Exact<{
 }>;
 
 
-export type GamePreviewQuery = { getGame?: Maybe<Pick<Game, 'createdBy' | '_id' | 'title' | 'description' | 'tags' | 'lastUpdated' | 'totalStars' | 'rating' | 'playCount' | 'codingLanguage' | 'difficulty'>> };
+export type GamePreviewQuery = { getGame?: Maybe<(
+    Pick<Game, 'createdBy' | '_id' | 'title' | 'description' | 'tags' | 'lastUpdated' | 'totalStars' | 'rating' | 'playCount' | 'codingLanguage' | 'difficulty'>
+    & { authorInfo: Pick<User, '_id' | 'username'> }
+  )> };
 
 export type GetGamePlayingProgressQueryVariables = Exact<{
   userId: Scalars['ObjectId'];
@@ -1376,6 +1386,10 @@ export const GamePreviewDocument = `
     codingLanguage
     difficulty
     tags
+    authorInfo {
+      _id
+      username
+    }
   }
 }
     `;

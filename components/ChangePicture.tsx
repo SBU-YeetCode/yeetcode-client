@@ -10,7 +10,6 @@ import {
 	Button,
 	Input,
 } from '@chakra-ui/react'
-import Upload from 'rc-upload'
 
 interface Props {
 	isOpen: boolean

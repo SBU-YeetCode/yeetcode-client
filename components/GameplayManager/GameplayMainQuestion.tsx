@@ -53,8 +53,8 @@ export default function GameplayMain(): ReactElement {
 				return <FillInTheBlank isEditable={false} />
 			// case 'SPOTTHEBUG':
 			// 	return <SpotTheBug />
-			// case 'MATCHING':
-			// 	return <Matching />
+			case 'MATCHING':
+				return <Matching canSelect={false} />
 			// case 'LIVECODING':
 			// 	return <LiveCoding />
 			default:

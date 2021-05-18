@@ -1,9 +1,13 @@
-import React, { useState } from 'react'
+import React, { ReactElement, useState } from 'react'
 import { MatchingCardInput, Question, UpdateGameDocument } from '../../../graphql/generated'
 import { useStore } from '../store'
 import { Badge, Box, SimpleGrid, Button, VStack } from '@chakra-ui/react'
 
-export default function PlayMatching() {
+interface Props {
+	canSelect?: boolean
+}
+
+export default function PlayMatching({canSelect = true}: Props): ReactElement {
 	// https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
 	// Fisher-Yates (aka Knuth) Shuffle
 	function shuffleArray(array: any) {
@@ -68,9 +72,9 @@ export default function PlayMatching() {
 		}
 	}
 
-	function getPairNumber(choice: string) {
+	function getPairNumber(choice: string, pairs: MatchingCardInput[]) {
 		var pairNumber = undefined
-		selectedAnswer?.matching?.map((pair, index) => {
+		pairs?.map((pair, index) => {
 			if (choice === pair.pairOne || choice === pair.pairTwo)
 				pairNumber = index + 1
 		})
@@ -96,7 +100,6 @@ export default function PlayMatching() {
 		setChoices(shuffleArray(choices.slice(0)))
 	}, [])
 
-
 	return (
 		<VStack>
 			<SimpleGrid columns={[2, null, 3]} spacingX='50' spacingY='35'>
@@ -108,11 +111,11 @@ export default function PlayMatching() {
 								fontSize='lg'
 								height='40'
 								width='60'
-								bg={ checkChoices(choice) ? 'background.dark.700' : 'background.dark.500'}
+								bg={ (checkChoices(choice) && canSelect) ? 'background.dark.700' : 'background.dark.500'}
 								color='gray.900'
 								borderRadius={20}
 								onClick={() => {
-									changeUpdateAnswer(choice)
+									if (canSelect) changeUpdateAnswer(choice)
 								}}
 							>
 								{choice}
@@ -126,7 +129,7 @@ export default function PlayMatching() {
 								position='absolute'
 								right='0' 
 							>
-								{ getPairNumber(choice) }
+								{ canSelect ? getPairNumber(choice, selectedAnswer?.matching!) : getPairNumber(choice, selectedValue.matching?.matching!)}
 							</Badge>
 						</Box>
 					)

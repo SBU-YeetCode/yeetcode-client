@@ -8,6 +8,8 @@ import GamePreviewButton from '../../components/GamePreview/GameButton'
 import { format, formatDistance, formatRelative, subDays } from 'date-fns'
 import Tag from '../../components/Tag'
 import CommentsDisplay from '../../components/GamePreview/Comments'
+import { useUser } from '../../contexts/UserContext'
+import { EditIcon } from '@chakra-ui/icons'
 
 interface Props {}
 
@@ -22,6 +24,7 @@ const LANGUAGE: { [key: string]: string } = {
 export default function GamePreview({}: Props): ReactElement {
 	const router = useRouter()
 	const toast = useToast()
+	const { user } = useUser()
 	const gameId = router.query['gameId'] as string
 	// Get Game
 	const { data, isError, isFetched, error } = useGamePreviewQuery({ gameId }, { enabled: !!gameId })
@@ -43,7 +46,12 @@ export default function GamePreview({}: Props): ReactElement {
 	}
 	return (
 		<>
-			<Image w='100%' h='20vh' objectFit='cover' src='https://source.unsplash.com/collection/335434/2000x200?q=0' />
+			<Image
+				w='100%'
+				h='20vh'
+				objectFit='cover'
+				src='https://source.unsplash.com/collection/335434/2000x200?q=0'
+			/>
 			<Heading ml={8}>{data?.getGame?.title}</Heading>
 			<Flex direction='row' justifyContent='space-around' p={2} m={2}>
 				<Box flexGrow={1} margin={4} w='1200px'>
@@ -51,7 +59,16 @@ export default function GamePreview({}: Props): ReactElement {
 					<Box>
 						<Box bg='background.dark.700' p={4} borderRadius={10}>
 							<Skeleton isLoaded={isFetched}>
-								<Text>Author: {}</Text>
+								<span>
+									<Text display='inline-block' mr={1}>
+										Author:
+									</Text>
+									<Link href={`/profile/${data?.getGame?.authorInfo.username}`}>
+										<Text as='a' cursor='pointer'>
+											{data?.getGame?.authorInfo.username}
+										</Text>
+									</Link>
+								</span>
 								<Text>Last Updated: {lastUpdated}</Text>
 								<Text>Language: {LANGUAGE[data?.getGame?.codingLanguage!]}</Text>
 								<Text>Difficulty: {data?.getGame?.difficulty}</Text>
@@ -61,8 +78,21 @@ export default function GamePreview({}: Props): ReactElement {
 							</Skeleton>
 						</Box>
 						<Center mt={2}>
-							<Skeleton isLoaded={isFetched}>
+							<Skeleton isLoaded={isFetched} display='inline-flex'>
 								<GamePreviewButton gameId={gameId} />
+								{data?.getGame?.createdBy === user?._id && (
+									<Link href={`/game/edit/${data?.getGame?._id}`}>
+										<Button
+											variant='outline'
+											borderColor='secondary.200'
+											color='secondary.200'
+											ml={4}
+											rightIcon={<EditIcon />}
+										>
+											Edit Game
+										</Button>
+									</Link>
+								)}
 							</Skeleton>
 						</Center>
 					</Box>

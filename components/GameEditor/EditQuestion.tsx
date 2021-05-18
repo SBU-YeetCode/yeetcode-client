@@ -18,7 +18,7 @@ import {
 	useToast,
 	NumberInput,
 	NumberInputField,
-	VStack
+	VStack,
 } from '@chakra-ui/react'
 import { Question, Gametype, useUpdateQuestionMutation, HintInput } from '../../graphql/generated'
 import React, { useState, useCallback } from 'react'
@@ -28,6 +28,7 @@ import useConfirm from '../../hooks/useConfirm'
 import SpotTheBug from './SpotTheBug'
 import FillInBlank from './FillInBlank'
 import Matching from './Matching'
+import LiveCoding from './LiveCoding'
 
 type EditQuestionProps = {
 	selectedInstance: any
@@ -67,6 +68,8 @@ const DefaultQuestionState: Partial<Question> = {
 		exampleSolutionCode: '',
 		exampleSolutionDescription: '',
 		prompt: '',
+		stdin: '',
+		expectedOutput: '',
 	},
 	multipleChoice: {
 		_id: new ObjectId(),
@@ -101,7 +104,7 @@ export default function EditQuestion({ selectedInstance, setSelectedInstance, ga
 	}
 	const [tabIndex, setTabIndex] = useState(0)
 	const [questionNav, setQuestionNav] = useState(['Question', 'Description', 'Hints', 'Settings'])
-	const { mutateAsync, isLoading, isError } = useUpdateQuestionMutation()
+	const { mutateAsync, isLoading, isError, error } = useUpdateQuestionMutation<Error>()
 
 	const confirm = useConfirm()
 	const toast = useToast()
@@ -132,7 +135,7 @@ export default function EditQuestion({ selectedInstance, setSelectedInstance, ga
 		queryClient.invalidateQueries(['GetGameEdit'])
 		toast({
 			title: isError ? 'Error' : 'Saved',
-			description: isError ? 'Not saved' : 'Successfully Saved',
+			description: isError ? error!.toString() : 'Successfully Saved',
 			status: isError ? 'error' : 'success',
 			position: 'bottom-left',
 			duration: isError ? 4000 : 1000,
@@ -213,6 +216,9 @@ export default function EditQuestion({ selectedInstance, setSelectedInstance, ga
 						)}
 						{instanceState.gameType === Gametype.Matching && (
 							<Matching instanceState={instanceState} setInstanceState={setInstanceState} />
+						)}
+						{instanceState.gameType === Gametype.Livecoding && (
+							<LiveCoding instanceState={instanceState} setInstanceState={setInstanceState} />
 						)}
 					</TabPanel>
 					<TabPanel>

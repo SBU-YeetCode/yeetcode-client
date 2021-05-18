@@ -61,6 +61,8 @@ export const GET_GAME_EDIT = gql`
 					prompt
 					exampleSolutionCode
 					exampleSolutionDescription
+					expectedOutput
+					stdin
 				}
 				matching {
 					_id

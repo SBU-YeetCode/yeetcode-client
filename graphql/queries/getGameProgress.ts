@@ -79,6 +79,8 @@ export const GetGamePlayingProgress = gql`
 						prompt
 						exampleSolutionCode
 						exampleSolutionDescription
+						expectedOutput
+						stdin
 					}
 					matching {
 						_id

@@ -14,6 +14,10 @@ export const GET_GAME_PREVIEW = gql`
 			codingLanguage
 			difficulty
 			tags
+			authorInfo {
+				_id
+				username
+			}
 		}
 	}
 `

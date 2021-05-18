@@ -8,6 +8,8 @@ import GamePreviewButton from '../../components/GamePreview/GameButton'
 import { format, formatDistance, formatRelative, subDays } from 'date-fns'
 import Tag from '../../components/Tag'
 import CommentsDisplay from '../../components/GamePreview/Comments'
+import { useUser } from '../../contexts/UserContext'
+import { EditIcon } from '@chakra-ui/icons'
 
 interface Props {}
 
@@ -22,6 +24,7 @@ const LANGUAGE: { [key: string]: string } = {
 export default function GamePreview({}: Props): ReactElement {
 	const router = useRouter()
 	const toast = useToast()
+	const { user } = useUser()
 	const gameId = router.query['gameId'] as string
 	// Get Game
 	const { data, isError, isFetched, error } = useGamePreviewQuery({ gameId }, { enabled: !!gameId })
@@ -75,8 +78,21 @@ export default function GamePreview({}: Props): ReactElement {
 							</Skeleton>
 						</Box>
 						<Center mt={2}>
-							<Skeleton isLoaded={isFetched}>
+							<Skeleton isLoaded={isFetched} display='inline-flex'>
 								<GamePreviewButton gameId={gameId} />
+								{data?.getGame?.createdBy === user?._id && (
+									<Link href={`/game/edit/${data?.getGame?._id}`}>
+										<Button
+											variant='outline'
+											borderColor='secondary.200'
+											color='secondary.200'
+											ml={4}
+											rightIcon={<EditIcon />}
+										>
+											Edit Game
+										</Button>
+									</Link>
+								)}
 							</Skeleton>
 						</Center>
 					</Box>

@@ -867,7 +867,7 @@ export type GetGameEditQuery = { getGame?: Maybe<(
     Pick<Game, '_id' | 'createdBy' | 'title' | 'description' | 'codingLanguage' | 'difficulty' | 'tags'>
     & { roadmap: Array<Pick<RoadmapObject, '_id' | 'parent' | 'sequence' | 'kind' | 'refId'>>, levels: Array<Pick<LevelObject, '_id' | 'title' | 'description'>>, stages: Array<Pick<StageObject, '_id' | 'title' | 'description'>>, questions: Array<(
       Pick<QuestionObject, '_id' | 'title' | 'description' | 'timeLimit' | 'points' | 'lives' | 'gameType'>
-      & { hints: Array<Pick<Hint, '_id' | 'description' | 'timeToReveal'>>, multipleChoice?: Maybe<Pick<MultipleChoice, '_id' | 'prompt' | 'correctChoice' | 'incorrectChoices'>>, fillInTheBlank?: Maybe<Pick<FillInTheBlank, '_id' | 'prompt' | 'solutions'>>, spotTheBug?: Maybe<Pick<SpotTheBug, '_id' | 'prompt' | 'bugLine' | 'code'>>, liveCoding?: Maybe<Pick<LiveCoding, '_id' | 'prompt' | 'exampleSolutionCode' | 'exampleSolutionDescription'>>, matching?: Maybe<(
+      & { hints: Array<Pick<Hint, '_id' | 'description' | 'timeToReveal'>>, multipleChoice?: Maybe<Pick<MultipleChoice, '_id' | 'prompt' | 'correctChoice' | 'incorrectChoices'>>, fillInTheBlank?: Maybe<Pick<FillInTheBlank, '_id' | 'prompt' | 'solutions'>>, spotTheBug?: Maybe<Pick<SpotTheBug, '_id' | 'prompt' | 'bugLine' | 'code'>>, liveCoding?: Maybe<Pick<LiveCoding, '_id' | 'prompt' | 'exampleSolutionCode' | 'exampleSolutionDescription' | 'expectedOutput' | 'stdin'>>, matching?: Maybe<(
         Pick<Matching, '_id' | 'prompt'>
         & { matching: Array<Pick<MatchingCard, 'pairOne' | 'pairTwo'>> }
       )> }
@@ -896,7 +896,7 @@ export type GetGamePlayingProgressQuery = { getGameProgressByUser?: Maybe<(
       Pick<Game, 'title' | '_id'>
       & { roadmap: Array<Pick<RoadmapObject, 'parent' | 'sequence' | 'kind' | 'refId' | '_id'>>, levels: Array<Pick<LevelObject, '_id' | 'title' | 'description'>>, stages: Array<Pick<StageObject, '_id' | 'title' | 'description'>>, questions: Array<(
         Pick<QuestionObject, '_id' | 'title' | 'description' | 'timeLimit' | 'points' | 'lives' | 'gameType'>
-        & { hints: Array<Pick<Hint, '_id' | 'description' | 'timeToReveal'>>, multipleChoice?: Maybe<Pick<MultipleChoice, '_id' | 'prompt' | 'correctChoice' | 'incorrectChoices'>>, fillInTheBlank?: Maybe<Pick<FillInTheBlank, '_id' | 'prompt' | 'solutions'>>, spotTheBug?: Maybe<Pick<SpotTheBug, '_id' | 'prompt' | 'bugLine' | 'code'>>, liveCoding?: Maybe<Pick<LiveCoding, '_id' | 'prompt' | 'exampleSolutionCode' | 'exampleSolutionDescription'>>, matching?: Maybe<(
+        & { hints: Array<Pick<Hint, '_id' | 'description' | 'timeToReveal'>>, multipleChoice?: Maybe<Pick<MultipleChoice, '_id' | 'prompt' | 'correctChoice' | 'incorrectChoices'>>, fillInTheBlank?: Maybe<Pick<FillInTheBlank, '_id' | 'prompt' | 'solutions'>>, spotTheBug?: Maybe<Pick<SpotTheBug, '_id' | 'prompt' | 'bugLine' | 'code'>>, liveCoding?: Maybe<Pick<LiveCoding, '_id' | 'prompt' | 'exampleSolutionCode' | 'exampleSolutionDescription' | 'expectedOutput' | 'stdin'>>, matching?: Maybe<(
           Pick<Matching, '_id' | 'prompt'>
           & { matching: Array<Pick<MatchingCard, 'pairOne' | 'pairTwo'>> }
         )> }
@@ -1344,6 +1344,8 @@ export const GetGameEditDocument = `
         prompt
         exampleSolutionCode
         exampleSolutionDescription
+        expectedOutput
+        stdin
       }
       matching {
         _id
@@ -1486,6 +1488,8 @@ export const GetGamePlayingProgressDocument = `
           prompt
           exampleSolutionCode
           exampleSolutionDescription
+          expectedOutput
+          stdin
         }
         matching {
           _id

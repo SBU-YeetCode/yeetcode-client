@@ -2,6 +2,7 @@ import gql from 'graphql-tag'
 export const GET_ME = gql`
 	query ContextGetMe {
 		getMe {
+			bio
 			_id
 			email
 			name

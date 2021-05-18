@@ -1,18 +1,22 @@
 import React, { ReactElement } from 'react'
-import { Box, Heading, Text, Avatar, HStack, Skeleton, Flex, Center } from '@chakra-ui/react'
+import { Box, Heading, Text, Avatar, HStack, Skeleton, Flex, Center, useDisclosure, Container } from '@chakra-ui/react'
 import { useUser } from '../../contexts/UserContext'
 import { useRouter } from 'next/router'
 import {
 	GetUserGameReviewQuery,
 	GetUserProfileQuery,
 	GetUserProfileQueryVariables,
+	UpdateUserMutationVariables,
 	useGetUserProfileQuery,
+	useUpdateUserMutation,
 } from '../../graphql/generated'
 import { BsPencilSquare } from 'react-icons/bs'
 import { Alert, AlertIcon, AlertTitle, AlertDescription } from '@chakra-ui/react'
 import { Tabs, TabList, TabPanels, Tab, TabPanel, IconButton } from '@chakra-ui/react'
 import HomeGameDisplay from '../../components/HomeGameDisplay'
 import EditProfile from '../../components/EditProfile'
+import ChangePicture from '../../components/ChangePicture'
+import { useQueryClient } from 'react-query'
 
 export default function Profile() {
 	const router = useRouter()
@@ -21,18 +25,19 @@ export default function Profile() {
 
 	const { user: userLoggedIn, isLoggedIn } = useUser()
 
-	const editable = React.useMemo(
-		() => userLoggedIn && (userLoggedIn._id === user?._id || userLoggedIn.roles.includes('ADMIN')),
-		[userLoggedIn]
-	)
-
 	const { isLoading, data, isError } = useGetUserProfileQuery({
 		username: username || '',
 	})
 
+	const { mutateAsync } = useUpdateUserMutation()
+
 	const user: GetUserProfileQuery['getUserByUsername'] = React.useMemo(
 		() => data?.getUserByUsername as GetUserProfileQuery['getUserByUsername'],
 		[data]
+	)
+	const editable = React.useMemo(
+		() => userLoggedIn && (userLoggedIn._id === user?._id || userLoggedIn.roles.includes('ADMIN')),
+		[userLoggedIn, user]
 	)
 
 	const { res, tabs } = React.useMemo(() => {
@@ -65,6 +70,10 @@ export default function Profile() {
 	const [tabIndex, setTabIndex] = React.useState(0)
 	const [editOpen, setEditOpen] = React.useState(false)
 
+	const { isOpen, onClose, onOpen } = useDisclosure()
+	const { isOpen: bgOpen, onClose: bgClose, onOpen: onBgOpen } = useDisclosure()
+	const queryClient = useQueryClient()
+
 	if (!user && !isLoading)
 		return (
 			<Flex direction='column' justify='center'>
@@ -75,23 +84,59 @@ export default function Profile() {
 				</Alert>
 			</Flex>
 		)
+	async function handleImageUpload(img: string, variable: keyof UpdateUserMutationVariables, close: () => void) {
+		await mutateAsync({
+			[variable]: img,
+			userId: user?._id,
+		})
+		location.reload()
+		close()
+	}
 	return (
 		<Skeleton isLoaded={!isLoading} mt='1em'>
 			<EditProfile isOpen={editOpen} onClose={() => setEditOpen(false)} user={user} />
+			<ChangePicture
+				isOpen={isOpen}
+				onClose={onClose}
+				onUpload={(img) => handleImageUpload(img, 'newAvatar', onClose)}
+			/>
+			<ChangePicture
+				isOpen={bgOpen}
+				onClose={bgClose}
+				onUpload={(img) => handleImageUpload(img, 'newLargePicture', bgClose)}
+			/>
 			<Tabs variant='unstyled'>
-				<Box bg='gray.700' h='35vh' bgImage='url(https://source.unsplash.com/collection/335434/2000x200?sig=1&q=0)' backgroundRepeat='no-repeat' backgroundSize='cover'>
+				<Box
+					bg='gray.700'
+					h='35vh'
+					bgImage={`url(${user?.profilePicture.large})`}
+					backgroundRepeat='no-repeat'
+					backgroundSize='cover'
+				>
 					<Flex direction='column' justify='center' alignItems='center'>
 						<HStack mr='10em' spacing={8} bg='gray.700' borderRadius='20' p='1em'>
 							<Avatar name={user?.name} src={user?.profilePicture.avatar} size={'2xl'} />
-							<Box>
-								<Heading size='4xl'>{user?.username}</Heading>
-								<Text fontSize='xl' fontWeight='bold'>
+							{editable && (
+								<IconButton
+									aria-label='edit-profile'
+									icon={<BsPencilSquare />}
+									onClick={onOpen}
+									fontSize='20'
+									colorScheme='teal'
+									variant='ghost'
+								/>
+							)}
+							<Container>
+								<Heading size='4xl'>{user?.name}</Heading>
+								<Text fontSize='2xl'>{user?.username}</Text>
+								{/* <Text fontSize='xl' fontWeight='bold'>
 									Points: {}
 								</Text>
 								<Text fontSize='xl' fontWeight='bold'>
 									Games Finished: {}
-								</Text>
-							</Box>
+								</Text> */}
+								<Text>{user?.bio}</Text>
+							</Container>
 							{editable && (
 								<IconButton
 									aria-label='edit-profile'
@@ -117,6 +162,18 @@ export default function Profile() {
 								</Tab>
 							))}
 						</TabList>
+						{editable && (
+							<IconButton
+								position='fixed'
+								right='0'
+								aria-label='edit-profile'
+								icon={<BsPencilSquare />}
+								onClick={onBgOpen}
+								fontSize='20'
+								colorScheme='teal'
+								variant='solid'
+							/>
+						)}
 					</Flex>
 				</Box>
 				<TabPanels>

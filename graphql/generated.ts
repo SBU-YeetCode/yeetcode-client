@@ -232,6 +232,7 @@ export type MutationCreateUserArgs = {
 export type MutationUpdateUserArgs = {
   userId: Scalars['ObjectId'];
   newName?: Maybe<Scalars['String']>;
+  newBio?: Maybe<Scalars['String']>;
   newUsername?: Maybe<Scalars['String']>;
   newAvatar?: Maybe<Scalars['String']>;
   newLargePicture?: Maybe<Scalars['String']>;
@@ -685,6 +686,7 @@ export type User = {
   _id: Scalars['ObjectId'];
   name: Scalars['String'];
   username: Scalars['String'];
+  bio: Scalars['String'];
   email: Scalars['String'];
   points: Points;
   profilePicture: ProfilePicture;
@@ -700,6 +702,7 @@ export type UserInput = {
   _id: Scalars['ObjectId'];
   name: Scalars['String'];
   username: Scalars['String'];
+  bio: Scalars['String'];
   email: Scalars['String'];
   points: PointsInput;
   profilePicture: ProfilePictureInput;
@@ -818,6 +821,18 @@ export type UpdateLevelsMutationVariables = Exact<{
 
 export type UpdateLevelsMutation = { updateLevels: Array<Pick<LevelObject, '_id'>> };
 
+export type UpdateUserMutationVariables = Exact<{
+  newAvatar?: Maybe<Scalars['String']>;
+  newLargePicture?: Maybe<Scalars['String']>;
+  newName?: Maybe<Scalars['String']>;
+  newUsername?: Maybe<Scalars['String']>;
+  userId: Scalars['ObjectId'];
+  newBio?: Maybe<Scalars['String']>;
+}>;
+
+
+export type UpdateUserMutation = { updateUser: Pick<User, '_id'> };
+
 export type GamePreviewCommentsQueryVariables = Exact<{
   gameId: Scalars['String'];
   amount?: Maybe<Scalars['Int']>;
@@ -923,7 +938,7 @@ export type ContextGetMeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type ContextGetMeQuery = { getMe?: Maybe<(
-    Pick<User, '_id' | 'email' | 'name' | 'roles' | 'username'>
+    Pick<User, 'bio' | '_id' | 'email' | 'name' | 'roles' | 'username'>
     & { profilePicture: Pick<ProfilePicture, 'avatar' | 'large'>, gamesRecent: Array<{ game: Pick<Game, '_id' | 'title' | 'createdBy' | 'rating'> }> }
   )> };
 
@@ -965,7 +980,7 @@ export type GetUserProfileQueryVariables = Exact<{
 
 
 export type GetUserProfileQuery = { getUserByUsername?: Maybe<(
-    Pick<User, '_id' | 'name' | 'username'>
+    Pick<User, 'bio' | '_id' | 'name' | 'username'>
     & { profilePicture: Pick<ProfilePicture, 'avatar' | 'large'>, comments: Array<Pick<Comment, 'review' | 'rating' | 'gameId'>>, gamesCompleted: Array<{ game: Pick<Game, '_id' | 'createdBy' | 'difficulty' | 'title' | 'rating' | 'codingLanguage'> }>, gamesCreated: Array<Pick<Game, '_id' | 'createdBy' | 'difficulty' | 'title' | 'rating' | 'codingLanguage'>>, gamesRecent: Array<{ game: Pick<Game, '_id' | 'createdBy' | 'difficulty' | 'title' | 'rating' | 'codingLanguage'> }> }
   )> };
 
@@ -1184,6 +1199,28 @@ export const useUpdateLevelsMutation = <
     >(options?: UseMutationOptions<UpdateLevelsMutation, TError, UpdateLevelsMutationVariables, TContext>) => 
     useMutation<UpdateLevelsMutation, TError, UpdateLevelsMutationVariables, TContext>(
       (variables?: UpdateLevelsMutationVariables) => fetcher<UpdateLevelsMutation, UpdateLevelsMutationVariables>(UpdateLevelsDocument, variables)(),
+      options
+    );
+export const UpdateUserDocument = `
+    mutation updateUser($newAvatar: String, $newLargePicture: String, $newName: String, $newUsername: String, $userId: ObjectId!, $newBio: String) {
+  updateUser(
+    newAvatar: $newAvatar
+    newLargePicture: $newLargePicture
+    newName: $newName
+    newUsername: $newUsername
+    userId: $userId
+    newBio: $newBio
+  ) {
+    _id
+  }
+}
+    `;
+export const useUpdateUserMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<UpdateUserMutation, TError, UpdateUserMutationVariables, TContext>) => 
+    useMutation<UpdateUserMutation, TError, UpdateUserMutationVariables, TContext>(
+      (variables?: UpdateUserMutationVariables) => fetcher<UpdateUserMutation, UpdateUserMutationVariables>(UpdateUserDocument, variables)(),
       options
     );
 export const GamePreviewCommentsDocument = `
@@ -1557,6 +1594,7 @@ useGetLeaderboardsQuery.getKey = (variables?: GetLeaderboardsQueryVariables) => 
 export const ContextGetMeDocument = `
     query ContextGetMe {
   getMe {
+    bio
     _id
     email
     name
@@ -1701,6 +1739,7 @@ useGetUserGameReviewQuery.getKey = (variables: GetUserGameReviewQueryVariables) 
 export const GetUserProfileDocument = `
     query getUserProfile($username: String!) {
   getUserByUsername(username: $username) {
+    bio
     _id
     name
     username

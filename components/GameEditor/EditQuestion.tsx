@@ -104,7 +104,7 @@ export default function EditQuestion({ selectedInstance, setSelectedInstance, ga
 	}
 	const [tabIndex, setTabIndex] = useState(0)
 	const [questionNav, setQuestionNav] = useState(['Question', 'Description', 'Hints', 'Settings'])
-	const { mutateAsync, isLoading, isError } = useUpdateQuestionMutation()
+	const { mutateAsync, isLoading, isError, error } = useUpdateQuestionMutation<Error>()
 
 	const confirm = useConfirm()
 	const toast = useToast()
@@ -135,7 +135,7 @@ export default function EditQuestion({ selectedInstance, setSelectedInstance, ga
 		queryClient.invalidateQueries(['GetGameEdit'])
 		toast({
 			title: isError ? 'Error' : 'Saved',
-			description: isError ? 'Not saved' : 'Successfully Saved',
+			description: isError ? error!.toString() : 'Successfully Saved',
 			status: isError ? 'error' : 'success',
 			position: 'bottom-left',
 			duration: isError ? 4000 : 1000,

@@ -19,29 +19,25 @@ import { useEffect, useState } from 'react'
 import { Question } from '../../graphql/generated'
 import ObjectID from 'bson-objectid'
 import Editor, { useMonaco } from '@monaco-editor/react'
-import Monaco from 'monaco-editor'
-import dynamic from 'next/dynamic'
 
 type SpotTheBugProps = {
 	instanceState: Question
 	setInstanceState: any // $Hook/$ hey
 }
 
-// const DynamicMonaco = dynamic(() => import('@monaco-editor/react'), { ssr: false })
-
 export default function SpotTheBug({ instanceState, setInstanceState }: SpotTheBugProps) {
 	const toast = useToast()
 	const editorRef = useRef<any>(null)
-    const [bugCode, setBugCode] = React.useState<string>()
+	const [bugCode, setBugCode] = React.useState<string>()
 	// const monaco = useMonaco()
 	useEffect(() => {
 		if (editorRef.current !== null) {
 			// @ts-ignore
 			const interval = setInterval(() => {
 				const selected = editorRef.current.getModel().getValueInRange(editorRef.current.getSelection())
-                if(selected!=='') setBugCode(selected)
+				if (selected !== '') setBugCode(selected)
 			}, 500)
-            return () => clearInterval(interval)
+			return () => clearInterval(interval)
 		}
 	}, [editorRef.current])
 	return (
@@ -83,7 +79,7 @@ export default function SpotTheBug({ instanceState, setInstanceState }: SpotTheB
 								spotTheBug: {
 									...(instanceState.spotTheBug ?? {}),
 									code: value,
-                                    bugLine: bugCode
+									bugLine: bugCode,
 								},
 							})
 						}}
@@ -93,7 +89,7 @@ export default function SpotTheBug({ instanceState, setInstanceState }: SpotTheB
 				<FormControl>
 					<FormLabel size='md'>Bug Select</FormLabel>
 					<FormHelperText mb='2em'>Select the bug from your code above</FormHelperText>
-                    <Textarea isReadOnly value={bugCode}/>
+					<Textarea isReadOnly value={bugCode} />
 					{/* <Editor
 						options={{
 							readOnly: true,

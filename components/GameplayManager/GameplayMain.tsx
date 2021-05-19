@@ -5,12 +5,7 @@ import { Box, Center, Heading, VStack, Text } from '@chakra-ui/react'
 import MainQuestion from './GameplayMainQuestion'
 
 export default function GameplayMain({ data }: Props): ReactElement {
-	const [
-		selectedProgress,
-		kind,
-		selectedRoadmap,
-		selectedValue,
-	] = useStore((s) => [
+	const [selectedProgress, kind, selectedRoadmap, selectedValue] = useStore((s) => [
 		s.selectedProgress,
 		s.kind,
 		s.selectedRoadmap,

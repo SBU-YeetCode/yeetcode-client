@@ -17,25 +17,15 @@ export default function GameplayManager({ data }: Props): ReactElement {
 	const update = useStore((s) => s.updateSelected)
 	React.useEffect(() => {
 		if (data && selectedId) {
-			const { item, itemProgress, itemRoadmap } = getInfoFor(
-				kind,
-				selectedId,
-				data
-			)
-			if (item && itemProgress && itemRoadmap)
-				update(kind, item, itemProgress, itemRoadmap)
+			const { item, itemProgress, itemRoadmap } = getInfoFor(kind, selectedId, data)
+			if (item && itemProgress && itemRoadmap) update(kind, item, itemProgress, itemRoadmap)
 		}
 	}, [data])
 
 	return (
 		<Box h='100%'>
-			<Box
-				className='parent'
-				h='85%'
-				display='grid'
-				gridTemplateColumns='1fr minmax(150px, 25%)'
-			>
-				<Box className='gameplay' bg='background.dark.primary'>
+			<Box className='parent' h='85%' display='grid' gridTemplateColumns='1fr minmax(150px, 25%)'>
+				<Box className='gameplay' bg='background.dark.primary' overflow='auto'>
 					<Main data={data} />
 				</Box>
 				<Box className='sidebar' bg='background.dark.700' overflowY='auto' overflowX='hidden' h='100%'>

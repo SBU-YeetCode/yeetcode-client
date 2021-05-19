@@ -9,6 +9,7 @@ import FillInTheBlank from './GameplayTypes/PlayFillInTheBlank'
 import SpotTheBug from './GameplayTypes/PlaySpotTheBug'
 import Matching from './GameplayTypes/PlayMatching'
 import LiveCoding from './GameplayTypes/PlayLiveCoding'
+import LiveCodingSolution from './GameplayTypes/LiveCodingSolution'
 
 export default function GameplayMain(): ReactElement {
 	const [selectedProgress, selectedRoadmap, selectedValue, tabIndex, updateTab] = useStore((s) => [
@@ -16,7 +17,7 @@ export default function GameplayMain(): ReactElement {
 		s.selectedRoadmap,
 		s.selectedValue as Question,
 		s.selectedTabIndex,
-		s.updateTab
+		s.updateTab,
 	])
 
 	let started: boolean
@@ -55,8 +56,8 @@ export default function GameplayMain(): ReactElement {
 			// 	return <SpotTheBug />
 			case 'MATCHING':
 				return <Matching canSelect={false} />
-			// case 'LIVECODING':
-			// 	return <LiveCoding />
+			case 'LIVECODING':
+				return <LiveCodingSolution />
 			default:
 				return (
 					<Center mt={6}>
@@ -67,24 +68,17 @@ export default function GameplayMain(): ReactElement {
 	}
 
 	return (
-		<Tabs
-			index={tabIndex ?? 0}
-			onChange={(newIndex) => updateTab(newIndex)}	
-			variant='soft-rounded'
-			isLazy
-			mx={2}>
+		<Tabs index={tabIndex ?? 0} onChange={(newIndex) => updateTab(newIndex)} variant='soft-rounded' isLazy mx={2}>
 			<TabList borderRadius={15} p={2} mt={8} bg='background.dark.500'>
 				<Tab color='white'>Description</Tab>
-				<Tab
-					isDisabled={!started}
-					color={tabColor(started)}
-					cursor={tabCursor(started)}>
+				<Tab isDisabled={!started} color={tabColor(started)} cursor={tabCursor(started)}>
 					Question
 				</Tab>
 				<Tab
 					isDisabled={!selectedProgress.completed}
 					color={tabColor(selectedProgress.completed)}
-					cursor={tabCursor(selectedProgress.completed)}>
+					cursor={tabCursor(selectedProgress.completed)}
+				>
 					Solution
 				</Tab>
 			</TabList>
@@ -102,7 +96,8 @@ export default function GameplayMain(): ReactElement {
 								borderWidth={1}
 								bg='background.dark.500'
 								p={2}
-								w='100%'>
+								w='100%'
+							>
 								{selectedValue?.description}
 							</Text>
 						</VStack>
@@ -114,9 +109,7 @@ export default function GameplayMain(): ReactElement {
 				</TabPanel>
 				<TabPanel>
 					{/* Solution Panel */}
-					<Center>
-					{renderSolution()}
-					</Center>
+					<Center>{renderSolution()}</Center>
 				</TabPanel>
 			</TabPanels>
 		</Tabs>

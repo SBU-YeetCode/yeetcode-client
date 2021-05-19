@@ -69,7 +69,7 @@ export default function EditProfile({ user, isOpen, onClose }: Props): ReactElem
 	]
 
 	return (
-		<Modal isOpen={isOpen} onClose={onClose}>
+		<Modal isOpen={isOpen} onClose={onClose} size='4xl'>
 			<ModalOverlay />
 			<ModalContent>
 				<ModalHeader>Change {user?.username} Profile</ModalHeader>

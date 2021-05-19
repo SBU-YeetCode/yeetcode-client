@@ -70,7 +70,8 @@ const DefaultQuestionState: Partial<Question> = {
 		exampleSolutionDescription: '',
 		prompt: '',
 		stdin: '',
-		expectedOutput: '',
+		starterCode: '',
+		matcherCode: ''
 	},
 	multipleChoice: {
 		_id: new ObjectId(),
@@ -210,7 +211,7 @@ export default function EditQuestion({ selectedInstance, setSelectedInstance, ga
 							<MultipleChoice instanceState={instanceState} setInstanceState={setInstanceState} />
 						)}
 						{instanceState.gameType === Gametype.Spotthebug && (
-							<SpotTheBug instanceState={instanceState} setInstanceState={setInstanceState} />
+							<SpotTheBug codingLanguage={game?.codingLanguage as string} instanceState={instanceState} setInstanceState={setInstanceState} />
 						)}
 						{instanceState.gameType === Gametype.Fillinblank && (
 							<FillInBlank instanceState={instanceState} setInstanceState={setInstanceState} />

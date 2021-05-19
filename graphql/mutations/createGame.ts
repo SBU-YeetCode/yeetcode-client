@@ -7,6 +7,7 @@ export const CREATE_GAME = gql`
 		$difficulty: String
 		$description: String
 		$tags: [String!]
+		$bannerUrl: String
 	) {
 		createGame(
 			title: $title
@@ -14,6 +15,7 @@ export const CREATE_GAME = gql`
 			difficulty: $difficulty
 			description: $description
 			tags: $tags
+			bannerUrl: $bannerUrl
 		) {
 			_id
 		}

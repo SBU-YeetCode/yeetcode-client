@@ -4,7 +4,12 @@ import { Box, Center, VStack, Input, Text, Heading } from '@chakra-ui/react'
 import { Question } from '../../../graphql/generated'
 import Editor from '@monaco-editor/react'
 
-export default function PlaySpotTheBug(): ReactElement {
+interface Props {
+	isEditable?: boolean
+	codingLanguage: string
+}
+
+export default function PlaySpotTheBug({isEditable = true, codingLanguage}: Props): ReactElement {
 	const [selectedValue, updateAnswer, selectedAnswer] = useStore((s) => [
 		s.selectedValue as Question,
 		s.updateAnswer,
@@ -42,19 +47,30 @@ export default function PlaySpotTheBug(): ReactElement {
 				onMount={(editor) => (editorRef.current = editor)}
 				width='60vw'
 				defaultLanguage='javascript'
+				language={codingLanguage.toLowerCase()}
 				defaultValue={selectedValue.spotTheBug?.code.replaceAll(/\\n/g, '\n')}
 				theme='vs-dark'
 			/>
-			<Input
-				variant='filled'
-				value={selectedAnswer?.spotTheBug ?? ''}
-				onChange={(e) => {
-					updateAnswer({
-						spotTheBug: e.target.value,
-					})
-				}}
-				placeholder='Select Code In The Editor with the bug in it'
-			/>
+			{ isEditable ? 
+				<Input
+					variant='filled'
+					value={selectedAnswer?.spotTheBug ?? ''}
+					onChange={(e) => {
+						updateAnswer({
+							spotTheBug: e.target.value,
+						})
+					}}
+					placeholder='Select Code In The Editor with the bug in it'
+				/> :
+				<>
+				<Text mb="8px">Answer</Text>
+				<Input
+					isReadOnly
+					variant='filled'
+					value={selectedValue?.spotTheBug?.bugLine}
+				/>
+				</>
+			}
 		</VStack>
 	)
 }

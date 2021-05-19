@@ -8,6 +8,7 @@ export const UPDATE_GAME = gql`
 		$newDifficulty: String
 		$newDescription: String
 		$newTags: [String!]
+		$newBanner: String
 	) {
 		updateGame(
 			gameId: $gameId
@@ -16,6 +17,7 @@ export const UPDATE_GAME = gql`
 			newDifficulty: $newDifficulty
 			newDescription: $newDescription
 			newTags: $newTags
+			newBanner: $newBanner
 		) {
 			_id
 		}

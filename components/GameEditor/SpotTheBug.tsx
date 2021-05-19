@@ -23,9 +23,10 @@ import Editor, { useMonaco } from '@monaco-editor/react'
 type SpotTheBugProps = {
 	instanceState: Question
 	setInstanceState: any // $Hook/$ hey
+	codingLanguage: string
 }
 
-export default function SpotTheBug({ instanceState, setInstanceState }: SpotTheBugProps) {
+export default function SpotTheBug({ instanceState, setInstanceState, codingLanguage }: SpotTheBugProps) {
 	const toast = useToast()
 	const editorRef = useRef<any>(null)
 	const [bugCode, setBugCode] = React.useState<string>()
@@ -83,7 +84,7 @@ export default function SpotTheBug({ instanceState, setInstanceState }: SpotTheB
 								},
 							})
 						}}
-						language='javascript'
+						language={codingLanguage.toLowerCase()}
 					/>
 				</FormControl>
 				<FormControl>

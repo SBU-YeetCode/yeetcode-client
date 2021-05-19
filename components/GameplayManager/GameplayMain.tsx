@@ -23,14 +23,14 @@ export default function GameplayMain({ data }: Props): ReactElement {
 							<Heading alignSelf='start' size='md'>
 								Description
 							</Heading>
-							<Text bg='background.dark.500' p={2} w='100%'>
+							<Text bg='background.dark.700' p={2} w='100%'>
 								{selectedValue?.description}
 							</Text>
 						</VStack>
 					</Center>
 				)
 			case 'Question':
-				return <MainQuestion />
+				return <MainQuestion data={data} />
 			default:
 				return (
 					<Center mt={6}>

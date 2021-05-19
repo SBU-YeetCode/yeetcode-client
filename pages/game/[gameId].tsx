@@ -50,7 +50,7 @@ export default function GamePreview({}: Props): ReactElement {
 				w='100%'
 				h='20vh'
 				objectFit='cover'
-				src='https://source.unsplash.com/collection/335434/2000x200?q=0'
+				src={data?.getGame?.bannerUrl ??  'https://source.unsplash.com/collection/335434/2000x200?q=0'}
 			/>
 			<Heading ml={8}>{data?.getGame?.title}</Heading>
 			<Flex direction='row' justifyContent='space-around' p={2} m={2}>

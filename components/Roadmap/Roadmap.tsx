@@ -17,15 +17,11 @@ import {
 	VStack,
 } from '@chakra-ui/react'
 import { IconType } from 'react-icons'
-import {
-	BsStopwatch,
-	BsListTask,
-	BsFillPlusCircleFill,
-	BsPencilSquare,
-} from 'react-icons/bs'
+import { BsStopwatch, BsListTask, BsFillPlusCircleFill, BsPencilSquare } from 'react-icons/bs'
 import { SiOpslevel } from 'react-icons/si'
 import { AiFillDelete } from 'react-icons/ai'
 import { BiBookOpen } from 'react-icons/bi'
+import { BsCheckAll } from 'react-icons/bs'
 
 interface Action {
 	type: 'add' | 'edit' | 'delete'
@@ -66,10 +62,11 @@ export interface RoadmapData {
 export function Item({
 	item,
 	showActions = true,
-	showCompleted = false,
+	showCompleted,
 	showReorder = true,
 	onAction,
 	selected,
+	completedInfo,
 }: Props) {
 	const style = {
 		_hover: {
@@ -84,7 +81,7 @@ export function Item({
 			alignItems='center'
 			alignContent='center'
 			justifyContent='space-between'
-			onClick={() => onAction && onAction("click",item)}
+			onClick={() => onAction && onAction('click', item)}
 		>
 			{item.children.length > 0 ? <AccordionIcon /> : <Box mr={2} />}
 			<HStack spacing={5} alignItems='center'>
@@ -116,18 +113,13 @@ export function Item({
 				showActions={showActions}
 				showCompleted={showCompleted}
 				showReorder={showReorder}
+				completedInfo={completedInfo}
 			/>
 		</>
 	)
 }
 
-export const ItemActions = ({
-	item,
-	onAction,
-	showActions,
-	showCompleted,
-	showReorder,
-}: Props) => {
+export const ItemActions = ({ item, onAction, showActions, showCompleted, showReorder, completedInfo }: Props) => {
 	const handleClick = (
 		e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
 		type: Action['type'],
@@ -137,14 +129,10 @@ export const ItemActions = ({
 		e.preventDefault()
 		if (onAction) onAction(type, item)
 	}
+	// console.log(completedInfo)
+	// console.log(Boolean(completedInfo[item.refId]))
 	return (
-		<Wrap
-			mx={2}
-			spacing={5}
-			alignItems='center'
-			alignContent='center'
-			justifyContent='space-between'
-		>
+		<Wrap mx={2} spacing={5} alignItems='center' alignContent='center' justifyContent='space-between'>
 			{showActions && (
 				<HStack>
 					{actions.map((action) => (
@@ -157,6 +145,13 @@ export const ItemActions = ({
 							onClick={(e) => onAction && handleClick(e, action.type, item)}
 						/>
 					))}
+				</HStack>
+			)}
+			{showCompleted && (
+				<HStack>
+					{completedInfo && Boolean(completedInfo[item.refId || '']) && (
+						<Icon aria-label={'completed'} key={'completed'} color='primary.400' as={BsCheckAll} />
+					)}
 				</HStack>
 			)}
 		</Wrap>
@@ -173,7 +168,7 @@ export function AccordionItem({ item, ...other }: Props) {
 				{item.children?.map((subItem, index) =>
 					subItem.children.length > 0 ? (
 						<Accordion allowMultiple key={index}>
-							<AccordionItem key={subItem.sequence} item={subItem} {...other} /> 
+							<AccordionItem key={subItem.sequence} item={subItem} {...other} />
 						</Accordion>
 					) : (
 						<HStack key={index}>
@@ -197,6 +192,7 @@ export default function Roadmap({
 	gameTitle,
 	showTitle = true,
 	onAction,
+	completedInfo,
 	...style
 }: RoadmapProps & Partial<BoxProps>): ReactElement {
 	function defaultOnAction(action: 'edit' | 'delete' | 'add' | 'click', item: RoadmapData) {
@@ -219,24 +215,27 @@ export default function Roadmap({
 		}
 	}
 	return (
-		<Box bg='gray.700' {...style} maxH='100%' overflow='auto'>
-			{showTitle &&<HStack>
-				<Item
-					item={{
-						children: [],
-						id: 'Game',
-						kind: 'Game',
-						parent: null,
-						sequence: 0,
-						title: gameTitle,
-						refId: undefined,
-					}}
-					selected={'false'}
-					onAction={onAction ?? defaultOnAction}
-					showActions={showActions}
-					showReorder={showReorder}
-				/>
-			</HStack>}
+		<Box bg='gray.700' {...style} maxH='100%' overflowY='auto' overflowX='hidden'>
+			{showTitle && (
+				<HStack>
+					<Item
+						item={{
+							children: [],
+							id: 'Game',
+							kind: 'Game',
+							parent: null,
+							sequence: 0,
+							title: gameTitle,
+							refId: undefined,
+						}}
+						completedInfo={completedInfo}
+						selected={'false'}
+						onAction={onAction ?? defaultOnAction}
+						showActions={showActions}
+						showReorder={showReorder}
+					/>
+				</HStack>
+			)}
 			<Accordion allowMultiple bg='gray.700'>
 				{data.map((item, index) => (
 					<AccordionItem
@@ -245,7 +244,9 @@ export default function Roadmap({
 						item={item}
 						showActions={showActions}
 						showReorder={showReorder}
+						showCompleted={showCompleted}
 						onAction={onAction ?? defaultOnAction}
+						completedInfo={completedInfo}
 					/>
 				))}
 			</Accordion>
@@ -260,15 +261,15 @@ interface Props {
 	showCompleted?: boolean
 	showReorder?: boolean
 	showTitle?: boolean
+	completedInfo?: {
+		[id: string]: boolean
+	}
 	onAction?: (action: 'edit' | 'delete' | 'add' | 'click', item: RoadmapData) => void
 }
 
 interface RoadmapProps extends Omit<Props, 'selected' | 'item'> {
 	selectedInstance: string
-	setSelectedInstance: (
-		id: string | undefined,
-		kind: 'Level' | 'Stage' | 'Question' | 'Game'
-	) => void
+	setSelectedInstance: (id: string | undefined, kind: 'Level' | 'Stage' | 'Question' | 'Game') => void
 	refId?: string | undefined
 	data: RoadmapData[]
 	gameTitle: string

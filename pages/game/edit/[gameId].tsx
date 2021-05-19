@@ -1,4 +1,5 @@
 import { Flex, useToast, Spinner, Center, Box } from '@chakra-ui/react'
+import id from 'date-fns/esm/locale/id/index.js'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import { useQueryClient } from 'react-query'
@@ -11,6 +12,7 @@ import {
 	Level,
 	Question,
 	Stage,
+	useDeleteGameMutation,
 	useDeleteInstanceMutation,
 	useGetGameEditQuery,
 } from '../../../graphql/generated'
@@ -32,7 +34,6 @@ export default function GameEdit() {
 	const deleteMutate = useDeleteInstanceMutation()
 	const queryClient = useQueryClient()
 	const updateSelectedInstance = (id: string | undefined, kind: SelectedInstance['kind']) => {
-		;``
 		switch (kind) {
 			case 'Level':
 				const item = data?.getGame?.levels.find((l) => l._id === id)
@@ -61,6 +62,7 @@ export default function GameEdit() {
 	const { data, isLoading, refetch, isError, error } = useGetGameEditQuery({
 		id: gameId || '',
 	})
+	const gameMutation = useDeleteGameMutation()
 
 	useEffect(() => {
 		if (!isLoggedIn()) router.push('/')
@@ -87,6 +89,26 @@ export default function GameEdit() {
 			setRoadmapData(newRoadmapData)
 		}
 	}, [data, isLoading])
+
+	async function handleDeleteGame() {
+		confirm(async () => {
+			await gameMutation.mutateAsync({
+				gameId,
+				userId: user!._id,
+			})
+			queryClient.invalidateQueries(['GetGameEdit'])
+			setDeleting(false)
+			const isError = deleteMutate.isError
+			toast({
+				title: isError ? 'Error' : 'Deleted',
+				description: isError ? 'Not saved' : 'Successfully Deleted',
+				status: isError ? 'error' : 'success',
+				position: 'bottom-left',
+				duration: isError ? 4000 : 1000,
+			})
+			router.push('/')
+		})
+	}
 
 	async function handleDeleteInstance(roadmapId: string) {
 		confirm(async () => {
@@ -116,7 +138,8 @@ export default function GameEdit() {
 				break
 			}
 			case 'delete': {
-				handleDeleteInstance(item.id)
+				if (item.kind !== 'Game') handleDeleteInstance(item.id)
+				else handleDeleteGame()
 				break
 			}
 			case 'edit': {

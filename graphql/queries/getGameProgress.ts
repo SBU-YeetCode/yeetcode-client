@@ -27,6 +27,7 @@ export const GetGamePlayingProgress = gql`
 			game {
 				title
 				_id
+				codingLanguage
 				roadmap {
 					parent
 					sequence
@@ -79,7 +80,8 @@ export const GetGamePlayingProgress = gql`
 						prompt
 						exampleSolutionCode
 						exampleSolutionDescription
-						expectedOutput
+						matcherCode
+						starterCode
 						stdin
 					}
 					matching {

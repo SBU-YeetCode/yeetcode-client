@@ -62,10 +62,10 @@ export default function ChangePicture({ isOpen, onClose, onUpload }: Props): Rea
 	}
 	return (
 		<>
-			<Modal isOpen={isOpen} onClose={onClose}>
+			<Modal isOpen={isOpen} onClose={onClose} size='3xl'>
 				<ModalOverlay />
 				<ModalContent>
-					<ModalHeader>Modal Title</ModalHeader>
+					<ModalHeader>Change Picture</ModalHeader>
 					<ModalCloseButton />
 					<ModalBody>
 						<div className='addNew'>

@@ -14,6 +14,7 @@ export const GET_GAME_PREVIEW = gql`
 			codingLanguage
 			difficulty
 			tags
+			bannerUrl
 			authorInfo {
 				_id
 				username

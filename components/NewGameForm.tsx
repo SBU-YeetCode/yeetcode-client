@@ -1,8 +1,5 @@
 import React, { ReactElement } from 'react'
-import {
-	useCreateGameMutation,
-	useUpdateGameMutation,
-} from '../graphql/generated'
+import { useCreateGameMutation, useUpdateGameMutation } from '../graphql/generated'
 import {
 	FormControl,
 	FormLabel,
@@ -18,6 +15,7 @@ import {
 	Button,
 	Center,
 	IconButton,
+	useDisclosure,
 } from '@chakra-ui/react'
 import { Box, HStack, Spacer } from '@chakra-ui/layout'
 import Tag from './Tag'
@@ -25,6 +23,8 @@ import { Languages, MutationCreateGameArgs } from '../graphql/generated'
 import { useRouter } from 'next/router'
 import { useQueryClient } from 'react-query'
 import { CloseIcon } from '@chakra-ui/icons'
+import ChangePicture from './ChangePicture'
+import Image from 'next/image'
 
 interface Props {
 	selectedInstance?: any | undefined
@@ -67,16 +67,14 @@ interface Props {
 //       options
 //     );
 
-export default function NewGameForm({
-	selectedInstance,
-	setSelectedInstance,
-}: Props): ReactElement {
+export default function NewGameForm({ selectedInstance, setSelectedInstance }: Props): ReactElement {
 	interface NewGame {
 		title: string
 		codingLanguage: string
 		description: string
 		difficulty: string
 		tags: string[]
+		bannerUrl?: string
 	}
 	const [isPopoverOpen, setIsOpen] = React.useState(false)
 	const [newTagVal, setNewTagVal] = React.useState('')
@@ -85,6 +83,7 @@ export default function NewGameForm({
 	const close = () => setIsOpen(false)
 	const router = useRouter()
 	const initialFocuRef = React.useRef<HTMLInputElement | null>(null)
+	const { isOpen, onOpen, onClose } = useDisclosure()
 
 	const [gameInfo, setGameInfo] = React.useState<NewGame>(() => {
 		if (selectedInstance?.kind === 'Game')
@@ -93,13 +92,9 @@ export default function NewGameForm({
 					? selectedInstance.item.codingLanguage
 					: 'JAVASCRIPT',
 				title: selectedInstance?.item.title ? selectedInstance.item.title : '',
-				difficulty: selectedInstance?.item.difficulty
-					? selectedInstance.item.difficulty
-					: '',
+				difficulty: selectedInstance?.item.difficulty ? selectedInstance.item.difficulty : '',
 				tags: selectedInstance?.item.tags ? selectedInstance.item.tags : [],
-				description: selectedInstance?.item.description
-					? selectedInstance.item.description
-					: '',
+				description: selectedInstance?.item.description ? selectedInstance.item.description : '',
 			}
 		else
 			return {
@@ -130,6 +125,10 @@ export default function NewGameForm({
 		setNewTagVal('')
 		close()
 	}
+	async function handleImageUpload(img: string) {
+		setGameInfo({ ...gameInfo, bannerUrl: img })
+		onClose()
+	}
 
 	React.useEffect(() => {
 		if (!selectedInstance && !createIsLoading && createData?.createGame) {
@@ -142,6 +141,7 @@ export default function NewGameForm({
 
 	return (
 		<>
+			<ChangePicture isOpen={isOpen} onClose={onClose} onUpload={(img: string) => handleImageUpload(img)} />
 			{selectedInstance && (
 				<HStack>
 					<Spacer />
@@ -158,36 +158,31 @@ export default function NewGameForm({
 
 			<Center padding='10'>
 				<FormControl id='newGame' m={10}>
+					<FormLabel>Banner</FormLabel>
+					<Button onClick={onOpen}>Change/Add Banner</Button>
+					{gameInfo.bannerUrl && <Image src={gameInfo.bannerUrl || ''} width='600' height='200' />}
 					<FormLabel>Game Title</FormLabel>
 					<Input
 						value={gameInfo.title}
-						onChange={(e) =>
-							setGameInfo({ ...gameInfo, title: e.target.value })
-						}
+						onChange={(e) => setGameInfo({ ...gameInfo, title: e.target.value })}
 						placeholder='Input Game Title Here'
 					/>
 					<FormLabel>Game Description</FormLabel>
 					<Textarea
 						value={gameInfo.description}
-						onChange={(e) =>
-							setGameInfo({ ...gameInfo, description: e.target.value })
-						}
+						onChange={(e) => setGameInfo({ ...gameInfo, description: e.target.value })}
 						placeholder='Input Game Description Here'
 					/>
 					<FormLabel>Game Difficulty</FormLabel>
 					<Input
 						value={gameInfo.difficulty}
-						onChange={(e) =>
-							setGameInfo({ ...gameInfo, difficulty: e.target.value })
-						}
+						onChange={(e) => setGameInfo({ ...gameInfo, difficulty: e.target.value })}
 						placeholder='Input Game Difficulty Here'
 					/>
 					<FormLabel>Game Coding Language</FormLabel>
 					<Select
 						value={gameInfo.codingLanguage}
-						onChange={(e) =>
-							setGameInfo({ ...gameInfo, codingLanguage: e.target.value })
-						}
+						onChange={(e) => setGameInfo({ ...gameInfo, codingLanguage: e.target.value })}
 					>
 						{Object.keys(Languages).map((language) => (
 							// @ts-ignore
@@ -224,9 +219,7 @@ export default function NewGameForm({
 											placeholder='Tag name'
 											size='sm'
 											value={newTagVal}
-											onChange={(e) =>
-												setNewTagVal(e.target.value.replace(/[\n\r\s\t]+/g, ''))
-											}
+											onChange={(e) => setNewTagVal(e.target.value.replace(/[\n\r\s\t]+/g, ''))}
 											ref={initialFocuRef}
 										/>
 										<Button variant='outline' size='xs	' type='submit'>
@@ -249,6 +242,7 @@ export default function NewGameForm({
 										newDifficulty: gameInfo.difficulty,
 										newDescription: gameInfo.description,
 										newTags: gameInfo.tags,
+										newBanner: gameInfo.bannerUrl
 									})
 									queryClient.invalidateQueries('GetGameEdit')
 									queryClient.refetchQueries('GetGameEdit')

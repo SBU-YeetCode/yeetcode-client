@@ -72,6 +72,7 @@ export type Game = {
   playCount: Scalars['Int'];
   commentsRef: Array<Scalars['String']>;
   codingLanguage: Scalars['String'];
+  bannerUrl?: Maybe<Scalars['String']>;
   title: Scalars['String'];
   difficulty: Scalars['String'];
   tags: Array<Scalars['String']>;
@@ -146,8 +147,10 @@ export type LiveCoding = {
   prompt: Scalars['String'];
   exampleSolutionCode: Scalars['String'];
   exampleSolutionDescription: Scalars['String'];
-  /** The expected stdout */
-  expectedOutput: Scalars['String'];
+  /** Code added to user code used to run checks */
+  matcherCode: Scalars['String'];
+  /** Code given to the user to start with */
+  starterCode: Scalars['String'];
   stdin: Scalars['String'];
 };
 
@@ -156,8 +159,10 @@ export type LiveCodingInput = {
   prompt: Scalars['String'];
   exampleSolutionCode: Scalars['String'];
   exampleSolutionDescription: Scalars['String'];
-  /** The expected stdout */
-  expectedOutput: Scalars['String'];
+  /** Code added to user code used to run checks */
+  matcherCode: Scalars['String'];
+  /** Code given to the user to start with */
+  starterCode: Scalars['String'];
   stdin: Scalars['String'];
 };
 
@@ -290,6 +295,7 @@ export type MutationCreateGameArgs = {
   difficulty?: Maybe<Scalars['String']>;
   tags?: Maybe<Array<Scalars['String']>>;
   description?: Maybe<Scalars['String']>;
+  bannerUrl?: Maybe<Scalars['String']>;
 };
 
 
@@ -300,6 +306,7 @@ export type MutationUpdateGameArgs = {
   newDifficulty?: Maybe<Scalars['String']>;
   newTags?: Maybe<Array<Scalars['String']>>;
   newDescription?: Maybe<Scalars['String']>;
+  newBanner?: Maybe<Scalars['String']>;
 };
 
 
@@ -724,6 +731,7 @@ export type CreateGameMutationVariables = Exact<{
   difficulty?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
   tags?: Maybe<Array<Scalars['String']> | Scalars['String']>;
+  bannerUrl?: Maybe<Scalars['String']>;
 }>;
 
 
@@ -747,6 +755,14 @@ export type CreateInstanceMutationVariables = Exact<{
 
 
 export type CreateInstanceMutation = { createInstance: Pick<RoadmapObject, '_id'> };
+
+export type DeleteGameMutationVariables = Exact<{
+  gameId: Scalars['String'];
+  userId: Scalars['ObjectId'];
+}>;
+
+
+export type DeleteGameMutation = { deleteGame: Pick<Deleted, 'success' | 'err'> };
 
 export type DeleteInstanceMutationVariables = Exact<{
   gameId: Scalars['String'];
@@ -792,6 +808,7 @@ export type UpdateGameMutationVariables = Exact<{
   newDifficulty?: Maybe<Scalars['String']>;
   newDescription?: Maybe<Scalars['String']>;
   newTags?: Maybe<Array<Scalars['String']> | Scalars['String']>;
+  newBanner?: Maybe<Scalars['String']>;
 }>;
 
 
@@ -882,7 +899,7 @@ export type GetGameEditQuery = { getGame?: Maybe<(
     Pick<Game, '_id' | 'createdBy' | 'title' | 'description' | 'codingLanguage' | 'difficulty' | 'tags'>
     & { roadmap: Array<Pick<RoadmapObject, '_id' | 'parent' | 'sequence' | 'kind' | 'refId'>>, levels: Array<Pick<LevelObject, '_id' | 'title' | 'description'>>, stages: Array<Pick<StageObject, '_id' | 'title' | 'description'>>, questions: Array<(
       Pick<QuestionObject, '_id' | 'title' | 'description' | 'timeLimit' | 'points' | 'lives' | 'gameType'>
-      & { hints: Array<Pick<Hint, '_id' | 'description' | 'timeToReveal'>>, multipleChoice?: Maybe<Pick<MultipleChoice, '_id' | 'prompt' | 'correctChoice' | 'incorrectChoices'>>, fillInTheBlank?: Maybe<Pick<FillInTheBlank, '_id' | 'prompt' | 'solutions'>>, spotTheBug?: Maybe<Pick<SpotTheBug, '_id' | 'prompt' | 'bugLine' | 'code'>>, liveCoding?: Maybe<Pick<LiveCoding, '_id' | 'prompt' | 'exampleSolutionCode' | 'exampleSolutionDescription' | 'expectedOutput' | 'stdin'>>, matching?: Maybe<(
+      & { hints: Array<Pick<Hint, '_id' | 'description' | 'timeToReveal'>>, multipleChoice?: Maybe<Pick<MultipleChoice, '_id' | 'prompt' | 'correctChoice' | 'incorrectChoices'>>, fillInTheBlank?: Maybe<Pick<FillInTheBlank, '_id' | 'prompt' | 'solutions'>>, spotTheBug?: Maybe<Pick<SpotTheBug, '_id' | 'prompt' | 'bugLine' | 'code'>>, liveCoding?: Maybe<Pick<LiveCoding, '_id' | 'prompt' | 'exampleSolutionCode' | 'exampleSolutionDescription' | 'matcherCode' | 'starterCode' | 'stdin'>>, matching?: Maybe<(
         Pick<Matching, '_id' | 'prompt'>
         & { matching: Array<Pick<MatchingCard, 'pairOne' | 'pairTwo'>> }
       )> }
@@ -895,7 +912,7 @@ export type GamePreviewQueryVariables = Exact<{
 
 
 export type GamePreviewQuery = { getGame?: Maybe<(
-    Pick<Game, 'createdBy' | '_id' | 'title' | 'description' | 'tags' | 'lastUpdated' | 'totalStars' | 'rating' | 'playCount' | 'codingLanguage' | 'difficulty'>
+    Pick<Game, 'createdBy' | '_id' | 'title' | 'description' | 'tags' | 'lastUpdated' | 'totalStars' | 'rating' | 'playCount' | 'codingLanguage' | 'difficulty' | 'bannerUrl'>
     & { authorInfo: Pick<User, '_id' | 'username'> }
   )> };
 
@@ -908,10 +925,10 @@ export type GetGamePlayingProgressQueryVariables = Exact<{
 export type GetGamePlayingProgressQuery = { getGameProgressByUser?: Maybe<(
     Pick<GameProgress, '_id' | 'completedAt' | 'isCompleted' | 'totalPoints'>
     & { levels?: Maybe<Array<Pick<LevelProgress, 'levelId' | 'completed'>>>, stages?: Maybe<Array<Pick<StageProgress, 'stageId' | 'completed'>>>, questions?: Maybe<Array<Pick<QuestionProgress, 'questionId' | 'completed' | 'livesLeft' | 'pointsReceived' | 'hintsRevealed' | 'dateStarted' | 'dateCompleted'>>>, game: (
-      Pick<Game, 'title' | '_id'>
+      Pick<Game, 'title' | '_id' | 'codingLanguage'>
       & { roadmap: Array<Pick<RoadmapObject, 'parent' | 'sequence' | 'kind' | 'refId' | '_id'>>, levels: Array<Pick<LevelObject, '_id' | 'title' | 'description'>>, stages: Array<Pick<StageObject, '_id' | 'title' | 'description'>>, questions: Array<(
         Pick<QuestionObject, '_id' | 'title' | 'description' | 'timeLimit' | 'points' | 'lives' | 'gameType'>
-        & { hints: Array<Pick<Hint, '_id' | 'description' | 'timeToReveal'>>, multipleChoice?: Maybe<Pick<MultipleChoice, '_id' | 'prompt' | 'correctChoice' | 'incorrectChoices'>>, fillInTheBlank?: Maybe<Pick<FillInTheBlank, '_id' | 'prompt' | 'solutions'>>, spotTheBug?: Maybe<Pick<SpotTheBug, '_id' | 'prompt' | 'bugLine' | 'code'>>, liveCoding?: Maybe<Pick<LiveCoding, '_id' | 'prompt' | 'exampleSolutionCode' | 'exampleSolutionDescription' | 'expectedOutput' | 'stdin'>>, matching?: Maybe<(
+        & { hints: Array<Pick<Hint, '_id' | 'description' | 'timeToReveal'>>, multipleChoice?: Maybe<Pick<MultipleChoice, '_id' | 'prompt' | 'correctChoice' | 'incorrectChoices'>>, fillInTheBlank?: Maybe<Pick<FillInTheBlank, '_id' | 'prompt' | 'solutions'>>, spotTheBug?: Maybe<Pick<SpotTheBug, '_id' | 'prompt' | 'bugLine' | 'code'>>, liveCoding?: Maybe<Pick<LiveCoding, '_id' | 'prompt' | 'exampleSolutionCode' | 'exampleSolutionDescription' | 'matcherCode' | 'starterCode' | 'stdin'>>, matching?: Maybe<(
           Pick<Matching, '_id' | 'prompt'>
           & { matching: Array<Pick<MatchingCard, 'pairOne' | 'pairTwo'>> }
         )> }
@@ -1001,13 +1018,14 @@ export const useCreateCommentMutation = <
       options
     );
 export const CreateGameDocument = `
-    mutation createGame($title: String, $codingLanguage: String, $difficulty: String, $description: String, $tags: [String!]) {
+    mutation createGame($title: String, $codingLanguage: String, $difficulty: String, $description: String, $tags: [String!], $bannerUrl: String) {
   createGame(
     title: $title
     codingLanguage: $codingLanguage
     difficulty: $difficulty
     description: $description
     tags: $tags
+    bannerUrl: $bannerUrl
   ) {
     _id
   }
@@ -1059,6 +1077,22 @@ export const useCreateInstanceMutation = <
     >(options?: UseMutationOptions<CreateInstanceMutation, TError, CreateInstanceMutationVariables, TContext>) => 
     useMutation<CreateInstanceMutation, TError, CreateInstanceMutationVariables, TContext>(
       (variables?: CreateInstanceMutationVariables) => fetcher<CreateInstanceMutation, CreateInstanceMutationVariables>(CreateInstanceDocument, variables)(),
+      options
+    );
+export const DeleteGameDocument = `
+    mutation deleteGame($gameId: String!, $userId: ObjectId!) {
+  deleteGame(gameId: $gameId, userId: $userId) {
+    success
+    err
+  }
+}
+    `;
+export const useDeleteGameMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<DeleteGameMutation, TError, DeleteGameMutationVariables, TContext>) => 
+    useMutation<DeleteGameMutation, TError, DeleteGameMutationVariables, TContext>(
+      (variables?: DeleteGameMutationVariables) => fetcher<DeleteGameMutation, DeleteGameMutationVariables>(DeleteGameDocument, variables)(),
       options
     );
 export const DeleteInstanceDocument = `
@@ -1135,7 +1169,7 @@ export const useSubmitQuestionMutation = <
       options
     );
 export const UpdateGameDocument = `
-    mutation updateGame($gameId: ObjectId!, $newTitle: String, $newCodingLanguage: String, $newDifficulty: String, $newDescription: String, $newTags: [String!]) {
+    mutation updateGame($gameId: ObjectId!, $newTitle: String, $newCodingLanguage: String, $newDifficulty: String, $newDescription: String, $newTags: [String!], $newBanner: String) {
   updateGame(
     gameId: $gameId
     newTitle: $newTitle
@@ -1143,6 +1177,7 @@ export const UpdateGameDocument = `
     newDifficulty: $newDifficulty
     newDescription: $newDescription
     newTags: $newTags
+    newBanner: $newBanner
   ) {
     _id
   }
@@ -1381,7 +1416,8 @@ export const GetGameEditDocument = `
         prompt
         exampleSolutionCode
         exampleSolutionDescription
-        expectedOutput
+        matcherCode
+        starterCode
         stdin
       }
       matching {
@@ -1425,6 +1461,7 @@ export const GamePreviewDocument = `
     codingLanguage
     difficulty
     tags
+    bannerUrl
     authorInfo {
       _id
       username
@@ -1473,6 +1510,7 @@ export const GetGamePlayingProgressDocument = `
     game {
       title
       _id
+      codingLanguage
       roadmap {
         parent
         sequence
@@ -1525,7 +1563,8 @@ export const GetGamePlayingProgressDocument = `
           prompt
           exampleSolutionCode
           exampleSolutionDescription
-          expectedOutput
+          matcherCode
+          starterCode
           stdin
         }
         matching {

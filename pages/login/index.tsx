@@ -9,7 +9,7 @@ export default function Login() {
 	const { isLoggedIn } = useUser()
 	if (isLoggedIn()) router.push('/')
 	return (
-		<Box h='93.2vh'>
+		<Box h='93.2vh' bgImage='url(/combined.png)' backgroundRepeat='no-repeat' backgroundPosition='bottom left'>
 			<Box pt={200}>
 				<Center>
 					<Stack spacing={4}>
@@ -37,9 +37,6 @@ export default function Login() {
 					}
 				/>
 			</Center>
-			<Box position='absolute' bottom='0'>
-				<Image src='/combined.png' width={701} height={609} />
-			</Box>
 		</Box>
 	)
 }

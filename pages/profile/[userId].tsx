@@ -123,7 +123,7 @@ export default function Profile() {
 									onClick={onOpen}
 									fontSize='20'
 									colorScheme='teal'
-									variant='ghost'
+									variant='link'
 								/>
 							)}
 							<Container>
@@ -164,7 +164,7 @@ export default function Profile() {
 						</TabList>
 						{editable && (
 							<IconButton
-								position='fixed'
+								position='absolute'
 								right='0'
 								aria-label='edit-profile'
 								icon={<BsPencilSquare />}

@@ -42,7 +42,8 @@ export default function SearchBar({ onSubmit }: Props): ReactElement {
 				<Input
 					onChange={(e) => setSearchInput(e.target.value)}
 					value={searchInput}
-					variant='filled'
+					variant='outline'
+					bg='primary.700'
 					placeholder='Search here for a game...'
 					borderWidth={1}
 					_focus={{

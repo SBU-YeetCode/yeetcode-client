@@ -1,6 +1,6 @@
 import { useUser } from '../../contexts/UserContext'
 import { useCreateGameProgressMutation, useGetGameProgressForGamePreviewQuery } from '../../graphql/generated'
-import { Button, Skeleton, useToast } from '@chakra-ui/react'
+import { Button, ButtonGroup, Skeleton, useToast } from '@chakra-ui/react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useState, useEffect } from 'react'
@@ -53,9 +53,10 @@ export default function GamePreviewButton({ gameId }: Props) {
 	}, [createProgError, createProgLoading, createProgData])
 	return (
 		<Skeleton isLoaded={!userProgLoading}>
+			<ButtonGroup>
 			{userProgress?.getGameProgressByUser ? (
 				<Link href={`/game/play/${gameId}`}>
-					<Button bg='secondary.300'>Resume Game</Button>
+					<Button color='black' bg='secondary.300'>{`${userProgress.getGameProgressByUser.isCompleted ?  'View' : 'Resume'} Game`}</Button>
 				</Link>
 			) : (
 				<Button
@@ -72,6 +73,24 @@ export default function GamePreviewButton({ gameId }: Props) {
 					Start Game
 				</Button>
 			)}
+			{userProgress?.getGameProgressByUser && (
+				<Button
+					variant='solid'
+					bg='secondary.300'
+					color='black'
+					isLoading={createProgLoading}
+					onClick={async () => {
+						mutate({ gameId, userId: user._id })
+						setMutateCalled(true)
+						await queryClient.invalidateQueries(['GetGameProgressForGamePreview'])
+						await queryClient.refetchQueries(['GetGameProgressForGamePreview'])
+						await queryClient.refetchQueries(['GetGamePlayingProgress'])
+					}}
+				>
+					Restart Game
+				</Button>
+			)}
+			</ButtonGroup>
 		</Skeleton>
 	)
 }

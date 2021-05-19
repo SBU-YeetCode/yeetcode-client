@@ -23,33 +23,24 @@ export default function GameEditorProps({
 	refetch,
 }: GameEditorProps) {
 	return (
-		<Box
-			m={6}
-			p={4}
-			borderRadius={15}
-			bg='background.dark.700'
-			w={'100%'}
-			h={'100%'}
-		>
+		<Box m={4} p={4} borderRadius={15} bg='background.dark.700' w={'100%'} h={'100%'} overflow='auto'>
 			{selectedInstance.kind === 'Question' && (
 				<EditQuestion
 					selectedInstance={selectedInstance}
 					setSelectedInstance={setSelectedInstance}
 					gameId={gameId}
+					game={dataProps?.getGame}
 				/>
 			)}
 			{selectedInstance.kind === 'Game' && (
-				<GameInformation
-					selectedInstance={selectedInstance}
-					setSelectedInstance={setSelectedInstance}
-				/>
+				<GameInformation selectedInstance={selectedInstance} setSelectedInstance={setSelectedInstance} />
 			)}
 			{(selectedInstance.kind === 'Stage' || selectedInstance.kind === 'Level') && (
 				<EditStageOrLevel
-				gameId={gameId}
-				selectedInstance={selectedInstance}
-				setSelectedInstance={setSelectedInstance}
-/>
+					gameId={gameId}
+					selectedInstance={selectedInstance}
+					setSelectedInstance={setSelectedInstance}
+				/>
 			)}
 		</Box>
 	)

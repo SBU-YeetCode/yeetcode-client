@@ -20,7 +20,7 @@ import {
 	NumberInputField,
 	VStack,
 } from '@chakra-ui/react'
-import { Question, Gametype, useUpdateQuestionMutation, HintInput } from '../../graphql/generated'
+import { Question, Gametype, useUpdateQuestionMutation, HintInput, GetGameEditQuery } from '../../graphql/generated'
 import React, { useState, useCallback } from 'react'
 import MultipleChoice from './MultipleChoice'
 import HintEditor from './HintEditor'
@@ -34,6 +34,7 @@ type EditQuestionProps = {
 	selectedInstance: any
 	setSelectedInstance: any
 	gameId: string
+	game: GetGameEditQuery['getGame']
 }
 
 const SELECT: { [key: string]: string } = {
@@ -69,7 +70,8 @@ const DefaultQuestionState: Partial<Question> = {
 		exampleSolutionDescription: '',
 		prompt: '',
 		stdin: '',
-		expectedOutput: '',
+		starterCode: '',
+		matcherCode: ''
 	},
 	multipleChoice: {
 		_id: new ObjectId(),
@@ -85,7 +87,7 @@ const DefaultQuestionState: Partial<Question> = {
 	},
 }
 
-export default function EditQuestion({ selectedInstance, setSelectedInstance, gameId }: EditQuestionProps) {
+export default function EditQuestion({ selectedInstance, setSelectedInstance, gameId, game }: EditQuestionProps) {
 	// State
 	const [instanceState, setInstanceState] = useState<Question>()
 	const queryClient = useQueryClient()
@@ -209,7 +211,7 @@ export default function EditQuestion({ selectedInstance, setSelectedInstance, ga
 							<MultipleChoice instanceState={instanceState} setInstanceState={setInstanceState} />
 						)}
 						{instanceState.gameType === Gametype.Spotthebug && (
-							<SpotTheBug instanceState={instanceState} setInstanceState={setInstanceState} />
+							<SpotTheBug codingLanguage={game?.codingLanguage as string} instanceState={instanceState} setInstanceState={setInstanceState} />
 						)}
 						{instanceState.gameType === Gametype.Fillinblank && (
 							<FillInBlank instanceState={instanceState} setInstanceState={setInstanceState} />
@@ -218,7 +220,11 @@ export default function EditQuestion({ selectedInstance, setSelectedInstance, ga
 							<Matching instanceState={instanceState} setInstanceState={setInstanceState} />
 						)}
 						{instanceState.gameType === Gametype.Livecoding && (
-							<LiveCoding instanceState={instanceState} setInstanceState={setInstanceState} />
+							<LiveCoding
+								codingLanguage={game?.codingLanguage as string}
+								instanceState={instanceState}
+								setInstanceState={setInstanceState}
+							/>
 						)}
 					</TabPanel>
 					<TabPanel>

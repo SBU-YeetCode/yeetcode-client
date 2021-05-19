@@ -56,10 +56,10 @@ export default function GameplayManager({ data }: Props): ReactElement {
 								<Heading color='primary.400'>Congratulations! You have completed the game!</Heading>
 								<Text>{`Total Points Earned: ${data?.totalPoints}`}</Text>
 								<Stack direction='column' spacing={2}>
-									<Link href='/leaderboard'>
+									<Link href='/leaderboards'>
 										<Button>Go To Leaderboard</Button>
 									</Link>
-									<Link href={`/game/${data?._id}`}>
+									<Link href={`/game/${data?.game._id}`}>
 										<Button>{`View & Replay Game`}</Button>
 									</Link>
 									<Link href={`/games`}>
